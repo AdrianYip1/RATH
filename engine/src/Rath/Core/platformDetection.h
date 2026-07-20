@@ -1,5 +1,6 @@
 #pragma once
 
+// Platform checks
 #if defined(_WIN32)
 	#define RATH_PLATFORM_WINDOWS 1
 #elif defined(__APPLE__)
@@ -12,4 +13,11 @@
 	#define RATH_PLATFORM_LINUX 1
 #else
 	#error "platformDetection: unsupported platform"
+#endif
+
+// Debug for validation layers
+#ifdef NDEBUG
+	#define RATH_RELEASE 1
+#else
+	#define RATH_DEBUG 1
 #endif

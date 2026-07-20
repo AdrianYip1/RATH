@@ -1,3 +1,6 @@
 [submodule "external/enginemath"]
 	path = external/enginemath
 	url = https://github.com/AdrianYip1/enginemath.git
+[submodule "external/glfw"]
+	path = external/glfw
+	url = https://github.com/glfw/glfw.git
