@@ -1,7 +1,9 @@
-#include "Rath/Core/platformDetection.h"
+#include "Rath/Core/defines.hpp"
+#include "Rath/Core/application.hpp"
 
 #include <iostream>
-#include <enginemath/vec3.hpp>
+#include <stdexcept>
+#include <cstdlib>
 
 int main() {
 #if defined(RATH_PLATFORM_WINDOWS)
@@ -12,9 +14,15 @@ int main() {
 	const char* platform = "unknown";
 #endif
 
-	enginemath::Vec3 v(1.0f, 2.0f, 3.0f);
+	Rath::Application app;
+	try {
+		app.run();
+	}
+	catch (const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
 
-	std::cout << "Rath sandbox up on " << platform << "\n";
-	std::cout << "enginemath vec: " << v.x << ", " << v.y << ", " << v.z << "\n";
-	return 0;
+	return EXIT_SUCCESS;
+
 }
