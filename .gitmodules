@@ -1,0 +1,3 @@
+[submodule "external/enginemath"]
+	path = external/enginemath
+	url = https://github.com/AdrianYip1/enginemath.git
