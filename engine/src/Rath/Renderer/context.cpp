@@ -1,14 +1,18 @@
 #include "context.hpp"
 
+// Context Constructor
 Rath::Context::Context() {
 	createInstance();
 }
 
+// Context Destructor
 Rath::Context::~Context() {
 	vkDestroyInstance(instance, nullptr);
 	std::cout << "Deleted Vulkan instance" << std::endl;
 }
 
+// Create the instance to connect application to Vulkan
+// Specify RATH version here + obtain extensions
 void Rath::Context::createInstance() {
 	// Version of RATH: change as needed
 	constexpr u32 RATH_VERSION = VK_MAKE_VERSION(0, 0, 1);
