@@ -25,7 +25,6 @@ namespace Rath {
 			u32 WIDTH;
 			u32 HEIGHT;
 			const char* TITLE;
-
 	};
 
 } // namespace Rath

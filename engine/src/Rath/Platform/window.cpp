@@ -28,10 +28,12 @@ void Rath::Window::initWindow() {
 	}
 }
 
+// Checks if the created window should be closed
 bool Rath::Window::shouldClose() const {
 	return glfwWindowShouldClose(window);
 }
 
+// Poll events such as closing window, resize, ...
 void Rath::Window::pollEvents() {
 	glfwPollEvents();
 }
