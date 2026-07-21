@@ -1,5 +1,6 @@
 #include "window.hpp"
 #include <GLFW/glfw3.h>
+
 #include <stdexcept>
 
 // Window Constructor

@@ -2,6 +2,8 @@
 #include "Rath/Platform/window.hpp"
 
 namespace Rath {
+	class Context;
+
 	class Application {
 	public:
 		Application(u32 width, u32 height, const char* title);
@@ -13,6 +15,7 @@ namespace Rath {
 		
 	private:
 		Window window;
+		Context* context;
 
 		void mainLoop();
 
