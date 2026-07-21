@@ -14,7 +14,7 @@ int main() {
 	const char* platform = "unknown";
 #endif
 
-	Rath::Application app;
+	Rath::Application app(1600, 1200, "Vulkan");
 	try {
 		app.run();
 	}

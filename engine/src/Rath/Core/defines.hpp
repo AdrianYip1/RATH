@@ -1,6 +1,6 @@
 #pragma once
-#include "Rath/Core/platformDetection.h"
-#include "Rath/Core/asserts.h"
+#include "Rath/Core/platformDetection.hpp"
+#include "Rath/Core/asserts.hpp"
 
 #include <cstdint>
 
