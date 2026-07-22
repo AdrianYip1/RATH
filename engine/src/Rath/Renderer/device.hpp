@@ -3,14 +3,22 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include "Rath/Core/defines.hpp"
+#include <map>
+#include <optional>
 
 #include "context.hpp"
 
 namespace Rath {
+	struct QueueFamilyIndices {
+		std::optional<u32> graphicsFamily;
+
+		bool isComplete() {
+			return graphicsFamily.has_value();
+		}
+	};
+
 	class Device {
 		public:
-			VkDevice physicalDevice = VK_NULL_HANDLE;
-
 			Device(Context& context);
 			~Device();
 			Device(const Device& other) = delete;
@@ -18,9 +26,10 @@ namespace Rath {
 
 		private:
 			const Context& context;
-
+			VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+			
 			void pickPhysicalDevice();
-			bool isDeviceSuitable();
-			u32 findQueueFamilies(VkPhysicalDevice device);
+			bool isDeviceSuitable(VkPhysicalDevice device);
+			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	};
 } // namespace Rath
