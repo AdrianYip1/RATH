@@ -162,3 +162,8 @@ void Rath::Context::setupDebugMessenger() {
 		throw std::runtime_error("Failed to setup debug messenger");
 	}
 }
+
+// Returns the VkInstance instance object
+VkInstance Rath::Context::getInstance() const {
+	return instance;
+}

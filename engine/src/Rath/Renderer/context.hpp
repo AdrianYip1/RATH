@@ -22,6 +22,7 @@ namespace Rath {
 			Context(const Context& other) = delete;
 			Context& operator=(const Context& other) = delete;
 
+			VkInstance getInstance() const;
 		private:
 			VkInstance instance;
 			VkDebugUtilsMessengerEXT debugMessenger;

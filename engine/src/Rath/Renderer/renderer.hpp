@@ -6,10 +6,12 @@
 #include <stdexcept>
 
 #include "context.hpp"
+#include "device.hpp"
 
 namespace Rath {
 	class Renderer {
 		public:
+
 			Renderer();
 			~Renderer();
 			Renderer(const Renderer& other) = delete;
@@ -17,5 +19,6 @@ namespace Rath {
 
 		private:
 			Context context;
+			Device device;
 	};
 } // namespace Rath
