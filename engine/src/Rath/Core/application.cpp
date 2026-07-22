@@ -1,19 +1,20 @@
 #include "application.hpp"
 
-#include "Rath/Renderer/context.hpp"
-#include "Rath/Renderer/device.hpp"
 #include "Rath/Renderer/renderer.hpp"
 
 // Application Constructor
+// 1. window creation
+// 2. renderer creation (which creates the instance)
 Rath::Application::Application(u32 width, u32 height, 
-	const char* title) : window(width, height, title) {
+	const char* title) : window(width, height, title),
+						 renderer(std::make_unique<Renderer>()) 
+{
 
-	context = new Context();
 }
 
 // Application Destructor
 Rath::Application::~Application() { 
-	delete context;
+
 }
 
 // Entrypoint to the application -> calls initVulkan()

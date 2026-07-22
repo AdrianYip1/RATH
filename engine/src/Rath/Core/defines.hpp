@@ -1,4 +1,6 @@
+// Aliases, detection for platform/debug mode
 #pragma once
+
 #include "Rath/Core/platformDetection.hpp"
 #include "Rath/Core/asserts.hpp"
 

@@ -1,8 +1,9 @@
 #pragma once
 #include "Rath/Platform/window.hpp"
+#include <memory>
 
 namespace Rath {
-	class Context;
+	class Renderer;
 
 	class Application {
 	public:
@@ -15,7 +16,8 @@ namespace Rath {
 		
 	private:
 		Window window;
-		Context* context;
+		// TODO: use smart pointers instead?
+		std::unique_ptr<Renderer> renderer;
 
 		void mainLoop();
 
