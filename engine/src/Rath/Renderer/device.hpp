@@ -27,8 +27,12 @@ namespace Rath {
 		private:
 			const Context& context;
 			VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-			
+			VkDevice device = VK_NULL_HANDLE;
+			// Retrieve queue handles using vkGetDeviceQueue
+			VkQueue graphicsQueue = VK_NULL_HANDLE;
+
 			void pickPhysicalDevice();
+			void createLogicalDevice();
 			bool isDeviceSuitable(VkPhysicalDevice device);
 			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	};
