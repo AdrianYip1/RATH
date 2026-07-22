@@ -18,6 +18,8 @@
 // Debug for validation layers
 #ifdef NDEBUG
 	#define RATH_RELEASE 1
+	#define RATH_DEBUG 0
 #else
 	#define RATH_DEBUG 1
+	#define RATH_RELEASE 0
 #endif
