@@ -34,9 +34,10 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 }
 
 // Context Constructor
-Rath::Context::Context() {
+Rath::Context::Context(Window& _window) : window(_window) {
 	createInstance();
 	setupDebugMessenger();
+	createSurface();
 }
 
 // Context Destructor
@@ -46,8 +47,20 @@ Rath::Context::~Context() {
 		std::cout << "Deleted debug messenger" << std::endl;
 	}
 
+	vkDestroySurfaceKHR(instance, surface, nullptr);
+	std::cout << "Deleted surface" << std::endl;
 	vkDestroyInstance(instance, nullptr);
 	std::cout << "Deleted Vulkan instance" << std::endl;
+}
+
+// Returns the VkInstance instance object
+VkInstance Rath::Context::getInstance() const {
+	return instance;
+}
+
+// Returns the vulkan surface
+VkSurfaceKHR Rath::Context::getSurface() const {
+	return surface;
 }
 
 // Create the instance to connect application to Vulkan
@@ -163,7 +176,8 @@ void Rath::Context::setupDebugMessenger() {
 	}
 }
 
-// Returns the VkInstance instance object
-VkInstance Rath::Context::getInstance() const {
-	return instance;
+void Rath::Context::createSurface() {
+	if (glfwCreateWindowSurface(instance, window.getWindow(), nullptr, &surface) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create window surface");
+	}
 }

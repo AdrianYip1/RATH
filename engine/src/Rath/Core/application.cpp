@@ -7,7 +7,7 @@
 // 2. renderer creation (which creates the instance)
 Rath::Application::Application(u32 width, u32 height, 
 	const char* title) : window(width, height, title),
-						 renderer(std::make_unique<Renderer>()) 
+						 renderer(std::make_unique<Renderer>(window)) 
 {
 
 }

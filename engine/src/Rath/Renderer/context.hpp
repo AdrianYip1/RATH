@@ -1,5 +1,6 @@
 // Contains instance, debug/validation, and surfaces
 #pragma once
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <stdexcept>
@@ -8,6 +9,7 @@
 #include <cstring>
 
 #include "Rath/Core/defines.hpp"
+#include "Rath/Platform/window.hpp"
 
 namespace Rath {
 	// Standard validation
@@ -17,20 +19,24 @@ namespace Rath {
 
 	class Context {
 		public:
-			Context();
+			Context(Window& _window);
 			~Context();
 			Context(const Context& other) = delete;
 			Context& operator=(const Context& other) = delete;
 
 			VkInstance getInstance() const;
+			VkSurfaceKHR getSurface() const;
 		private:
-			VkInstance instance;
-			VkDebugUtilsMessengerEXT debugMessenger;
+			Window& window;
+			VkInstance instance = VK_NULL_HANDLE;
+			VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
+			VkSurfaceKHR surface = VK_NULL_HANDLE;
 
 			void createInstance();
 			bool checkValidationLayerSupport();
 			std::vector<const char*> getRequiredExtensions();
 			void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 			void setupDebugMessenger();
+			void createSurface();
 	};
 } // namespace Rath

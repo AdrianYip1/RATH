@@ -11,6 +11,14 @@ Rath::Device::~Device() {
 	std::cout << "Deleted device" << std::endl;
 }
 
+VkQueue Rath::Device::getGraphicsQueue() {
+	return graphicsQueue;
+}
+
+VkQueue Rath::Device::getPresentQueue() {
+	return presentQueue;
+}
+
 // TODO: instead of going with the 1st suitable device, give each device a
 // score and choose the highest scoring device
 void Rath::Device::pickPhysicalDevice() {
@@ -37,20 +45,27 @@ void Rath::Device::pickPhysicalDevice() {
 void Rath::Device::createLogicalDevice() {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-	VkDeviceQueueCreateInfo queueCreateInfo{};
-	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	queueCreateInfo.queueCount = 1;
-
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<u32> uniqueQueueFamilies = { indices.graphicsFamily.value(),
+										  indices.presentFamily.value() };
 	float queuePriority = 1.0f;
-	queueCreateInfo.pQueuePriorities = &queuePriority;
+
+	for (u32 queueFamily : uniqueQueueFamilies) {
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	createInfo.pQueueCreateInfos = &queueCreateInfo;
-	createInfo.queueCreateInfoCount = 1;
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
+	createInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
 	createInfo.enabledExtensionCount = 0;
@@ -68,6 +83,9 @@ void Rath::Device::createLogicalDevice() {
 	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create logical device");
 	}
+
+	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
 
 bool Rath::Device::isDeviceSuitable(VkPhysicalDevice device) {
@@ -90,6 +108,12 @@ Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 			indices.graphicsFamily = i;
 		}
+		VkBool32 presentSupport = VK_FALSE;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, context.getSurface(), &presentSupport);
+		if (presentSupport) {
+			indices.presentFamily = i;
+		}
+
 		i++;
 		// Early Exit
 		if (indices.isComplete()) {

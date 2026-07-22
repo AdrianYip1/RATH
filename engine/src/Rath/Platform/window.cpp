@@ -15,6 +15,10 @@ Rath::Window::~Window() {
 	glfwTerminate();
 }
 
+GLFWwindow* Rath::Window::getWindow() {
+	return window;
+}
+
 // Set up glfw window contexts and create the window
 void Rath::Window::initWindow() {
 	glfwInit();

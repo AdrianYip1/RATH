@@ -14,6 +14,8 @@ namespace Rath {
 			Window(const Window& other) = delete;
 			Window& operator=(const Window& other) = delete;
 
+			GLFWwindow* getWindow();
+
 			void initWindow();
 
 			bool shouldClose() const;

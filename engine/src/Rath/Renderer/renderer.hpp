@@ -8,11 +8,13 @@
 #include "context.hpp"
 #include "device.hpp"
 
+#include "Rath/Platform/window.hpp"
+
 namespace Rath {
 	class Renderer {
 		public:
 
-			Renderer();
+			Renderer(Window& window);
 			~Renderer();
 			Renderer(const Renderer& other) = delete;
 			Renderer& operator=(const Renderer& other) = delete;

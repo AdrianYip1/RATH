@@ -1,6 +1,6 @@
 #include "renderer.hpp"
 
-Rath::Renderer::Renderer() : context(), device(context) {
+Rath::Renderer::Renderer(Window& window) : context(window), device(context) {
 
 }
 
