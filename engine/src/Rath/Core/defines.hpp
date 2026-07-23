@@ -1,9 +1,11 @@
 // Aliases, detection for platform/debug mode
 #pragma once
 
+// Rath files
 #include "Rath/Core/platformDetection.hpp"
 #include "Rath/Core/asserts.hpp"
 
+// std
 #include <cstdint>
 
 // Short aliases for commonly used types

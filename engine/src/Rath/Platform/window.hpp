@@ -1,6 +1,7 @@
 #pragma once
-
 #define GLFW_INCLUDE_VULKAN
+
+// Rath files
 #include "Rath/Core/defines.hpp"
 
 

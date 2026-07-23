@@ -11,6 +11,14 @@ Rath::Device::~Device() {
 	std::cout << "Deleted device" << std::endl;
 }
 
+VkPhysicalDevice Rath::Device::getPhysicalDevice() {
+	return physicalDevice;
+}
+
+VkDevice Rath::Device::getDevice() {
+	return device;
+}
+
 VkQueue Rath::Device::getGraphicsQueue() {
 	return graphicsQueue;
 }
@@ -53,7 +61,7 @@ void Rath::Device::createLogicalDevice() {
 	for (u32 queueFamily : uniqueQueueFamilies) {
 		VkDeviceQueueCreateInfo queueCreateInfo{};
 		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueFamilyIndex = queueFamily;
 		queueCreateInfo.queueCount = 1;
 		queueCreateInfo.pQueuePriorities = &queuePriority;
 
@@ -68,7 +76,8 @@ void Rath::Device::createLogicalDevice() {
 	createInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = 0;
+	createInfo.enabledExtensionCount = static_cast<u32>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	/* enabledLayerCount and ppEnabledLayerNames are legacy and not used
 	if (RATH_DEBUG) {
@@ -91,7 +100,30 @@ void Rath::Device::createLogicalDevice() {
 bool Rath::Device::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
-	return indices.isComplete();
+	bool extensionsSupported = checkDeviceExtensionSupport(device);
+
+	bool swapChainAdequate = false;
+	if (extensionsSupported) {
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+	}
+	return indices.isComplete() && extensionsSupported && swapChainAdequate;
+}
+
+bool Rath::Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+	u32 extensionCount = 0;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+	for (const auto& extension : availableExtensions) {
+		requiredExtensions.erase(extension.extensionName);
+	}
+
+	return requiredExtensions.empty();
 }
 
 Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device) {
@@ -122,4 +154,28 @@ Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device
 	}
 
 	return indices;
+}
+
+Rath::SwapChainSupportDetails Rath::Device::querySwapChainSupport(VkPhysicalDevice device) {
+	SwapChainSupportDetails details;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, context.getSurface(), &details.capabilities);
+
+	u32 formatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, context.getSurface(), &formatCount, nullptr);
+
+	if (formatCount != 0) {
+		details.formats.resize(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, context.getSurface(), &formatCount, details.formats.data());
+	}
+
+	u32 presentModeCount;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, context.getSurface(), &presentModeCount, nullptr);
+
+	if (presentModeCount != 0) {
+		details.presentModes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, context.getSurface(), &presentModeCount, details.presentModes.data());
+	}
+
+	return details;
 }

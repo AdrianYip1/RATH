@@ -1,5 +1,6 @@
 #include "application.hpp"
 
+// Rath files
 #include "Rath/Renderer/renderer.hpp"
 
 // Application Constructor

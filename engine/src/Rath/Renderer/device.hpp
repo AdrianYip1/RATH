@@ -1,15 +1,24 @@
 // Contains physical/logical devices, queues and their indices
-
 #pragma once
 #include <vulkan/vulkan.h>
+
+// Rath files
 #include "Rath/Core/defines.hpp"
+#include "context.hpp"
+
+// std
 #include <map>
 #include <set>
 #include <optional>
+#include <string>
 
-#include "context.hpp"
 
 namespace Rath {
+
+	const std::vector<const char*> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
 	struct QueueFamilyIndices {
 		std::optional<u32> graphicsFamily;
 		std::optional<u32> presentFamily;
@@ -20,6 +29,12 @@ namespace Rath {
 		}
 	};
 
+	struct SwapChainSupportDetails {
+		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<VkSurfaceFormatKHR> formats;
+		std::vector<VkPresentModeKHR> presentModes;
+	};
+
 	class Device {
 		public:
 			Device(Context& context);
@@ -27,8 +42,12 @@ namespace Rath {
 			Device(const Device& other) = delete;
 			Device& operator=(const Device& other) = delete;
 
+			VkPhysicalDevice getPhysicalDevice();
+			VkDevice getDevice();
 			VkQueue getGraphicsQueue();
 			VkQueue getPresentQueue();
+			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 		private:
 			const Context& context;
@@ -41,6 +60,7 @@ namespace Rath {
 			void pickPhysicalDevice();
 			void createLogicalDevice();
 			bool isDeviceSuitable(VkPhysicalDevice device);
-			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+			bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+			
 	};
 } // namespace Rath

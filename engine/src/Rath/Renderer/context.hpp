@@ -3,13 +3,17 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
+
+// Rath files
+#include "Rath/Core/defines.hpp"
+#include "Rath/Platform/window.hpp"
+
+// std
 #include <stdexcept>
 #include <iostream>
 #include <vector>
 #include <cstring>
 
-#include "Rath/Core/defines.hpp"
-#include "Rath/Platform/window.hpp"
 
 namespace Rath {
 	// Standard validation

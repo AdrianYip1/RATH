@@ -1,5 +1,9 @@
 #pragma once
+
+// Rath files
 #include "Rath/Platform/window.hpp"
+
+// std
 #include <memory>
 
 namespace Rath {

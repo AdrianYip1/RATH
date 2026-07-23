@@ -1,14 +1,17 @@
 // Contains frames in flight sync, command buffers,
 // pools/sets, draw loop
-
 #pragma once
 #include <vulkan/vulkan.h>
-#include <stdexcept>
 
+// Rath files
 #include "context.hpp"
 #include "device.hpp"
-
+#include "swapchain.hpp"
 #include "Rath/Platform/window.hpp"
+
+// std
+#include <stdexcept>
+
 
 namespace Rath {
 	class Renderer {
@@ -22,5 +25,6 @@ namespace Rath {
 		private:
 			Context context;
 			Device device;
+			Swapchain swapchain;
 	};
 } // namespace Rath
