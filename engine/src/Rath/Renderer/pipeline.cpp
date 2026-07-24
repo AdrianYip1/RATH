@@ -45,6 +45,8 @@ VkShaderModule Rath::Pipeline::createShaderModule(const std::vector<char>& code)
 	if (vkCreateShaderModule(device.getDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create shader module");
 	}
+
+	return shaderModule;
 }
 
 std::vector<char> Rath::Pipeline::readFile(const std::string& fileName) {
