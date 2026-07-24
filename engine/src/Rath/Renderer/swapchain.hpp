@@ -26,6 +26,7 @@ namespace Rath {
 			Swapchain& operator=(const Swapchain& other) = delete;
 
 			VkSwapchainKHR getSwapchain();
+			VkExtent2D getExtent();
 		private:
 			Window& window;
 			Context& context;

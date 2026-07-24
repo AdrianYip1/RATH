@@ -22,6 +22,10 @@ VkSwapchainKHR Rath::Swapchain::getSwapchain() {
 	return swapChain;
 }
 
+VkExtent2D Rath::Swapchain::getExtent() {
+	return swapChainExtent;
+}
+
 void Rath::Swapchain::createSwapChain() {
 	SwapChainSupportDetails swapChainSupport = device.querySwapChainSupport(device.getPhysicalDevice());
 

@@ -7,6 +7,7 @@
 
 // std
 #include <cstdint>
+#include <cstddef>
 
 // Short aliases for commonly used types
 namespace Rath {

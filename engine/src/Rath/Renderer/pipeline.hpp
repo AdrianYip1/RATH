@@ -3,6 +3,7 @@
 
 // Rath files
 #include "device.hpp"
+#include "swapchain.hpp"
 #include "Rath/Core/defines.hpp"
 
 // std
@@ -18,13 +19,16 @@
 namespace Rath {
 	class Pipeline {
 		public:
-			Pipeline(Device _device);
+			Pipeline(Device& _device, Swapchain& _swapchain);
 			~Pipeline();
 			Pipeline(const Pipeline& other) = delete;
 			Pipeline& operator=(const Pipeline& other) = delete;
 
 		private:
 			Device& device;
+			Swapchain& swapchain;
+
+			VkPipelineLayout pipelineLayout;
 
 			void createGraphicsPipeline();
 			VkShaderModule createShaderModule(const std::vector<char>& code);
