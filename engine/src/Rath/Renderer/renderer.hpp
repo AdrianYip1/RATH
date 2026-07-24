@@ -7,6 +7,7 @@
 #include "context.hpp"
 #include "device.hpp"
 #include "swapchain.hpp"
+#include "pipeline.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -26,5 +27,6 @@ namespace Rath {
 			Context context;
 			Device device;
 			Swapchain swapchain;
+			Pipeline pipeline;
 	};
 } // namespace Rath

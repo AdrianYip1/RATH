@@ -33,10 +33,17 @@ namespace Rath {
 
 			VkSwapchainKHR swapChain;
 			std::vector<VkImage> swapChainImages;
+			/* examples for swapChainImages + usage
+			swapChainImages[0] == 0x000001A2B4C05080   // a handle: a pointer to image A
+			swapChainImages[1] == 0x000001A2B4C05100   // a handle: a pointer to image B
+			swapChainImages[2] == 0x000001A2B4C05180   // a handle: a pointer to image C
+			*/
 			VkFormat swapChainImageFormat;
 			VkExtent2D swapChainExtent;
+			std::vector<VkImageView> swapChainImageViews;
 
 			void createSwapChain();
+			void createImageViews();
 			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 			VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 			VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
