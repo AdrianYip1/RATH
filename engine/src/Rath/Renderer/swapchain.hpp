@@ -27,6 +27,7 @@ namespace Rath {
 
 			VkSwapchainKHR getSwapchain();
 			VkExtent2D getExtent();
+			VkFormat getFormat();
 		private:
 			Window& window;
 			Context& context;

@@ -28,9 +28,11 @@ namespace Rath {
 			Device& device;
 			Swapchain& swapchain;
 
+			VkRenderPass renderPass;
 			VkPipelineLayout pipelineLayout;
 
 			void createGraphicsPipeline();
+			void createRenderPass();
 			VkShaderModule createShaderModule(const std::vector<char>& code);
 			static std::vector<char> readFile(const std::string& fileName);
 	};

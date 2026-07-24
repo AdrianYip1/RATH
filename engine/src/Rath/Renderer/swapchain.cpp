@@ -26,6 +26,10 @@ VkExtent2D Rath::Swapchain::getExtent() {
 	return swapChainExtent;
 }
 
+VkFormat Rath::Swapchain::getFormat() {
+	return swapChainImageFormat;
+}
+
 void Rath::Swapchain::createSwapChain() {
 	SwapChainSupportDetails swapChainSupport = device.querySwapChainSupport(device.getPhysicalDevice());
 
