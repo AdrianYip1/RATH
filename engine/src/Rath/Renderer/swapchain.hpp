@@ -28,6 +28,9 @@ namespace Rath {
 			VkSwapchainKHR getSwapchain();
 			VkExtent2D getExtent();
 			VkFormat getFormat();
+			// Call this function after graphics pipeline is created
+			void createFramebuffers(VkRenderPass renderpass);
+
 		private:
 			Window& window;
 			Context& context;
@@ -43,9 +46,11 @@ namespace Rath {
 			VkFormat swapChainImageFormat;
 			VkExtent2D swapChainExtent;
 			std::vector<VkImageView> swapChainImageViews;
+			std::vector<VkFramebuffer> swapChainFramebuffers;
 
 			void createSwapChain();
 			void createImageViews();
+
 			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 			VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 			VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);

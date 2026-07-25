@@ -9,6 +9,11 @@ Rath::Swapchain::Swapchain(Window& _window, Context& _context, Device& _device) 
 }
 
 Rath::Swapchain::~Swapchain() {
+	for (auto framebuffer : swapChainFramebuffers) {
+		vkDestroyFramebuffer(device.getDevice(), framebuffer, nullptr);
+	}
+	std::cout << "Destroyed framebuffers" << std::endl;
+
 	for (auto imageView : swapChainImageViews) {
 		vkDestroyImageView(device.getDevice(), imageView, nullptr);
 	}
@@ -104,6 +109,30 @@ void Rath::Swapchain::createImageViews() {
 		if (vkCreateImageView(device.getDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create image views");
 		}
+	}
+}
+
+void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass) {
+	swapChainFramebuffers.resize(swapChainImageViews.size());
+
+	for (size i = 0; i < swapChainFramebuffers.size(); i++) {
+		VkImageView attachments[] = {
+			swapChainImageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = renderpass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = swapChainExtent.width;
+		framebufferInfo.height = swapChainExtent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(device.getDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create framebuffers");
+		}
+
 	}
 }
 

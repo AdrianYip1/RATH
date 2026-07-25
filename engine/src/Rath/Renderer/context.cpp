@@ -110,7 +110,7 @@ void Rath::Context::createInstance() {
 	std::cout << "Created Vulkan instance" << std::endl;
 }
 
-//
+// find and check if the instance supports validation layers
 bool Rath::Context::checkValidationLayerSupport() {
 	u32 layerCount;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -134,7 +134,9 @@ bool Rath::Context::checkValidationLayerSupport() {
 	return true;
 }
 
-//
+// find and return the required extensions via glfwGetRequiredInstanceExtensions()
+// if RATH_DEBUG is enabled, also add VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+// as one of the required extensions
 std::vector<const char*> Rath::Context::getRequiredExtensions() {
 	u32 glfwExtensionCount = 0;
 	const char** glfwExtensions;
@@ -150,7 +152,9 @@ std::vector<const char*> Rath::Context::getRequiredExtensions() {
 	return extensions;
 }
 
-//
+// Create the struct for debug messenger
+// specifies the types of messages (warnings, general, error) that will
+// be shown
 void Rath::Context::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
 	createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -164,7 +168,7 @@ void Rath::Context::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreate
 	createInfo.pfnUserCallback = debugCallback;
 }
 
-//
+// Sets up debug messenger only if RATH_DEBUG is enabled
 void Rath::Context::setupDebugMessenger() {
 	if (!RATH_DEBUG) return;
 
@@ -176,6 +180,7 @@ void Rath::Context::setupDebugMessenger() {
 	}
 }
 
+// Create the interface connection between the vulkan instance and the glfw window
 void Rath::Context::createSurface() {
 	if (glfwCreateWindowSurface(instance, window.getWindow(), nullptr, &surface) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create window surface");

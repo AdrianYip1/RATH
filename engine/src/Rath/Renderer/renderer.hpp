@@ -7,6 +7,7 @@
 #include "context.hpp"
 #include "device.hpp"
 #include "swapchain.hpp"
+#include "renderpass.hpp"
 #include "pipeline.hpp"
 #include "Rath/Platform/window.hpp"
 
@@ -27,6 +28,7 @@ namespace Rath {
 			Context context;
 			Device device;
 			Swapchain swapchain;
+			Renderpass renderpass;
 			Pipeline pipeline;
 	};
 } // namespace Rath

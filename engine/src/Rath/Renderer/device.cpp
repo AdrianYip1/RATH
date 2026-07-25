@@ -1,28 +1,34 @@
 #include "device.hpp"
 
+// Device constructor
 Rath::Device::Device(Context& _context) : context(_context) {
 	std::cout << "Created device" << std::endl;
 	pickPhysicalDevice();
 	createLogicalDevice();
 }
 
+// Device destructor
 Rath::Device::~Device() {
 	vkDestroyDevice(device, nullptr);
 	std::cout << "Deleted device" << std::endl;
 }
 
+// Return the selected (compatiable) physical device
 VkPhysicalDevice Rath::Device::getPhysicalDevice() {
 	return physicalDevice;
 }
 
+// Return the logical device
 VkDevice Rath::Device::getDevice() {
 	return device;
 }
 
+// Return the graphics queue
 VkQueue Rath::Device::getGraphicsQueue() {
 	return graphicsQueue;
 }
 
+// Return the present queue
 VkQueue Rath::Device::getPresentQueue() {
 	return presentQueue;
 }
@@ -50,6 +56,9 @@ void Rath::Device::pickPhysicalDevice() {
 	}
 }
 
+// Create the logical device using information about the queueFamilies,
+// device features, device extensions
+// Create the handles for graphics and present queues
 void Rath::Device::createLogicalDevice() {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -97,6 +106,8 @@ void Rath::Device::createLogicalDevice() {
 	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
 
+// Determine if a physical device is suitable based on
+// extension support, swapChain support, queue family indices filled out
 bool Rath::Device::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -110,6 +121,7 @@ bool Rath::Device::isDeviceSuitable(VkPhysicalDevice device) {
 	return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
+// Checks if the physical device has the extensions wanted by deviceExtensions
 bool Rath::Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 	u32 extensionCount = 0;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -126,6 +138,8 @@ bool Rath::Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 	return requiredExtensions.empty();
 }
 
+// Fill out the QueueFamilyIndices struct with the corresponding 
+// index values of the queueFamilies
 Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device) {
 	QueueFamilyIndices indices;
 
@@ -156,6 +170,8 @@ Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device
 	return indices;
 }
 
+// Queries information about the swapchain struct's
+// capabilities, formats, and present modes
 Rath::SwapChainSupportDetails Rath::Device::querySwapChainSupport(VkPhysicalDevice device) {
 	SwapChainSupportDetails details;
 
