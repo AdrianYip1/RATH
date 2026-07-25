@@ -30,5 +30,10 @@ namespace Rath {
 			Swapchain swapchain;
 			Renderpass renderpass;
 			Pipeline pipeline;
+
+			VkCommandPool commandPool;
+			VkCommandBuffer commandBuffer;
+
+			void createCommandPool();
 	};
 } // namespace Rath
