@@ -17,6 +17,10 @@ Rath::Pipeline::~Pipeline() {
 
 }
 
+VkPipeline Rath::Pipeline::getGraphicsPipeline() {
+	return graphicsPipeline;
+}
+
 void Rath::Pipeline::createGraphicsPipeline() {
 	auto vertShaderCode = readFile("../../../../engine/shaders/basic.vert.spv");
 	auto fragShaderCode = readFile("../../../../engine/shaders/basic.frag.spv");

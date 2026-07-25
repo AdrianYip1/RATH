@@ -35,6 +35,11 @@ VkFormat Rath::Swapchain::getFormat() {
 	return swapChainImageFormat;
 }
 
+
+std::vector<VkFramebuffer> Rath::Swapchain::getFramebuffers() {
+	return swapChainFramebuffers;
+}
+
 void Rath::Swapchain::createSwapChain() {
 	SwapChainSupportDetails swapChainSupport = device.querySwapChainSupport(device.getPhysicalDevice());
 

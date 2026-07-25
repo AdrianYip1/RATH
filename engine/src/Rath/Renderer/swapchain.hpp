@@ -28,6 +28,7 @@ namespace Rath {
 			VkSwapchainKHR getSwapchain();
 			VkExtent2D getExtent();
 			VkFormat getFormat();
+			std::vector<VkFramebuffer> getFramebuffers();
 			// Call this function after graphics pipeline is created
 			void createFramebuffers(VkRenderPass renderpass);
 

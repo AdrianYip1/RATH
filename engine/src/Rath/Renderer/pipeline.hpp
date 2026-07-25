@@ -25,6 +25,7 @@ namespace Rath {
 			Pipeline(const Pipeline& other) = delete;
 			Pipeline& operator=(const Pipeline& other) = delete;
 
+			VkPipeline getGraphicsPipeline();
 		private:
 			Device& device;
 			Swapchain& swapchain;

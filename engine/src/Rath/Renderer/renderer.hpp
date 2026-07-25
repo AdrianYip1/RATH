@@ -35,5 +35,7 @@ namespace Rath {
 			VkCommandBuffer commandBuffer;
 
 			void createCommandPool();
+			void createCommandBuffer();
+			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
 	};
 } // namespace Rath
