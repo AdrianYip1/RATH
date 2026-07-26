@@ -189,8 +189,8 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.height = static_cast<f64>(swapchain.getExtent().height);
-	viewport.width = static_cast<f64>(swapchain.getExtent().width);
+	viewport.height = static_cast<f32>(swapchain.getExtent().height);
+	viewport.width = static_cast<f32>(swapchain.getExtent().width);
 	viewport.maxDepth = 1.0f;
 	viewport.minDepth = 0.0f;
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);

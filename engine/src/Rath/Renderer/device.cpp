@@ -65,7 +65,7 @@ void Rath::Device::createLogicalDevice() {
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<u32> uniqueQueueFamilies = { indices.graphicsFamily.value(),
 										  indices.presentFamily.value() };
-	float queuePriority = 1.0f;
+	f32 queuePriority = 1.0f;
 
 	for (u32 queueFamily : uniqueQueueFamilies) {
 		VkDeviceQueueCreateInfo queueCreateInfo{};

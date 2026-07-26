@@ -55,8 +55,8 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)swapchain.getExtent().width;
-	viewport.height = (float)swapchain.getExtent().height;
+	viewport.width = (f32)swapchain.getExtent().width;
+	viewport.height = (f32)swapchain.getExtent().height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
