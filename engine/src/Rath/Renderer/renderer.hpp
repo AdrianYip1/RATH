@@ -24,6 +24,12 @@ namespace Rath {
 			Renderer(const Renderer& other) = delete;
 			Renderer& operator=(const Renderer& other) = delete;
 
+			void drawFrame();
+
+			// can't call vkDeviceWaitIdle(device) in application so have a function here
+			void wait();
+			
+
 		private:
 			Context context;
 			Device device;
@@ -34,8 +40,13 @@ namespace Rath {
 			VkCommandPool commandPool;
 			VkCommandBuffer commandBuffer;
 
+			VkSemaphore imageAvailableSemaphore;
+			VkSemaphore renderFinishedSemaphore;
+			VkFence inFlightFence;
+
 			void createCommandPool();
 			void createCommandBuffer();
+			void createSyncObjects();
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
 	};
 } // namespace Rath

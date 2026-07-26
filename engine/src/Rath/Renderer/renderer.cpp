@@ -9,11 +9,68 @@ Rath::Renderer::Renderer(Window& window) :
 
 	createCommandPool();
 	std::cout << "Created command pool" << std::endl;
+	createCommandBuffer();
+	std::cout << "Created command buffer" << std::endl;
+	createSyncObjects();
+	std::cout << "Created sync objects" << std::endl;
 }
 
 Rath::Renderer::~Renderer() {
+	vkDestroySemaphore(device.getDevice(), imageAvailableSemaphore, nullptr);
+	vkDestroySemaphore(device.getDevice(), renderFinishedSemaphore, nullptr);
+	vkDestroyFence(device.getDevice(), inFlightFence, nullptr);
+	std::cout << "Destroyed sync objects" << std::endl;
 	vkDestroyCommandPool(device.getDevice(), commandPool, nullptr);
 	std::cout << "Destroyed command pool" << std::endl;
+}
+
+void Rath::Renderer::drawFrame() {
+	vkWaitForFences(device.getDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(device.getDevice(), 1, &inFlightFence);
+
+	u32 imageIndex;
+	vkAcquireNextImageKHR(device.getDevice(), swapchain.getSwapchain(), UINT64_MAX, 
+						  imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+	vkResetCommandBuffer(commandBuffer, 0);
+
+	recordCommandBuffer(commandBuffer, imageIndex);
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	
+	VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffer;
+
+	VkSemaphore signalSemaphores[] = { renderFinishedSemaphore };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	if (vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to submit draw command buffer");
+	}
+
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+
+	VkSwapchainKHR swapChains[] = { swapchain.getSwapchain() };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &imageIndex;
+
+	vkQueuePresentKHR(device.getPresentQueue(), &presentInfo);
+}
+
+void Rath::Renderer::wait() {
+	vkDeviceWaitIdle(device.getDevice());
 }
 
 void Rath::Renderer::createCommandPool() {
@@ -40,6 +97,23 @@ void Rath::Renderer::createCommandBuffer() {
 		throw std::runtime_error("Failed to allocate command buffers");
 	}
 }
+
+void Rath::Renderer::createSyncObjects() {
+	VkSemaphoreCreateInfo semaphoreInfo{};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	if (vkCreateSemaphore(device.getDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+		vkCreateSemaphore(device.getDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
+		vkCreateFence(device.getDevice(), &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create sync objects");
+	}
+
+}
+
 
 void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex) {
 	VkCommandBufferBeginInfo beginInfo{};

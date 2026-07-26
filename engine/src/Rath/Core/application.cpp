@@ -27,5 +27,8 @@ void Rath::Application::run() {
 void Rath::Application::mainLoop() {
 	while (!window.shouldClose()) {
 		window.pollEvents();
+		renderer->drawFrame();
 	}
+	renderer->wait();
+
 } 
