@@ -9,18 +9,7 @@ Rath::Swapchain::Swapchain(Window& _window, Context& _context, Device& _device) 
 }
 
 Rath::Swapchain::~Swapchain() {
-	for (auto framebuffer : swapChainFramebuffers) {
-		vkDestroyFramebuffer(device.getDevice(), framebuffer, nullptr);
-	}
-	std::cout << "Destroyed framebuffers" << std::endl;
-
-	for (auto imageView : swapChainImageViews) {
-		vkDestroyImageView(device.getDevice(), imageView, nullptr);
-	}
-	std::cout << "Destroyed imageviews" << std::endl;
-
-	vkDestroySwapchainKHR(device.getDevice(), swapChain, nullptr);
-	std::cout << "Destroyed swapchain" << std::endl;
+	cleanupSwapChain();
 }
 
 VkSwapchainKHR Rath::Swapchain::getSwapchain() {
@@ -41,7 +30,7 @@ VkFormat Rath::Swapchain::getFormat() {
 }
 
 
-std::vector<VkFramebuffer> Rath::Swapchain::getFramebuffers() {
+const std::vector<VkFramebuffer>& Rath::Swapchain::getFramebuffers() {
 	return swapChainFramebuffers;
 }
 
@@ -185,4 +174,36 @@ VkExtent2D Rath::Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 
 		return actualExtent;
 	}
+}
+
+void Rath::Swapchain::recreateSwapChain(VkRenderPass renderpass) {
+	int width = 0, height = 0;
+	glfwGetFramebufferSize(window.getWindow(), &width, &height);
+	while (width == 0 || height == 0) {
+		glfwGetFramebufferSize(window.getWindow(), &width, &height);
+		glfwWaitEvents();
+	}
+
+	vkDeviceWaitIdle(device.getDevice());
+
+	cleanupSwapChain();
+
+	createSwapChain();
+	createImageViews();
+	createFramebuffers(renderpass);
+}
+
+void Rath::Swapchain::cleanupSwapChain() {
+	for (auto framebuffer : swapChainFramebuffers) {
+		vkDestroyFramebuffer(device.getDevice(), framebuffer, nullptr);
+	}
+	std::cout << "Destroyed framebuffers" << std::endl;
+
+	for (auto imageView : swapChainImageViews) {
+		vkDestroyImageView(device.getDevice(), imageView, nullptr);
+	}
+	std::cout << "Destroyed imageviews" << std::endl;
+
+	vkDestroySwapchainKHR(device.getDevice(), swapChain, nullptr);
+	std::cout << "Destroyed swapchain" << std::endl;
 }

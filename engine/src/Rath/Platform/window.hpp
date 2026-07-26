@@ -16,18 +16,21 @@ namespace Rath {
 			Window& operator=(const Window& other) = delete;
 
 			GLFWwindow* getWindow();
-
 			void initWindow();
-
 			bool shouldClose() const;
-
 			void pollEvents();
+			bool getFramebufferResized();
+			void setFramebufferResized(bool info);
 			
 		private:
 			GLFWwindow* window = nullptr;
 			u32 WIDTH;
 			u32 HEIGHT;
 			const char* TITLE;
+
+			bool framebufferResized = false;
+
+			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	};
 
 } // namespace Rath

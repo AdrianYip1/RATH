@@ -32,8 +32,11 @@ namespace Rath {
 			// can't call vkDeviceWaitIdle(device) in application so have a function here
 			void wait();
 			
+			
+			
 
 		private:
+			Window& window;
 			Context context;
 			Device device;
 			Swapchain swapchain;

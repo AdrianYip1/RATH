@@ -29,9 +29,10 @@ namespace Rath {
 			u32 getImageCount();
 			VkExtent2D getExtent();
 			VkFormat getFormat();
-			std::vector<VkFramebuffer> getFramebuffers();
+			const std::vector<VkFramebuffer>& getFramebuffers();
 			// Call this function after graphics pipeline is created
 			void createFramebuffers(VkRenderPass renderpass);
+			void recreateSwapChain(VkRenderPass renderpass);
 
 		private:
 			Window& window;
@@ -52,6 +53,7 @@ namespace Rath {
 
 			void createSwapChain();
 			void createImageViews();
+			void cleanupSwapChain();
 
 			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 			VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);

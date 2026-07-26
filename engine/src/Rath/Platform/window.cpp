@@ -3,6 +3,7 @@
 
 // std
 #include <stdexcept>
+#include <cstdint>
 
 // Window Constructor
 Rath::Window::Window(u32 width, u32 height, const char* title) :
@@ -32,6 +33,9 @@ void Rath::Window::initWindow() {
 	if (!window) {
 		throw std::runtime_error("Failed to create window");
 	}
+
+	glfwSetWindowUserPointer(window, this);
+	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 }
 
 // Checks if the created window should be closed
@@ -42,4 +46,19 @@ bool Rath::Window::shouldClose() const {
 // Poll events such as closing window, resize, ...
 void Rath::Window::pollEvents() {
 	glfwPollEvents();
+}
+
+bool Rath::Window::getFramebufferResized() {
+	return framebufferResized;
+}
+
+
+void Rath::Window::setFramebufferResized(bool info) {
+	framebufferResized = info;
+}
+
+
+void Rath::Window::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+	auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+	app->framebufferResized = true;
 }

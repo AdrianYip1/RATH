@@ -1,9 +1,10 @@
 #include "renderer.hpp"
 
-Rath::Renderer::Renderer(Window& window) : 
-	context(window), 
-	device(context), 
-	swapchain(window, context, device),
+Rath::Renderer::Renderer(Window& _window) :
+	window(_window),
+	context(_window),
+	device(context),
+	swapchain(_window, context, device),
 	renderpass(device, swapchain),
 	pipeline(device, swapchain, renderpass) {
 
@@ -40,11 +41,20 @@ Rath::Renderer::~Renderer() {
 // the driver can't return image 0 while image 0's present hasnt consumed yet
 void Rath::Renderer::drawFrame() {
 	vkWaitForFences(device.getDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-	vkResetFences(device.getDevice(), 1, &inFlightFences[currentFrame]);
 
 	u32 imageIndex;
-	vkAcquireNextImageKHR(device.getDevice(), swapchain.getSwapchain(), UINT64_MAX, 
-						  imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(device.getDevice(), swapchain.getSwapchain(), UINT64_MAX,
+		imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+		swapchain.recreateSwapChain(renderpass.getRenderPass());
+		return;
+	}
+	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+		throw std::runtime_error("Failed to aquire swapchain image");
+	}
+	// Reset fences only when submitting work
+	vkResetFences(device.getDevice(), 1, &inFlightFences[currentFrame]);
 
 	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
@@ -80,7 +90,15 @@ void Rath::Renderer::drawFrame() {
 	presentInfo.pSwapchains = swapChains;
 	presentInfo.pImageIndices = &imageIndex;
 
-	vkQueuePresentKHR(device.getPresentQueue(), &presentInfo);
+	result = vkQueuePresentKHR(device.getPresentQueue(), &presentInfo);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.getFramebufferResized()) {
+		window.setFramebufferResized(false);
+		swapchain.recreateSwapChain(renderpass.getRenderPass());
+	}
+	else if (result != VK_SUCCESS) {
+		throw std::runtime_error("Failed to present swap chain image");
+	}
 
 	// Advance to the next frame every cycle
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -119,6 +137,7 @@ void Rath::Renderer::createCommandBuffers() {
 
 void Rath::Renderer::createSyncObjects() {
 	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	// TODO: function to resize renderFinishedSemaphores after swapchain recreation
 	renderFinishedSemaphores.resize(swapchain.getImageCount());
 	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -170,8 +189,8 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.height = static_cast<u32>(swapchain.getExtent().height);
-	viewport.width = static_cast<u32>(swapchain.getExtent().width);
+	viewport.height = static_cast<f64>(swapchain.getExtent().height);
+	viewport.width = static_cast<f64>(swapchain.getExtent().width);
 	viewport.maxDepth = 1.0f;
 	viewport.minDepth = 0.0f;
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
