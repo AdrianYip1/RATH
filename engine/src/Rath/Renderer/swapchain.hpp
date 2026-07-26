@@ -26,6 +26,7 @@ namespace Rath {
 			Swapchain& operator=(const Swapchain& other) = delete;
 
 			VkSwapchainKHR getSwapchain();
+			u32 getImageCount();
 			VkExtent2D getExtent();
 			VkFormat getFormat();
 			std::vector<VkFramebuffer> getFramebuffers();

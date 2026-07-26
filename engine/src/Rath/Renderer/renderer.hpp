@@ -16,6 +16,9 @@
 
 
 namespace Rath {
+	// The amount of frames that can be processed at the same time
+	const int MAX_FRAMES_IN_FLIGHT = 2;
+
 	class Renderer {
 		public:
 
@@ -38,14 +41,16 @@ namespace Rath {
 			Pipeline pipeline;
 
 			VkCommandPool commandPool;
-			VkCommandBuffer commandBuffer;
+			std::vector<VkCommandBuffer> commandBuffers;
 
-			VkSemaphore imageAvailableSemaphore;
-			VkSemaphore renderFinishedSemaphore;
-			VkFence inFlightFence;
+			std::vector<VkSemaphore> imageAvailableSemaphores;
+			std::vector<VkSemaphore> renderFinishedSemaphores;
+			std::vector<VkFence> inFlightFences;
+
+			u32 currentFrame = 0;
 
 			void createCommandPool();
-			void createCommandBuffer();
+			void createCommandBuffers();
 			void createSyncObjects();
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
 	};

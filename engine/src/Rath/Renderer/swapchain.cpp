@@ -27,6 +27,11 @@ VkSwapchainKHR Rath::Swapchain::getSwapchain() {
 	return swapChain;
 }
 
+Rath::u32 Rath::Swapchain::getImageCount() {
+	return swapChainImages.size();
+}
+
+
 VkExtent2D Rath::Swapchain::getExtent() {
 	return swapChainExtent;
 }
