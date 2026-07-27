@@ -9,6 +9,7 @@
 #include "swapchain.hpp"
 #include "renderpass.hpp"
 #include "pipeline.hpp"
+#include "buffers/vertex.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -31,9 +32,6 @@ namespace Rath {
 
 			// can't call vkDeviceWaitIdle(device) in application so have a function here
 			void wait();
-			
-			
-			
 
 		private:
 			Window& window;
@@ -42,6 +40,7 @@ namespace Rath {
 			Swapchain swapchain;
 			Renderpass renderpass;
 			Pipeline pipeline;
+			VertexBuffer vertexBuffer;
 
 			VkCommandPool commandPool;
 			std::vector<VkCommandBuffer> commandBuffers;

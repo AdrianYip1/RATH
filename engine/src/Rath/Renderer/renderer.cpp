@@ -6,7 +6,8 @@ Rath::Renderer::Renderer(Window& _window) :
 	device(context),
 	swapchain(_window, context, device),
 	renderpass(device, swapchain),
-	pipeline(device, swapchain, renderpass) {
+	pipeline(device, swapchain, renderpass),
+	vertexBuffer(device) {
 
 	createCommandPool();
 	std::cout << "Created command pool" << std::endl;
@@ -200,7 +201,11 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	scissor.extent = swapchain.getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+	VkBuffer vertexBuffers[] = {vertexBuffer.getVertexBuffer()};
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	
+	vkCmdDraw(commandBuffer, static_cast<u32>(vertices.size()), 1, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 

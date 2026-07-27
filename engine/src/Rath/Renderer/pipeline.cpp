@@ -25,6 +25,9 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	auto vertShaderCode = readFile("../../../../engine/shaders/basic.vert.spv");
 	auto fragShaderCode = readFile("../../../../engine/shaders/basic.frag.spv");
 
+	auto bindingDescriptions = Rath::Vertex::getBindingDescription();
+	auto attributeDescriptions = Rath::Vertex::getAttributeDescriptions();
+
 	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
@@ -44,8 +47,10 @@ void Rath::Pipeline::createGraphicsPipeline() {
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<u32>(attributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescriptions;
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

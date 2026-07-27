@@ -5,6 +5,7 @@
 #include "device.hpp"
 #include "swapchain.hpp"
 #include "renderpass.hpp"
+#include "buffers/vertex.hpp"
 #include "Rath/Core/defines.hpp"
 
 // std
