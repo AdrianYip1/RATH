@@ -6,6 +6,7 @@
 // Rath files
 #include "Rath/Core/defines.hpp"
 #include "../device.hpp"
+#include "buffer.hpp"
 
 // std
 #include <stdexcept>
@@ -52,7 +53,7 @@ namespace Rath {
 
 	class VertexBuffer {
 		public:
-			VertexBuffer(Device& _device);
+			VertexBuffer(Device& _device, Buffer& _buffer);
 			~VertexBuffer();
 			VertexBuffer(const VertexBuffer& other) = delete;
 			VertexBuffer& operator=(const VertexBuffer& other) = delete;
@@ -60,11 +61,11 @@ namespace Rath {
 			VkBuffer getVertexBuffer();
 		private:
 			Device& device;
+			Buffer& buffer;
 
 			VkBuffer vertexBuffer;
 			VkDeviceMemory vertexBufferMemory;
 
 			void createVertexBuffer();
-			u32 findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
 	};
 } // namespace Rath

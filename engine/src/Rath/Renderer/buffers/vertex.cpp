@@ -1,7 +1,8 @@
 #include "vertex.hpp"
 
-Rath::VertexBuffer::VertexBuffer(Device& _device) :
-	device(_device) {
+Rath::VertexBuffer::VertexBuffer(Device& _device, Buffer& _buffer) :
+	device(_device),
+	buffer(_buffer) {
 	createVertexBuffer();
 }
 
@@ -15,46 +16,27 @@ VkBuffer Rath::VertexBuffer::getVertexBuffer() {
 }
 
 void Rath::VertexBuffer::createVertexBuffer() {
-	VkBufferCreateInfo bufferInfo{};
-	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = sizeof(vertices[0]) * vertices.size();
-	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
-	if (vkCreateBuffer(device.getDevice(), &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to create vertex buffer");
-	}
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	buffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+						VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+						VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+						stagingBuffer, stagingBufferMemory);
 
-	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(device.getDevice(), vertexBuffer, &memRequirements);
-
-	VkMemoryAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, 
-											   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-											   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-	if (vkAllocateMemory(device.getDevice(), &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to allocate vertex buffer memory");
-	}
-
-	vkBindBufferMemory(device.getDevice(), vertexBuffer, vertexBufferMemory, 0);
-	
 	void* data;
-	vkMapMemory(device.getDevice(), vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-	memcpy(data, vertices.data(), (size)bufferInfo.size);
-	vkUnmapMemory(device.getDevice(), vertexBufferMemory);
-}
+	vkMapMemory(device.getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, vertices.data(), bufferSize);
+	vkUnmapMemory(device.getDevice(), stagingBufferMemory);
 
-Rath::u32 Rath::VertexBuffer::findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties) {
-	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProperties);
+	buffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+						VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+						VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+						vertexBuffer, vertexBufferMemory);
 
-	for (u32 i = 0; i < memProperties.memoryTypeCount; i++) {
-		if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-			return i;
-		}
-	}
-	throw std::runtime_error("Failed to find suitable memory type");
+	buffer.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+	vkDestroyBuffer(device.getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(device.getDevice(), stagingBufferMemory, nullptr);
 }

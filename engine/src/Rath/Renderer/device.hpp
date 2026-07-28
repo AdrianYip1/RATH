@@ -48,6 +48,7 @@ namespace Rath {
 			VkQueue getPresentQueue();
 			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+			VkCommandPool getCommandPool();
 
 		private:
 			const Context& context;
@@ -56,11 +57,12 @@ namespace Rath {
 			// Retrieve queue handles using vkGetDeviceQueue
 			VkQueue graphicsQueue = VK_NULL_HANDLE;
 			VkQueue presentQueue = VK_NULL_HANDLE;
+			VkCommandPool commandPool;
 
 			void pickPhysicalDevice();
 			void createLogicalDevice();
 			bool isDeviceSuitable(VkPhysicalDevice device);
 			bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-			
+			void createCommandPool();
 	};
 } // namespace Rath

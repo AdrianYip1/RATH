@@ -7,10 +7,9 @@ Rath::Renderer::Renderer(Window& _window) :
 	swapchain(_window, context, device),
 	renderpass(device, swapchain),
 	pipeline(device, swapchain, renderpass),
-	vertexBuffer(device) {
+	buffer(device),
+	vertexBuffer(device, buffer) {
 
-	createCommandPool();
-	std::cout << "Created command pool" << std::endl;
 	createCommandBuffers();
 	std::cout << "Created command buffer" << std::endl;
 	createSyncObjects();
@@ -26,8 +25,6 @@ Rath::Renderer::~Renderer() {
 		vkDestroySemaphore(device.getDevice(), renderFinishedSemaphores[i], nullptr);
 	}
 	std::cout << "Destroyed sync objects" << std::endl;
-	vkDestroyCommandPool(device.getDevice(), commandPool, nullptr);
-	std::cout << "Destroyed command pool" << std::endl;
 }
 
 // NOTE: renderFinishedSemaphore is resized to the number of images the swapchain owns (swapchain.getImageCount())
@@ -109,25 +106,12 @@ void Rath::Renderer::wait() {
 	vkDeviceWaitIdle(device.getDevice());
 }
 
-void Rath::Renderer::createCommandPool() {
-	QueueFamilyIndices queueFamilyIndices = device.findQueueFamilies(device.getPhysicalDevice());
-
-	VkCommandPoolCreateInfo poolInfo{};
-	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-
-	if (vkCreateCommandPool(device.getDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to create command pool");
-	}
-}
-
 void Rath::Renderer::createCommandBuffers() {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandPool;
+	allocInfo.commandPool = device.getCommandPool();
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	allocInfo.commandBufferCount = static_cast<u32>(commandBuffers.size());
 

@@ -5,10 +5,15 @@ Rath::Device::Device(Context& _context) : context(_context) {
 	std::cout << "Created device" << std::endl;
 	pickPhysicalDevice();
 	createLogicalDevice();
+
+	createCommandPool();
+	std::cout << "Created command pool" << std::endl;
 }
 
 // Device destructor
 Rath::Device::~Device() {
+	vkDestroyCommandPool(getDevice(), commandPool, nullptr);
+	std::cout << "Destroyed command pool" << std::endl;
 	vkDestroyDevice(device, nullptr);
 	std::cout << "Deleted device" << std::endl;
 }
@@ -31,6 +36,23 @@ VkQueue Rath::Device::getGraphicsQueue() {
 // Return the present queue
 VkQueue Rath::Device::getPresentQueue() {
 	return presentQueue;
+} 
+
+VkCommandPool Rath::Device::getCommandPool() {
+	return commandPool;
+}
+
+void Rath::Device::createCommandPool() {
+	Rath::QueueFamilyIndices queueFamilyIndices = findQueueFamilies(getPhysicalDevice());
+
+	VkCommandPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+	if (vkCreateCommandPool(getDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create command pool");
+	}
 }
 
 // TODO: instead of going with the 1st suitable device, give each device a

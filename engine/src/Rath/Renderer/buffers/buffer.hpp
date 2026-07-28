@@ -1,0 +1,37 @@
+#pragma once
+#include <vulkan/vulkan.h>
+#include <enginemath/vec2.hpp>
+#include <enginemath/vec3.hpp>
+
+// Rath files
+#include "Rath/Core/defines.hpp"
+#include "../device.hpp"
+
+// std
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <array>
+
+namespace Rath {
+	class Buffer {
+		public:
+			Buffer(Device& _device);
+			~Buffer();
+			Buffer(const Buffer& other) = delete;
+			Buffer& operator=(const Buffer& other) = delete;
+
+			void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
+							  VkMemoryPropertyFlags properties, VkBuffer& buffer,
+							  VkDeviceMemory& bufferMemory);
+
+			void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	
+	private:
+			Device& device;
+
+			u32 findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
+			
+	};
+} // namespace Rath

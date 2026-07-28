@@ -10,6 +10,7 @@
 #include "renderpass.hpp"
 #include "pipeline.hpp"
 #include "buffers/vertex.hpp"
+#include "buffers/buffer.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -40,9 +41,9 @@ namespace Rath {
 			Swapchain swapchain;
 			Renderpass renderpass;
 			Pipeline pipeline;
+			Buffer buffer;
 			VertexBuffer vertexBuffer;
 
-			VkCommandPool commandPool;
 			std::vector<VkCommandBuffer> commandBuffers;
 
 			std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -51,7 +52,6 @@ namespace Rath {
 
 			u32 currentFrame = 0;
 
-			void createCommandPool();
 			void createCommandBuffers();
 			void createSyncObjects();
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
