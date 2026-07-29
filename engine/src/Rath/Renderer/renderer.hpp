@@ -11,6 +11,7 @@
 #include "pipeline.hpp"
 #include "buffers/vertex.hpp"
 #include "buffers/buffer.hpp"
+#include "buffers/uniform.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -18,8 +19,6 @@
 
 
 namespace Rath {
-	// The amount of frames that can be processed at the same time
-	const int MAX_FRAMES_IN_FLIGHT = 2;
 
 	class Renderer {
 		public:
@@ -40,9 +39,10 @@ namespace Rath {
 			Device device;
 			Swapchain swapchain;
 			Renderpass renderpass;
-			Pipeline pipeline;
 			Buffer buffer;
 			VertexBuffer vertexBuffer;
+			UniformBuffer uniformBuffer;
+			Pipeline pipeline;
 
 			std::vector<VkCommandBuffer> commandBuffers;
 

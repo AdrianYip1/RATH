@@ -6,9 +6,10 @@ Rath::Renderer::Renderer(Window& _window) :
 	device(context),
 	swapchain(_window, context, device),
 	renderpass(device, swapchain),
-	pipeline(device, swapchain, renderpass),
 	buffer(device),
-	vertexBuffer(device, buffer) {
+	vertexBuffer(device, buffer),
+	uniformBuffer(device, swapchain, buffer),
+	pipeline(device, swapchain, renderpass, uniformBuffer) {
 
 	createCommandBuffers();
 	std::cout << "Created command buffer" << std::endl;
@@ -53,6 +54,8 @@ void Rath::Renderer::drawFrame() {
 	}
 	// Reset fences only when submitting work
 	vkResetFences(device.getDevice(), 1, &inFlightFences[currentFrame]);
+
+	uniformBuffer.updateUniformBuffer(currentFrame);
 
 	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
@@ -190,7 +193,10 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
 	vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
-	
+
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
+							0, 1, &uniformBuffer.getDescriptorSets()[currentFrame], 0, nullptr);
+
 	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indices.size()), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);

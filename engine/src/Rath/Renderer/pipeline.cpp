@@ -1,7 +1,9 @@
 #include "pipeline.hpp"
 
-Rath::Pipeline::Pipeline(Device& _device, Swapchain& _swapchain, Renderpass& _renderpass) : 
-	device(_device), swapchain(_swapchain), renderpass(_renderpass) {
+Rath::Pipeline::Pipeline(Device& _device, Swapchain& _swapchain, 
+						 Renderpass& _renderpass, UniformBuffer& _uniformbuffer) : 
+	device(_device), swapchain(_swapchain), 
+	renderpass(_renderpass), uniformbuffer(_uniformbuffer) {
 
 	createGraphicsPipeline();
 	std::cout << "Created pipeline" << std::endl;
@@ -19,6 +21,10 @@ Rath::Pipeline::~Pipeline() {
 
 VkPipeline Rath::Pipeline::getGraphicsPipeline() {
 	return graphicsPipeline;
+}
+
+VkPipelineLayout Rath::Pipeline::getPipelineLayout() {
+	return pipelineLayout;
 }
 
 void Rath::Pipeline::createGraphicsPipeline() {
@@ -91,7 +97,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	rasterizer.depthBiasClamp = VK_FALSE;
 	rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.depthBiasEnable = VK_FALSE;
@@ -114,6 +120,13 @@ void Rath::Pipeline::createGraphicsPipeline() {
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 1;
+
+	// getDescriptorSetLayout returns by value so you can immediately
+	// get the address with &. Need to create setLayouts and write those bits into stack
+	// to have it in memory first beofre referencing with &
+	VkDescriptorSetLayout setLayouts = uniformbuffer.getDescriptorSetLayout();
+	pipelineLayoutInfo.pSetLayouts = &setLayouts;
 
 	if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create pipeline layout");

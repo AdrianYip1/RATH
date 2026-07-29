@@ -6,6 +6,7 @@
 #include "swapchain.hpp"
 #include "renderpass.hpp"
 #include "buffers/vertex.hpp"
+#include "buffers/uniform.hpp"
 #include "Rath/Core/defines.hpp"
 
 // std
@@ -21,16 +22,19 @@
 namespace Rath {
 	class Pipeline {
 		public:
-			Pipeline(Device& _device, Swapchain& _swapchain, Renderpass& _renderpass);
+			Pipeline(Device& _device, Swapchain& _swapchain, 
+				     Renderpass& _renderpass, UniformBuffer& _uniformbuffer);
 			~Pipeline();
 			Pipeline(const Pipeline& other) = delete;
 			Pipeline& operator=(const Pipeline& other) = delete;
 
 			VkPipeline getGraphicsPipeline();
+			VkPipelineLayout getPipelineLayout();
 		private:
 			Device& device;
 			Swapchain& swapchain;
 			Renderpass& renderpass;
+			UniformBuffer& uniformbuffer;
 
 			VkPipelineLayout pipelineLayout;
 			VkPipeline graphicsPipeline;

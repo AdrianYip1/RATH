@@ -11,6 +11,8 @@
 
 // Short aliases for commonly used types
 namespace Rath {
+	// The amount of frames that can be processed at the same time
+	const int MAX_FRAMES_IN_FLIGHT = 2;
 
 	using size = size_t;
 
