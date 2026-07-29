@@ -27,11 +27,12 @@ namespace Rath {
 							  VkDeviceMemory& bufferMemory);
 
 			void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	
+			u32 findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
+			VkCommandBuffer beginSingleTimeCommands();
+			void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
 	private:
 			Device& device;
-
-			u32 findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
 			
 	};
 } // namespace Rath

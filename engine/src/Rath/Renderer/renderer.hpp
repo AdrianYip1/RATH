@@ -12,6 +12,7 @@
 #include "buffers/vertex.hpp"
 #include "buffers/buffer.hpp"
 #include "buffers/uniform.hpp"
+#include "images/image.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -42,6 +43,7 @@ namespace Rath {
 			Buffer buffer;
 			VertexBuffer vertexBuffer;
 			UniformBuffer uniformBuffer;
+			Image image;
 			Pipeline pipeline;
 
 			std::vector<VkCommandBuffer> commandBuffers;

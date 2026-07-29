@@ -39,6 +39,28 @@ void Rath::Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
 
 
 void Rath::Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+	VkBufferCopy copyRegion{};
+	copyRegion.size = size;
+	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+	endSingleTimeCommands(commandBuffer);
+}
+
+Rath::u32 Rath::Buffer::findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties) {
+	VkPhysicalDeviceMemoryProperties memProperties;
+	vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProperties);
+
+	for (u32 i = 0; i < memProperties.memoryTypeCount; i++) {
+		if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+			return i;
+		}
+	}
+	throw std::runtime_error("Failed to find suitable memory type");
+}
+
+VkCommandBuffer Rath::Buffer::beginSingleTimeCommands() {
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -54,9 +76,11 @@ void Rath::Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSi
 
 	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-	VkBufferCopy copyRegion{};
-	copyRegion.size = size;
-	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+	return commandBuffer;
+}
+
+
+void Rath::Buffer::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
 	vkEndCommandBuffer(commandBuffer);
 
 	VkSubmitInfo submitInfo{};
@@ -67,17 +91,5 @@ void Rath::Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSi
 	vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 	vkQueueWaitIdle(device.getGraphicsQueue());
 
-	vkFreeCommandBuffers(device.getDevice(), device.getCommandPool(), 1, &commandBuffer);	
-}
-
-Rath::u32 Rath::Buffer::findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties) {
-	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProperties);
-
-	for (u32 i = 0; i < memProperties.memoryTypeCount; i++) {
-		if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-			return i;
-		}
-	}
-	throw std::runtime_error("Failed to find suitable memory type");
+	vkFreeCommandBuffers(device.getDevice(), device.getCommandPool(), 1, &commandBuffer);
 }
