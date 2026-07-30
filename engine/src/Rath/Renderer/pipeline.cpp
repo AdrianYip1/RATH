@@ -1,9 +1,11 @@
 #include "pipeline.hpp"
 
 Rath::Pipeline::Pipeline(Device& _device, Swapchain& _swapchain, 
-						 Renderpass& _renderpass, UniformBuffer& _uniformbuffer) : 
+						 Renderpass& _renderpass, UniformBuffer& _uniformbuffer,
+						 Descriptor& _descriptor) : 
 	device(_device), swapchain(_swapchain), 
-	renderpass(_renderpass), uniformbuffer(_uniformbuffer) {
+	renderpass(_renderpass), uniformbuffer(_uniformbuffer),
+	descriptor(_descriptor) {
 
 	createGraphicsPipeline();
 	std::cout << "Created pipeline" << std::endl;
@@ -125,7 +127,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	// getDescriptorSetLayout returns by value so you can immediately
 	// get the address with &. Need to create setLayouts and write those bits into stack
 	// to have it in memory first beofre referencing with &
-	VkDescriptorSetLayout setLayouts = uniformbuffer.getDescriptorSetLayout();
+	VkDescriptorSetLayout setLayouts = descriptor.getDescriptorSetLayout();
 	pipelineLayoutInfo.pSetLayouts = &setLayouts;
 
 	if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {

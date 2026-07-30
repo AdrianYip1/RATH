@@ -9,8 +9,9 @@ Rath::Renderer::Renderer(Window& _window) :
 	buffer(device),
 	vertexBuffer(device, buffer),
 	image(device, buffer),
-	uniformBuffer(device, swapchain, buffer, image),
-	pipeline(device, swapchain, renderpass, uniformBuffer) {
+	uniformBuffer(device, swapchain, buffer),
+	descriptor(device, uniformBuffer, image),
+	pipeline(device, swapchain, renderpass, uniformBuffer, descriptor) {
 
 	createCommandBuffers();
 	std::cout << "Created command buffer" << std::endl;
@@ -195,8 +196,10 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 
 	vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
 
+	VkDescriptorSet set = descriptor.getDescriptorSet(currentFrame);
+
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
-							0, 1, &uniformBuffer.getDescriptorSets()[currentFrame], 0, nullptr);
+							0, 1, &set, 0, nullptr);
 
 	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indices.size()), 1, 0, 0, 0);
 

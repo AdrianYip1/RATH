@@ -9,7 +9,6 @@
 #include "Rath/Core/defines.hpp"
 #include "../device.hpp"
 #include "../swapchain.hpp"
-#include "../images/image.hpp"
 #include "buffer.hpp"
 
 // std
@@ -29,23 +28,18 @@ namespace Rath {
 
 	class UniformBuffer {
 		public:
-			UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer, Image& _image);
+			UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer);
 			~UniformBuffer();
 			UniformBuffer(const UniformBuffer& other) = delete;
 			UniformBuffer& operator=(const UniformBuffer& other) = delete;
 	
-			const VkDescriptorSetLayout getDescriptorSetLayout();
 			void updateUniformBuffer(u32 currentImage);
-			std::vector<VkDescriptorSet> getDescriptorSets();
+			std::vector<VkBuffer> getUniformBuffer() { return uniformBuffers; };
 		private:
 			Device& device;
 			Swapchain& swapchain;
 			Buffer& buffer;
-			Image& image;
 
-			VkDescriptorSetLayout descriptorSetLayout;
-			VkDescriptorPool descriptorPool;
-			std::vector<VkDescriptorSet> descriptorSets;
 			// New data is copied into uniform buffer every frame
 			// no point in having staging buffer
 			// Should use multiple buffers as multiple frames
@@ -54,11 +48,7 @@ namespace Rath {
 			std::vector<VkDeviceMemory> uniformBuffersMemory;
 			std::vector<void*> uniformBuffersMapped;
 			
-
-			void createDescriptorSetLayout();
 			void createUniformBuffers();
-			void createDescriptorPool();
-			void createDescriptorSets();
 
 	};
 
