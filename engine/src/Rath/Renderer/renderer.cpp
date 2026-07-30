@@ -8,8 +8,8 @@ Rath::Renderer::Renderer(Window& _window) :
 	renderpass(device, swapchain),
 	buffer(device),
 	vertexBuffer(device, buffer),
-	uniformBuffer(device, swapchain, buffer),
 	image(device, buffer),
+	uniformBuffer(device, swapchain, buffer, image),
 	pipeline(device, swapchain, renderpass, uniformBuffer) {
 
 	createCommandBuffers();

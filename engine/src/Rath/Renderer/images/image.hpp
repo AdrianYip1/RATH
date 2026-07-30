@@ -27,6 +27,9 @@ namespace Rath {
 							 VkImageTiling tiling, VkImageUsageFlags usage,
 							 VkMemoryPropertyFlags properties, VkImage& image,
 							 VkDeviceMemory& imageMemory);
+		
+			VkImageView getTextureImageView();
+			VkSampler getSampler();
 		private:
 			Device& device;
 			Buffer& buffer;
@@ -34,9 +37,15 @@ namespace Rath {
 			VkImage textureImage;
 			VkDeviceMemory textureImageMemory;
 
+			VkImageView textureImageView;
+			VkSampler textureSampler;
+
 			void createTextureImage();
 			void transitionImageLayout(VkImage image, VkFormat format,
 									   VkImageLayout oldLayout, VkImageLayout newLayout);
 			void copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height);
+			void createTextureImageView();
+			void createTextureSampler();
+	
 	};
 } // namespace Rath

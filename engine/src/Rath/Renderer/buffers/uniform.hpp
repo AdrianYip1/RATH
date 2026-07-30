@@ -9,6 +9,7 @@
 #include "Rath/Core/defines.hpp"
 #include "../device.hpp"
 #include "../swapchain.hpp"
+#include "../images/image.hpp"
 #include "buffer.hpp"
 
 // std
@@ -28,7 +29,7 @@ namespace Rath {
 
 	class UniformBuffer {
 		public:
-			UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer);
+			UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer, Image& _image);
 			~UniformBuffer();
 			UniformBuffer(const UniformBuffer& other) = delete;
 			UniformBuffer& operator=(const UniformBuffer& other) = delete;
@@ -40,6 +41,7 @@ namespace Rath {
 			Device& device;
 			Swapchain& swapchain;
 			Buffer& buffer;
+			Image& image;
 
 			VkDescriptorSetLayout descriptorSetLayout;
 			VkDescriptorPool descriptorPool;

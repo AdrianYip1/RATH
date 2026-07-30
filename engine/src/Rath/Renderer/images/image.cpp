@@ -5,9 +5,13 @@
 Rath::Image::Image(Device& _device, Buffer& _buffer) : 
 	device(_device), buffer(_buffer) {
 	createTextureImage();
+	createTextureImageView();
+	createTextureSampler();
 }
 
 Rath::Image::~Image() {
+	vkDestroySampler(device.getDevice(), textureSampler, nullptr);
+	vkDestroyImageView(device.getDevice(), textureImageView, nullptr);
 	vkDestroyImage(device.getDevice(), textureImage, nullptr);
 	vkFreeMemory(device.getDevice(), textureImageMemory, nullptr);
 }
@@ -49,6 +53,14 @@ void Rath::Image::createImage(u32 width, u32 height, VkFormat format,
 	}
 
 	vkBindImageMemory(device.getDevice(), image, imageMemory, 0);
+}
+
+VkImageView Rath::Image::getTextureImageView() {
+	return textureImageView;
+}
+
+VkSampler Rath::Image::getSampler() {
+	return textureSampler;
 }
 
 void Rath::Image::createTextureImage() {
@@ -151,4 +163,51 @@ void Rath::Image::copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, 
 	vkCmdCopyBufferToImage(commandBuffer, _buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
 	buffer.endSingleTimeCommands(commandBuffer);
+}
+
+// TODO: abstract imageview into a single createImageView function
+void Rath::Image::createTextureImageView() {
+	VkImageViewCreateInfo viewInfo{};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = textureImage;
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.baseMipLevel = 0;
+	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = 1;
+
+	if (vkCreateImageView(device.getDevice(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create texture image view");
+	}
+
+}
+
+void Rath::Image::createTextureSampler() {
+	VkSamplerCreateInfo samplerInfo{};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.magFilter = VK_FILTER_LINEAR;
+	samplerInfo.minFilter = VK_FILTER_LINEAR;
+	samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.anisotropyEnable = VK_TRUE;
+
+	VkPhysicalDeviceProperties properties{};
+	vkGetPhysicalDeviceProperties(device.getPhysicalDevice(), &properties);
+	samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+
+	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	samplerInfo.unnormalizedCoordinates = VK_FALSE;
+	samplerInfo.compareEnable = VK_FALSE;
+	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	samplerInfo.mipLodBias = 0.0f;
+	samplerInfo.minLod = 0.0f;
+	samplerInfo.maxLod = 0.0f;
+
+	if (vkCreateSampler(device.getDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create texture sampler");
+	}
 }

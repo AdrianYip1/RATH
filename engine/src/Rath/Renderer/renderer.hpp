@@ -42,8 +42,8 @@ namespace Rath {
 			Renderpass renderpass;
 			Buffer buffer;
 			VertexBuffer vertexBuffer;
-			UniformBuffer uniformBuffer;
 			Image image;
+			UniformBuffer uniformBuffer;
 			Pipeline pipeline;
 
 			std::vector<VkCommandBuffer> commandBuffers;
