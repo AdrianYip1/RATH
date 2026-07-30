@@ -34,7 +34,7 @@ namespace Rath {
 			UniformBuffer& operator=(const UniformBuffer& other) = delete;
 	
 			void updateUniformBuffer(u32 currentImage);
-			std::vector<VkBuffer> getUniformBuffer() { return uniformBuffers; };
+			VkBuffer getUniformBuffer(u32 currentFrame) { return uniformBuffers[currentFrame]; };
 		private:
 			Device& device;
 			Swapchain& swapchain;

@@ -63,6 +63,23 @@ VkSampler Rath::Image::getSampler() {
 	return textureSampler;
 }
 
+void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat format, VkImageView& imageView) {
+	VkImageViewCreateInfo viewInfo{};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = image;
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.format = format;
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.baseMipLevel = 0;
+	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = 1;
+
+	if (vkCreateImageView(device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create image view");
+	}
+}
+
 void Rath::Image::createTextureImage() {
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load("../../../../engine/textures/texture.jpg", &texWidth,
@@ -165,23 +182,8 @@ void Rath::Image::copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, 
 	buffer.endSingleTimeCommands(commandBuffer);
 }
 
-// TODO: abstract imageview into a single createImageView function
 void Rath::Image::createTextureImageView() {
-	VkImageViewCreateInfo viewInfo{};
-	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = textureImage;
-	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = 1;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = 1;
-
-	if (vkCreateImageView(device.getDevice(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to create texture image view");
-	}
-
+	createImageView(device.getDevice(), textureImage, VK_FORMAT_R8G8B8A8_SRGB, textureImageView);
 }
 
 void Rath::Image::createTextureSampler() {

@@ -6,7 +6,6 @@
 #include "swapchain.hpp"
 #include "renderpass.hpp"
 #include "buffers/vertex.hpp"
-#include "buffers/uniform.hpp"
 #include "descriptor.hpp"
 #include "Rath/Core/defines.hpp"
 
@@ -24,8 +23,7 @@ namespace Rath {
 	class Pipeline {
 		public:
 			Pipeline(Device& _device, Swapchain& _swapchain, 
-				     Renderpass& _renderpass, UniformBuffer& _uniformbuffer,
-					 Descriptor& _descriptor);
+				     Renderpass& _renderpass, Descriptor& _descriptor);
 			~Pipeline();
 			Pipeline(const Pipeline& other) = delete;
 			Pipeline& operator=(const Pipeline& other) = delete;
@@ -36,7 +34,6 @@ namespace Rath {
 			Device& device;
 			Swapchain& swapchain;
 			Renderpass& renderpass;
-			UniformBuffer& uniformbuffer;
 			Descriptor& descriptor;
 
 			VkPipelineLayout pipelineLayout;

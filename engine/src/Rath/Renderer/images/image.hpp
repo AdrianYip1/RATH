@@ -30,6 +30,8 @@ namespace Rath {
 		
 			VkImageView getTextureImageView();
 			VkSampler getSampler();
+
+			static void createImageView(VkDevice device, VkImage image, VkFormat format, VkImageView& imageView);
 		private:
 			Device& device;
 			Buffer& buffer;

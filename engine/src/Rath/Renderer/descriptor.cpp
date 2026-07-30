@@ -71,7 +71,7 @@ void Rath::Descriptor::createDescriptorSets() {
 
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = uniform.getUniformBuffer()[i];
+		bufferInfo.buffer = uniform.getUniformBuffer(i);
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
 

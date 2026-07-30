@@ -6,6 +6,7 @@
 #include "Rath/Core/defines.hpp"
 #include "device.hpp"
 #include "context.hpp"
+#include "images/image.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std

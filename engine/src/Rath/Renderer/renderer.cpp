@@ -11,7 +11,7 @@ Rath::Renderer::Renderer(Window& _window) :
 	image(device, buffer),
 	uniformBuffer(device, swapchain, buffer),
 	descriptor(device, uniformBuffer, image),
-	pipeline(device, swapchain, renderpass, uniformBuffer, descriptor) {
+	pipeline(device, swapchain, renderpass, descriptor) {
 
 	createCommandBuffers();
 	std::cout << "Created command buffer" << std::endl;

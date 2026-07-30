@@ -1,11 +1,9 @@
 #include "pipeline.hpp"
 
 Rath::Pipeline::Pipeline(Device& _device, Swapchain& _swapchain, 
-						 Renderpass& _renderpass, UniformBuffer& _uniformbuffer,
-						 Descriptor& _descriptor) : 
+						 Renderpass& _renderpass, Descriptor& _descriptor) : 
 	device(_device), swapchain(_swapchain), 
-	renderpass(_renderpass), uniformbuffer(_uniformbuffer),
-	descriptor(_descriptor) {
+	renderpass(_renderpass), descriptor(_descriptor) {
 
 	createGraphicsPipeline();
 	std::cout << "Created pipeline" << std::endl;
