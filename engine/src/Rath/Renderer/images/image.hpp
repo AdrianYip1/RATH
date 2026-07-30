@@ -28,26 +28,14 @@ namespace Rath {
 							 VkMemoryPropertyFlags properties, VkImage& image,
 							 VkDeviceMemory& imageMemory);
 		
-			VkImageView getTextureImageView();
-			VkSampler getSampler();
 
+			void transitionImageLayout(VkImage image, VkFormat format,
+				VkImageLayout oldLayout, VkImageLayout newLayout);
+			void copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height);
+			
 			static void createImageView(VkDevice device, VkImage image, VkFormat format, VkImageView& imageView);
 		private:
 			Device& device;
-			Buffer& buffer;
-
-			VkImage textureImage;
-			VkDeviceMemory textureImageMemory;
-
-			VkImageView textureImageView;
-			VkSampler textureSampler;
-
-			void createTextureImage();
-			void transitionImageLayout(VkImage image, VkFormat format,
-									   VkImageLayout oldLayout, VkImageLayout newLayout);
-			void copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height);
-			void createTextureImageView();
-			void createTextureSampler();
-	
+			Buffer& buffer;	
 	};
 } // namespace Rath

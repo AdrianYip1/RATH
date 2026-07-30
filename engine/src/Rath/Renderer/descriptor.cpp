@@ -1,7 +1,7 @@
 #include "descriptor.hpp"
 
-Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, Image& _image) : 
-	device(_device), uniform(_uniform), image(_image) {
+Rath::Descriptor::Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform) :
+	device(_device), texture(_texture), uniform(_uniform) {
 	createDescriptorSetLayout();
 	createDescriptorPool();
 	createDescriptorSets();
@@ -77,8 +77,8 @@ void Rath::Descriptor::createDescriptorSets() {
 
 		VkDescriptorImageInfo imageInfo{};
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = image.getTextureImageView();
-		imageInfo.sampler = image.getSampler();
+		imageInfo.imageView = texture.getTextureImageView();
+		imageInfo.sampler = texture.getSampler();
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 

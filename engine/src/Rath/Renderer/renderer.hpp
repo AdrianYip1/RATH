@@ -14,6 +14,7 @@
 #include "buffers/uniform.hpp"
 #include "images/image.hpp"
 #include "descriptor.hpp"
+#include "images/texture.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -44,6 +45,7 @@ namespace Rath {
 			Buffer buffer;
 			VertexBuffer vertexBuffer;
 			Image image;
+			Texture texture;
 			UniformBuffer uniformBuffer;
 			Descriptor descriptor;
 			Pipeline pipeline;

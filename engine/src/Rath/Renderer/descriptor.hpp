@@ -9,9 +9,9 @@
 #include "Rath/Core/defines.hpp"
 #include "device.hpp"
 #include "swapchain.hpp"
-#include "images/image.hpp"
 #include "buffers/buffer.hpp"
 #include "buffers/uniform.hpp"
+#include "images/texture.hpp"
 
 // std
 #include <stdexcept>
@@ -23,7 +23,7 @@
 namespace Rath {
 	class Descriptor {
 		public:
-			Descriptor(Device& _device, UniformBuffer& _uniform, Image& _image);
+			Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform);
 			~Descriptor();
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
@@ -32,8 +32,9 @@ namespace Rath {
 			VkDescriptorSet getDescriptorSet(u32 frame) { return descriptorSets[frame]; };
 		private:
 			Device& device;
+			Texture& texture;
 			UniformBuffer& uniform;
-			Image& image;
+			
 
 			VkDescriptorSetLayout descriptorSetLayout;
 			VkDescriptorPool descriptorPool;

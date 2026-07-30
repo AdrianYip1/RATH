@@ -9,8 +9,9 @@ Rath::Renderer::Renderer(Window& _window) :
 	buffer(device),
 	vertexBuffer(device, buffer),
 	image(device, buffer),
+	texture(device, image, buffer),
 	uniformBuffer(device, swapchain, buffer),
-	descriptor(device, uniformBuffer, image),
+	descriptor(device, texture, uniformBuffer),
 	pipeline(device, swapchain, renderpass, descriptor) {
 
 	createCommandBuffers();
