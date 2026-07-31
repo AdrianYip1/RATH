@@ -90,23 +90,24 @@ void Rath::Swapchain::createImageViews() {
 	swapChainImageViews.resize(swapChainImages.size());
 
 	for (size i = 0; i < swapChainImages.size(); i++) {
-		Image::createImageView(device.getDevice(), swapChainImages[i], swapChainImageFormat, swapChainImageViews[i]);
+		Image::createImageView(device.getDevice(), swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, swapChainImageViews[i]);
 	}
 }
 
-void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass) {
+void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass, VkImageView depthView) {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 
 	for (size i = 0; i < swapChainFramebuffers.size(); i++) {
-		VkImageView attachments[] = {
-			swapChainImageViews[i]
+		std::array<VkImageView, 2> attachments = {
+			swapChainImageViews[i],
+			depthView
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferInfo.renderPass = renderpass;
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.attachmentCount = static_cast<u32>(attachments.size());
+		framebufferInfo.pAttachments = attachments.data();
 		framebufferInfo.width = swapChainExtent.width;
 		framebufferInfo.height = swapChainExtent.height;
 		framebufferInfo.layers = 1;
@@ -159,7 +160,7 @@ VkExtent2D Rath::Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 	}
 }
 
-void Rath::Swapchain::recreateSwapChain(VkRenderPass renderpass) {
+void Rath::Swapchain::recreateSwapChain(VkRenderPass renderpass, VkImageView depthView) {
 	int width = 0, height = 0;
 	glfwGetFramebufferSize(window.getWindow(), &width, &height);
 	while (width == 0 || height == 0) {
@@ -173,7 +174,8 @@ void Rath::Swapchain::recreateSwapChain(VkRenderPass renderpass) {
 
 	createSwapChain();
 	createImageViews();
-	createFramebuffers(renderpass);
+	
+	createFramebuffers(renderpass, depthView);
 }
 
 void Rath::Swapchain::cleanupSwapChain() {

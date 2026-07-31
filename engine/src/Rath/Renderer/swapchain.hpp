@@ -32,8 +32,8 @@ namespace Rath {
 			VkFormat getFormat();
 			const std::vector<VkFramebuffer>& getFramebuffers();
 			// Call this function after graphics pipeline is created
-			void createFramebuffers(VkRenderPass renderpass);
-			void recreateSwapChain(VkRenderPass renderpass);
+			void createFramebuffers(VkRenderPass renderpass, VkImageView depthView);
+			void recreateSwapChain(VkRenderPass renderpass, VkImageView depthView);
 
 		private:
 			Window& window;

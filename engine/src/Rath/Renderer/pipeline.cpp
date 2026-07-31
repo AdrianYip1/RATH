@@ -7,7 +7,6 @@ Rath::Pipeline::Pipeline(Device& _device, Swapchain& _swapchain,
 
 	createGraphicsPipeline();
 	std::cout << "Created pipeline" << std::endl;
-	swapchain.createFramebuffers(renderpass.getRenderPass());
 }
 
 Rath::Pipeline::~Pipeline() {
@@ -118,6 +117,14 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	colorBlending.attachmentCount = 1;
 	colorBlending.pAttachments = &colorBlendAttachment;
 
+	VkPipelineDepthStencilStateCreateInfo depthStencil{};
+	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depthStencil.depthTestEnable = VK_TRUE;
+	depthStencil.depthWriteEnable = VK_TRUE;
+	// Keep the closer (less depth)
+	depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+	depthStencil.stencilTestEnable = VK_FALSE;
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 1;
@@ -145,6 +152,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	pipelineInfo.pDepthStencilState = nullptr;
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
+	pipelineInfo.pDepthStencilState = &depthStencil;
 
 	pipelineInfo.layout = pipelineLayout;
 
@@ -158,7 +166,6 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	vkDestroyShaderModule(device.getDevice(), fragShaderModule, nullptr);
 	vkDestroyShaderModule(device.getDevice(), vertShaderModule, nullptr);
 }
-
 
 VkShaderModule Rath::Pipeline::createShaderModule(const std::vector<char>& code) {
 	VkShaderModuleCreateInfo createInfo{};

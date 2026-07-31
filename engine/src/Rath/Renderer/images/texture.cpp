@@ -56,7 +56,7 @@ void Rath::Texture::createTextureImage() {
 }
 
 void Rath::Texture::createTextureImageView() {
-	image.createImageView(device.getDevice(), textureImage, VK_FORMAT_R8G8B8A8_SRGB, textureImageView);
+	image.createImageView(device.getDevice(), textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, textureImageView);
 }
 
 void Rath::Texture::createTextureSampler() {

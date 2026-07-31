@@ -33,9 +33,11 @@ namespace Rath {
 				VkImageLayout oldLayout, VkImageLayout newLayout);
 			void copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height);
 			
-			static void createImageView(VkDevice device, VkImage image, VkFormat format, VkImageView& imageView);
+			static void createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView);
 		private:
 			Device& device;
 			Buffer& buffer;	
+
+
 	};
 } // namespace Rath

@@ -49,7 +49,9 @@ namespace Rath {
 			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 			VkCommandPool getCommandPool();
-
+			VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
+				VkImageTiling tiling, VkFormatFeatureFlags features);
+			bool hasStencilComponent(VkFormat format);
 		private:
 			const Context& context;
 			VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
@@ -64,5 +66,6 @@ namespace Rath {
 			bool isDeviceSuitable(VkPhysicalDevice device);
 			bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 			void createCommandPool();
+		
 	};
 } // namespace Rath

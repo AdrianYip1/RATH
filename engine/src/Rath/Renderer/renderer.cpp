@@ -5,15 +5,18 @@ Rath::Renderer::Renderer(Window& _window) :
 	context(_window),
 	device(context),
 	swapchain(_window, context, device),
-	renderpass(device, swapchain),
 	buffer(device),
 	vertexBuffer(device, buffer),
 	image(device, buffer),
+	depth(device, swapchain, image),
+	renderpass(device, swapchain, depth),
 	texture(device, image, buffer),
 	uniformBuffer(device, swapchain, buffer),
 	descriptor(device, texture, uniformBuffer),
 	pipeline(device, swapchain, renderpass, descriptor) {
 
+	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
+	std::cout << "Created framebuffers" << std::endl;
 	createCommandBuffers();
 	std::cout << "Created command buffer" << std::endl;
 	createSyncObjects();
@@ -49,7 +52,8 @@ void Rath::Renderer::drawFrame() {
 		imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		swapchain.recreateSwapChain(renderpass.getRenderPass());
+		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
+		depth.createDepthResources();
 		return;
 	}
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -98,7 +102,8 @@ void Rath::Renderer::drawFrame() {
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.getFramebufferResized()) {
 		window.setFramebufferResized(false);
-		swapchain.recreateSwapChain(renderpass.getRenderPass());
+		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
+		depth.createDepthResources();
 	}
 	else if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to present swap chain image");
@@ -169,9 +174,13 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	renderPassInfo.renderArea.extent = swapchain.getExtent();
 	renderPassInfo.renderArea.offset = { 0,0 };
 
-	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColor;
+	// Same to the order of my renderpass attachments
+	std::array<VkClearValue, 2> clearValues{};
+	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	clearValues[1].depthStencil = { 1.0f, 0 };
+
+	renderPassInfo.clearValueCount = static_cast<u32>(clearValues.size());
+	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 

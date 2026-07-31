@@ -4,6 +4,7 @@
 // Rath files
 #include "device.hpp"
 #include "swapchain.hpp"
+#include "images/depth.hpp"
 #include "Rath/Core/defines.hpp"
 
 // std
@@ -19,7 +20,7 @@
 namespace Rath {
 	class Renderpass {
 	public:
-		Renderpass(Device& _device, Swapchain& _swapchain);
+		Renderpass(Device& _device, Swapchain& _swapchain, Depth& _depth);
 		~Renderpass();
 		Renderpass(const Renderpass& other) = delete;
 		Renderpass& operator=(const Renderpass& other) = delete;
@@ -28,6 +29,7 @@ namespace Rath {
 	private:
 		Device& device;
 		Swapchain& swapchain;
+		Depth& depth;
 
 		VkRenderPass renderPass;
 
