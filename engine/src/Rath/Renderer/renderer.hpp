@@ -31,9 +31,12 @@ namespace Rath {
 			~Renderer();
 			Renderer(const Renderer& other) = delete;
 			Renderer& operator=(const Renderer& other) = delete;
-
+			
+			// Draws one frame: waits on the fence, acquires an image, updates the
+			// uniform buffer, records and submits, then presents
 			void drawFrame();
 
+			// Waits for all queues to finish, needed before destruction
 			// can't call vkDeviceWaitIdle(device) in application so have a function here
 			void wait();
 
@@ -61,8 +64,16 @@ namespace Rath {
 
 			u32 currentFrame = 0;
 
+			// Allocates a command buffer per frame in flight from the command pool,
+			// freed when the command pool is destroyed
 			void createCommandBuffers();
+
+			// Creates the semaphores and fences needed for rendering
 			void createSyncObjects();
+
+			// Begins recording, starts the render pass, binds the pipeline, sets the
+			// dynamic viewport and scissor, then binds the vertex, descriptor and
+			// index data before drawing
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
 	};
 } // namespace Rath

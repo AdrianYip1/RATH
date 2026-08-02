@@ -11,6 +11,10 @@ Rath::Image::~Image() {
 
 }
 
+// Helper function that creates the image and imageMemory, storing them
+// in the passed image and memory parameters. The memory is bounded to the image
+// The function takes the format, tiling, usage, and properties to create
+// a specific image
 void Rath::Image::createImage(u32 width, u32 height, VkFormat format,
 							  VkImageTiling tiling, VkImageUsageFlags usage,
 							  VkMemoryPropertyFlags properties, VkImage& image,
@@ -50,8 +54,10 @@ void Rath::Image::createImage(u32 width, u32 height, VkFormat format,
 	vkBindImageMemory(device.getDevice(), image, imageMemory, 0);
 }
 
-
-void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView) {
+// Helper function for creating image views, a specific way of accessing
+// the provided image. The imageView is stored in the imageView reference
+void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat format, 
+								  VkImageAspectFlags aspectFlags, VkImageView& imageView) {
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
@@ -68,6 +74,11 @@ void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat forma
 	}
 }
 
+// Helper function used to transition an image's layout from one to another.
+// This is used for cases such as before copying an image into a texture
+// (UNDEFINED to TRANSFER_DST_OPTIMAL) or depth images
+// (UNDEFINED to DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+// the format is used only to check if stencil is used
 void Rath::Image::transitionImageLayout(VkImage image, VkFormat format,
 										 VkImageLayout oldLayout, VkImageLayout newLayout) {
 	VkCommandBuffer commandBuffer = buffer.beginSingleTimeCommands();
@@ -123,9 +134,9 @@ void Rath::Image::transitionImageLayout(VkImage image, VkFormat format,
 	vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
 	buffer.endSingleTimeCommands(commandBuffer);
-
 }
 
+// Helper function that copies the buffer's information into an image
 void Rath::Image::copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height) {
 	VkCommandBuffer commandBuffer = buffer.beginSingleTimeCommands();
 

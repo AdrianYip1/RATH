@@ -28,7 +28,10 @@ namespace Rath {
 			Pipeline(const Pipeline& other) = delete;
 			Pipeline& operator=(const Pipeline& other) = delete;
 
+			// Returns graphicsPipeline
 			VkPipeline getGraphicsPipeline() const { return graphicsPipeline; };
+
+			// Returns pipelineLayout
 			VkPipelineLayout getPipelineLayout() const { return pipelineLayout; };
 		
 		private:
@@ -40,8 +43,15 @@ namespace Rath {
 			VkPipelineLayout pipelineLayout;
 			VkPipeline graphicsPipeline;
 
+			// Builds every create info the pipeline needs, then creates the layout
+			// and the pipeline. Viewport and scissor are dynamic, set at record time
 			void createGraphicsPipeline();
+
+			// Takes the byte data of a shader and returns a corresponding shader module
 			VkShaderModule createShaderModule(const std::vector<char>& code);
+
+			// Reads the file at the given path and returns its byte data,
+			// read in binary with the size computed from opening the file at the end
 			static std::vector<char> readFile(const std::string& fileName);
 	};
 } // namespace Rath

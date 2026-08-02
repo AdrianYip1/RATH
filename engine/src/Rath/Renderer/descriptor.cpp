@@ -1,5 +1,6 @@
 #include "descriptor.hpp"
 
+// Descriptor constructor
 Rath::Descriptor::Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform) :
 	device(_device), texture(_texture), uniform(_uniform) {
 	createDescriptorSetLayout();
@@ -7,11 +8,14 @@ Rath::Descriptor::Descriptor(Device& _device, Texture& _texture, UniformBuffer& 
 	createDescriptorSets();
 }
 
+// Descriptor destructor
 Rath::Descriptor::~Descriptor() {
 	vkDestroyDescriptorPool(device.getDevice(), descriptorPool, nullptr);
 	vkDestroyDescriptorSetLayout(device.getDevice(), descriptorSetLayout, nullptr);
 }
 
+// Creates the descriptor set layout, which has the shape of a descriptor set and
+// their binding layout indices used in shaders (and determines which shaders can access it)
 void Rath::Descriptor::createDescriptorSetLayout() {
 	VkDescriptorSetLayoutBinding uboLayoutBinding{};
 	uboLayoutBinding.binding = 0;
@@ -37,6 +41,9 @@ void Rath::Descriptor::createDescriptorSetLayout() {
 	}
 }
 
+// Creates the descriptor pool for both the uniform and texture
+// DescriptorSets are allocated using descriptor pools (they get freed when the pool is destroyed)
+// poolSizes determine how many descriptors of each type exist
 void Rath::Descriptor::createDescriptorPool() {
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -55,6 +62,12 @@ void Rath::Descriptor::createDescriptorPool() {
 	}
 }
 
+// Creates the descriptor sets allocated by the descriptor pools
+// descriptorWrites contains buffer and image info, which contain
+// a handle to the uniformBuffer and texture sampler + imageView
+// Descriptor writes also specifies the binding layout of these
+// and vkUpdateDescriptorSets writes descriptorWrites into the set
+// the descriptorSet is then binded to the command buffer during rendering
 void Rath::Descriptor::createDescriptorSets() {
 	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
 

@@ -21,16 +21,24 @@ namespace Rath {
 			Image(const Image& other) = delete;
 			Image& operator=(const Image& other) = delete;
 
+			// Creates the image and its memory, storing them in the passed references,
+			// then binds the memory to the image
 			void createImage(u32 width, u32 height, VkFormat format,
 							 VkImageTiling tiling, VkImageUsageFlags usage,
 							 VkMemoryPropertyFlags properties, VkImage& image,
 							 VkDeviceMemory& imageMemory);
-		
-			void transitionImageLayout(VkImage image, VkFormat format,
-				VkImageLayout oldLayout, VkImageLayout newLayout);
+
+			// Transitions an image's layout using a pipeline barrier,
+			// format is only used to check whether the image has a stencil component
+			void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+			// Copies the buffer's contents into an image
 			void copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height);
-			
+
+			// Creates an image view, a specific way of accessing the provided image,
+			// stored in the imageView reference
 			static void createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView);
+		
 		private:
 			Device& device;
 			Buffer& buffer;	

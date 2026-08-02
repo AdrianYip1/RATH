@@ -1,20 +1,31 @@
 #include "renderpass.hpp"
 
+// Renderpass constructor
 Rath::Renderpass::Renderpass(Device& _device, Swapchain& _swapchain, Depth& _depth) :
 	device(_device), swapchain(_swapchain), depth(_depth) {
 	createRenderPass();
-	std::cout << "Created render pass" << std::endl;
 }
 
+// Renderpass destructor
 Rath::Renderpass::~Renderpass() {
 	vkDestroyRenderPass(device.getDevice(), renderPass, nullptr);
-	std::cout << "Destroyed render pass" << std::endl;
 }
 
-VkRenderPass Rath::Renderpass::getRenderPass() {
-	return renderPass;
-}
-
+// Creates the renderpass with the following information:
+// //
+// Attachment descriptions (color and depth attachments with load/store operations,
+// format, initial and final layouts)
+// 
+// Attachment references: the index into array attachments = { colorAttachment, depthAttachment }
+// is gives the layout the subpass wants this attachment in while drawing
+//
+// Subpass which has the references that will be used
+//
+// Dependencies decide the timings on what gets done and what needs to wait for previous steps
+// to be finished. scrSubpass = VK_SUBPASS means everything before this renderpass
+// for depth, LATE_FRAGMENT_TESTS on the src side and EARLY_FRAGMENT_TESTS in dst since the depth 
+// needs to wait for the previous render pass's late fragment tests before it can start
+// the current early fragment tests
 void Rath::Renderpass::createRenderPass() {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = swapchain.getFormat();
@@ -57,10 +68,12 @@ void Rath::Renderpass::createRenderPass() {
 	
 	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
 							  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+
 	dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
 							  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+
 	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
 							   VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
@@ -77,5 +90,4 @@ void Rath::Renderpass::createRenderPass() {
 	if (vkCreateRenderPass(device.getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create render pass");
 	}
-
 }

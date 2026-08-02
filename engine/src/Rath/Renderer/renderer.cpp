@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 
+// Renderer constructor
 Rath::Renderer::Renderer(Window& _window) :
 	window(_window),
 	context(_window),
@@ -16,13 +17,11 @@ Rath::Renderer::Renderer(Window& _window) :
 	pipeline(device, swapchain, renderpass, descriptor) {
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
-	std::cout << "Created framebuffers" << std::endl;
 	createCommandBuffers();
-	std::cout << "Created command buffer" << std::endl;
 	createSyncObjects();
-	std::cout << "Created sync objects" << std::endl;
 }
 
+// Renderer destructor
 Rath::Renderer::~Renderer() {
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(device.getDevice(), imageAvailableSemaphores[i], nullptr);
@@ -31,7 +30,6 @@ Rath::Renderer::~Renderer() {
 	for (size i = 0; i < swapchain.getImageCount(); i++) {
 		vkDestroySemaphore(device.getDevice(), renderFinishedSemaphores[i], nullptr);
 	}
-	std::cout << "Destroyed sync objects" << std::endl;
 }
 
 // NOTE: renderFinishedSemaphore is resized to the number of images the swapchain owns (swapchain.getImageCount())
@@ -115,10 +113,14 @@ void Rath::Renderer::drawFrame() {
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+// Wrapper to wait for the device's GPU to be free
 void Rath::Renderer::wait() {
 	vkDeviceWaitIdle(device.getDevice());
 }
 
+// Allocates the command buffer with the command pool
+// Doesn't need to be deleted since it is freed when the command pool
+// is deleted
 void Rath::Renderer::createCommandBuffers() {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -133,6 +135,8 @@ void Rath::Renderer::createCommandBuffers() {
 	}
 }
 
+// Creates the semaphores and fences needed for rendering
+// TODO: function to resize renderFinishedSemaphores after swapchain recreation
 void Rath::Renderer::createSyncObjects() {
 	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	// TODO: function to resize renderFinishedSemaphores after swapchain recreation
@@ -157,10 +161,12 @@ void Rath::Renderer::createSyncObjects() {
 			throw std::runtime_error("Failed to create renderFinishedSemaphore");
 			}
 	}
-	
 }
 
-
+// The recording of the command buffer
+// Begins command buffer recording -> starts renderpass -> bind the pipeline
+// sets the viewport and scissor (since they are dynamic states)
+// then binds the vertex, descriptorSets, index to the command buffer before drawing
 void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex) {
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

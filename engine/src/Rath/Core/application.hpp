@@ -16,13 +16,17 @@ namespace Rath {
 		Application& operator=(const Application& other) = delete;
 		Application(Application&& other) = delete;
 
+		// Entrypoint to the application, runs mainLoop
 		void run();
-		
+
 	private:
 		Window window;
-		// TODO: use smart pointers instead?
+		
+		// Smmart pointer used for renderer to automatically manage
+		// memory
 		std::unique_ptr<Renderer> renderer;
 
+		// Main loop which polls for window resize/close/minimize and starts the drawing loop
 		void mainLoop();
 
 	};

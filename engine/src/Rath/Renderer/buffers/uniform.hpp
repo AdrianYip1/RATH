@@ -33,8 +33,13 @@ namespace Rath {
 			UniformBuffer(const UniformBuffer& other) = delete;
 			UniformBuffer& operator=(const UniformBuffer& other) = delete;
 	
+			// Changes the values in the ubo struct and copies them into
+			// uniformBuffersMapped at the current frame
 			void updateUniformBuffer(u32 currentImage);
-			VkBuffer getUniformBuffer(u32 currentFrame) { return uniformBuffers[currentFrame]; };
+
+			// Returns uniformBuffers at currentFrame
+			VkBuffer getUniformBuffer(u32 currentFrame) const { return uniformBuffers[currentFrame]; };
+		
 		private:
 			Device& device;
 			Swapchain& swapchain;
@@ -48,6 +53,8 @@ namespace Rath {
 			std::vector<VkDeviceMemory> uniformBuffersMemory;
 			std::vector<void*> uniformBuffersMapped;
 			
+			// Creates a uniform buffer and memory per frame in flight, then
+			// persistently maps them into uniformBuffersMapped
 			void createUniformBuffers();
 
 	};

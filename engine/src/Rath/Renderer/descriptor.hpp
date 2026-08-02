@@ -28,20 +28,31 @@ namespace Rath {
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
 
-			VkDescriptorSetLayout getDescriptorSetLayout() { return descriptorSetLayout; };
-			VkDescriptorSet getDescriptorSet(u32 frame) { return descriptorSets[frame]; };
+			// Returns descriptorSetLayout
+			VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; };
+
+			// Returns descriptorSets at frame
+			VkDescriptorSet getDescriptorSet(u32 frame) const { return descriptorSets[frame]; };
+		
 		private:
 			Device& device;
 			Texture& texture;
 			UniformBuffer& uniform;
-			
 
 			VkDescriptorSetLayout descriptorSetLayout;
 			VkDescriptorPool descriptorPool;
 			std::vector<VkDescriptorSet> descriptorSets;
 
+			// Creates the shape of a descriptor set: what type sits at each binding
+			// number and which shader stages can see it
 			void createDescriptorSetLayout();
+
+			// Creates the pool the sets are allocated from, poolSizes determines
+			// how many descriptors of each type exist
 			void createDescriptorPool();
+
+			// Allocates a set per frame in flight, then writes the uniform buffer
+			// and the texture view + sampler into them with vkUpdateDescriptorSets
 			void createDescriptorSets();
 			
 	};

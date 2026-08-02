@@ -23,12 +23,12 @@ void Rath::Application::run() {
 	mainLoop();
 }
 
-// Main loop
+// Main loop which polls for window resize/close/minimize
+// and starts the drawing loop
 void Rath::Application::mainLoop() {
 	while (!window.shouldClose()) {
 		window.pollEvents();
 		renderer->drawFrame();
 	}
 	renderer->wait();
-
 } 

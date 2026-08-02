@@ -23,8 +23,11 @@ namespace Rath {
 			Texture(const Texture& other) = delete;
 			Texture& operator=(const Texture& other) = delete;
 		
-			VkImageView getTextureImageView() { return textureImageView; };
-			VkSampler getSampler() { return textureSampler; };
+			// Returns textureImageView
+			VkImageView getTextureImageView() const { return textureImageView; };
+
+			// Returns textureSampler
+			VkSampler getSampler() const { return textureSampler; };
 
 		private:
 			Device& device;
@@ -37,8 +40,14 @@ namespace Rath {
 			VkImageView textureImageView;
 			VkSampler textureSampler;
 
+			// Loads the pixel data with stb_image, stages it into textureImage, and
+			// transitions the image to TRANSFER_DST_OPTIMAL then SHADER_READ_ONLY_OPTIMAL
 			void createTextureImage();
+
+			// Creates the view used to access textureImage
 			void createTextureImageView();
+
+			// Creates the sampler, a reusable set of rules for how any image is sampled
 			void createTextureSampler();
 
 	};

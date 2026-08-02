@@ -55,8 +55,8 @@ namespace Rath {
 
 	// Vertex data being drawn
 	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+		{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+		{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 		{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
 		{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 
@@ -79,7 +79,10 @@ namespace Rath {
 			VertexBuffer(const VertexBuffer& other) = delete;
 			VertexBuffer& operator=(const VertexBuffer& other) = delete;
 
+			// Returns vertexBuffer
 			VkBuffer getVertexBuffer() const { return vertexBuffer; };
+
+			// Returns indexBuffer
 			VkBuffer getIndexBuffer() const { return indexBuffer; };
 
 		private:
@@ -91,7 +94,12 @@ namespace Rath {
 			VkBuffer indexBuffer;
 			VkDeviceMemory indexBufferMemory;
 
+			// Uses a staging buffer to copy vertices into the device local vertexBuffer,
+			// staging buffer is destroyed after
 			void createVertexBuffer();
+
+			// Uses a staging buffer to copy indices into the device local indexBuffer,
+			// staging buffer is destroyed after
 			void createIndexBuffer();
 	};
 } // namespace Rath

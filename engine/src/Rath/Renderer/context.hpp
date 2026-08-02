@@ -28,7 +28,10 @@ namespace Rath {
 			Context(const Context& other) = delete;
 			Context& operator=(const Context& other) = delete;
 
+			// Returns instance
 			VkInstance getInstance() const { return instance; };
+
+			// Returns surface
 			VkSurfaceKHR getSurface() const { return surface; };
 
 		private:
@@ -37,11 +40,25 @@ namespace Rath {
 			VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
 			VkSurfaceKHR surface = VK_NULL_HANDLE;
 
+			// Creates the instance connecting the application to Vulkan,
+			// specifies the RATH version and obtains the extensions
 			void createInstance();
+
+			// Checks if the instance supports the layers in validationLayers
 			bool checkValidationLayerSupport();
+
+			// Returns the extensions glfw requires, plus the debug utils
+			// extension when RATH_DEBUG is enabled
 			std::vector<const char*> getRequiredExtensions();
+
+			// Fills out the debug messenger struct, specifies which message
+			// types and severities are shown
 			void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+
+			// Sets up the debug messenger only if RATH_DEBUG is enabled
 			void setupDebugMessenger();
+
+			// Creates the interface connection between the instance and the glfw window
 			void createSurface();
 	};
 } // namespace Rath

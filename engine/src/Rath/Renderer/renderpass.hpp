@@ -25,7 +25,9 @@ namespace Rath {
 		Renderpass(const Renderpass& other) = delete;
 		Renderpass& operator=(const Renderpass& other) = delete;
 
-		VkRenderPass getRenderPass();
+		// Returns renderPass
+		VkRenderPass getRenderPass() const { return renderPass; };
+
 	private:
 		Device& device;
 		Swapchain& swapchain;
@@ -33,6 +35,9 @@ namespace Rath {
 
 		VkRenderPass renderPass;
 
+		// Creates the render pass from the colour and depth attachment descriptions,
+		// their references, the single subpass, and the subpass dependency that
+		// orders this pass after everything before it
 		void createRenderPass();
 		
 	};

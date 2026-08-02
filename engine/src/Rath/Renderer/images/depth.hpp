@@ -1,7 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
 
-
 // Rath files
 #include "Rath/Core/defines.hpp"
 #include "../device.hpp"
@@ -24,9 +23,16 @@ namespace Rath {
 			Depth(const Depth& other) = delete;
 			Depth& operator=(const Depth& other) = delete;
 
+			// Returns a format supporting optimal tiling and the depth stencil attachment bit
 			VkFormat findDepthFormat();
-			VkImageView getDepthImageView() { return depthImageView; };
+
+			// Returns depthImageView
+			VkImageView getDepthImageView() const { return depthImageView; };
+
+			// Creates the depth image, its memory and its view, then transitions
+			// the image from UNDEFINED to DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 			void createDepthResources();
+
 		private:
 			Device& device;
 			Swapchain& swapchain;
@@ -35,7 +41,5 @@ namespace Rath {
 			VkImage depthImage;
 			VkDeviceMemory depthImageMemory;
 			VkImageView depthImageView;
-
-
 	};
 } // namespace Rath

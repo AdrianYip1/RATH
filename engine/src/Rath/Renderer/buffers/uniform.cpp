@@ -1,13 +1,12 @@
 #include "uniform.hpp"
 
+// Uniform buffer constructor
 Rath::UniformBuffer::UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer) :
 	device(_device), swapchain(_swapchain), buffer(_buffer) {
-
 	createUniformBuffers();
-	std::cout << "Created uniform buffers" << std::endl;
-
 }
 
+// Uniform buffer destructor
 Rath::UniformBuffer::~UniformBuffer() {
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroyBuffer(device.getDevice(), uniformBuffers[i], nullptr);
@@ -15,6 +14,11 @@ Rath::UniformBuffer::~UniformBuffer() {
 	}
 }
 
+// Updates the uniform buffer
+// This is done by changing the values within the ubo struct and copying
+// the data into uniformBuffersMapped at the current frame
+// This is possible since uniformBufferMapped is persistently mapped
+// to the uniformBuffer's memory
 void Rath::UniformBuffer::updateUniformBuffer(u32 currentImage) {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -35,11 +39,15 @@ void Rath::UniformBuffer::updateUniformBuffer(u32 currentImage) {
 										 0.1f, 10.0f);
 
 	// Vulkan's Y coord in clip space is inverted compared to OpenGL's
-	ubo.proj.m[1][1] *= -1; // or ubo.proj.col1.y *= -1;
+	ubo.proj.m[1][1] *= -1; // or ubo.proj.col1.y *= -1; per enginemath's conventions
 
 	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
+// Creates an array of uniformBuffers, memory, then persistently maps them into
+// uniformBuffersMapped
+// A uniformBuffer is required for each frame in flight as multiple frames
+// may be in flight -> dont want to overwrite buffers 
 void Rath::UniformBuffer::createUniformBuffers() {
 	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
