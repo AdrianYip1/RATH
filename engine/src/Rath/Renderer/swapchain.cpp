@@ -67,6 +67,7 @@ void Rath::Swapchain::createSwapChain() {
 	swapChainExtent = extent;
 }
 
+// Creates the image views: a way to intepret each swapChainImage
 void Rath::Swapchain::createImageViews() {
 	swapChainImageViews.resize(swapChainImages.size());
 
@@ -75,6 +76,8 @@ void Rath::Swapchain::createImageViews() {
 	}
 }
 
+// Creates a framebuffer for every swapchainImage I have
+// Each framebuffer holds my required attachments and the depth format
 void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass, VkImageView depthView) {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 
