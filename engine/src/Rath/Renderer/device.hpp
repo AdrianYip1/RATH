@@ -42,16 +42,19 @@ namespace Rath {
 			Device(const Device& other) = delete;
 			Device& operator=(const Device& other) = delete;
 
-			VkPhysicalDevice getPhysicalDevice();
-			VkDevice getDevice();
-			VkQueue getGraphicsQueue();
-			VkQueue getPresentQueue();
+			VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; };
+			VkDevice getDevice() const { return device; };
+			VkQueue getGraphicsQueue() const { return graphicsQueue; };
+			VkQueue getPresentQueue() const { return presentQueue; };
+			VkCommandPool getCommandPool() const { return commandPool; };
+
 			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-			VkCommandPool getCommandPool();
 			VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
-				VkImageTiling tiling, VkFormatFeatureFlags features);
+			VkImageTiling tiling, VkFormatFeatureFlags features);
+
 			bool hasStencilComponent(VkFormat format);
+
 		private:
 			const Context& context;
 			VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;

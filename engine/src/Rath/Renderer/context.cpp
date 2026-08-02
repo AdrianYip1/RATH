@@ -44,23 +44,10 @@ Rath::Context::Context(Window& _window) : window(_window) {
 Rath::Context::~Context() {
 	if (RATH_DEBUG) {
 		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-		std::cout << "Deleted debug messenger" << std::endl;
 	}
 
 	vkDestroySurfaceKHR(instance, surface, nullptr);
-	std::cout << "Deleted surface" << std::endl;
 	vkDestroyInstance(instance, nullptr);
-	std::cout << "Deleted Vulkan instance" << std::endl;
-}
-
-// Returns the VkInstance instance object
-VkInstance Rath::Context::getInstance() const {
-	return instance;
-}
-
-// Returns the vulkan surface
-VkSurfaceKHR Rath::Context::getSurface() const {
-	return surface;
 }
 
 // Create the instance to connect application to Vulkan
@@ -87,7 +74,7 @@ void Rath::Context::createInstance() {
 
 	auto extensions = getRequiredExtensions();
 	createInfo.enabledExtensionCount = static_cast<u32>(extensions.size());
-	createInfo.ppEnabledExtensionNames = extensions.data();;
+	createInfo.ppEnabledExtensionNames = extensions.data();
 
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 	if (RATH_DEBUG) {
@@ -99,15 +86,12 @@ void Rath::Context::createInstance() {
 	}
 	else {
 		createInfo.enabledLayerCount = 0;
-
 		createInfo.pNext = nullptr;
 	}
 
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create instance");
 	}
-
-	std::cout << "Created Vulkan instance" << std::endl;
 }
 
 // find and check if the instance supports validation layers

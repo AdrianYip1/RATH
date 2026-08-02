@@ -26,11 +26,12 @@ namespace Rath {
 			Swapchain(const Swapchain& other) = delete;
 			Swapchain& operator=(const Swapchain& other) = delete;
 
-			VkSwapchainKHR getSwapchain();
-			u32 getImageCount();
-			VkExtent2D getExtent();
-			VkFormat getFormat();
-			const std::vector<VkFramebuffer>& getFramebuffers();
+			VkSwapchainKHR getSwapchain() const { return swapChain; };
+			u32 getImageCount() const { return swapChainImages.size(); };
+			VkExtent2D getExtent() const { return swapChainExtent; };
+			VkFormat getFormat() const { return swapChainImageFormat; };
+			const std::vector<VkFramebuffer>& getFramebuffers() const { return swapChainFramebuffers; };
+			
 			// Call this function after graphics pipeline is created
 			void createFramebuffers(VkRenderPass renderpass, VkImageView depthView);
 			void recreateSwapChain(VkRenderPass renderpass, VkImageView depthView);

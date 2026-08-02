@@ -4,7 +4,6 @@
 // Rath files
 #include "Rath/Core/defines.hpp"
 
-
 struct GLFWwindow;
 
 namespace Rath {
@@ -19,7 +18,7 @@ namespace Rath {
 			void initWindow();
 			bool shouldClose() const;
 			void pollEvents();
-			bool getFramebufferResized();
+			bool getFramebufferResized() { return framebufferResized; };
 			void setFramebufferResized(bool info);
 			
 		private:
@@ -27,7 +26,6 @@ namespace Rath {
 			u32 WIDTH;
 			u32 HEIGHT;
 			const char* TITLE;
-
 			bool framebufferResized = false;
 
 			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

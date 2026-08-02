@@ -2,46 +2,20 @@
 
 // Device constructor
 Rath::Device::Device(Context& _context) : context(_context) {
-	std::cout << "Created device" << std::endl;
 	pickPhysicalDevice();
 	createLogicalDevice();
-
 	createCommandPool();
-	std::cout << "Created command pool" << std::endl;
 }
 
 // Device destructor
 Rath::Device::~Device() {
 	vkDestroyCommandPool(getDevice(), commandPool, nullptr);
-	std::cout << "Destroyed command pool" << std::endl;
 	vkDestroyDevice(device, nullptr);
-	std::cout << "Deleted device" << std::endl;
 }
 
-// Return the selected (compatiable) physical device
-VkPhysicalDevice Rath::Device::getPhysicalDevice() {
-	return physicalDevice;
-}
-
-// Return the logical device
-VkDevice Rath::Device::getDevice() {
-	return device;
-}
-
-// Return the graphics queue
-VkQueue Rath::Device::getGraphicsQueue() {
-	return graphicsQueue;
-}
-
-// Return the present queue
-VkQueue Rath::Device::getPresentQueue() {
-	return presentQueue;
-} 
-
-VkCommandPool Rath::Device::getCommandPool() {
-	return commandPool;
-}
-
+// Create a command pool: owns the memory that command buffers record into
+// Command buffers are allocated from pools instead of being created indivually
+// so destroying a pool frees all the buffers attached to that pool
 void Rath::Device::createCommandPool() {
 	Rath::QueueFamilyIndices queueFamilyIndices = findQueueFamilies(getPhysicalDevice());
 
@@ -64,6 +38,7 @@ void Rath::Device::pickPhysicalDevice() {
 	if (deviceCount == 0) {
 		throw std::runtime_error("Failed to find GPUs with Vulkan support");
 	}
+
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(context.getInstance(), &deviceCount, devices.data());
 
@@ -197,8 +172,7 @@ Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device
 	return indices;
 }
 
-// Queries information about the swapchain struct's
-// capabilities, formats, and present modes
+// Queries information about the swapchain struct's capabilities, formats, and present modes
 Rath::SwapChainSupportDetails Rath::Device::querySwapChainSupport(VkPhysicalDevice device) {
 	SwapChainSupportDetails details;
 
@@ -223,6 +197,7 @@ Rath::SwapChainSupportDetails Rath::Device::querySwapChainSupport(VkPhysicalDevi
 	return details;
 }
 
+// Returns the format that supports the tiling and features wanted
 VkFormat Rath::Device::findSupportedFormat(const std::vector<VkFormat>& candidates,
 	VkImageTiling tiling, VkFormatFeatureFlags features) {
 	for (VkFormat format : candidates) {
@@ -239,6 +214,7 @@ VkFormat Rath::Device::findSupportedFormat(const std::vector<VkFormat>& candidat
 	throw std::runtime_error("Failed to find supported format");
 }
 
+// Check if the format has stencil capabilities
 bool Rath::Device::hasStencilComponent(VkFormat format) {
 	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }

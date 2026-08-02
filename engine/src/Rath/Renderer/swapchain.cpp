@@ -1,39 +1,20 @@
 #include "swapchain.hpp"
 
+// Swapchain constructor
 Rath::Swapchain::Swapchain(Window& _window, Context& _context, Device& _device) : 
 	window(_window), context(_context), device(_device) {
 	createSwapChain();
-	std::cout << "Created swapchain" << std::endl;
 	createImageViews();
-	std::cout << "Created image view" << std::endl;
 }
 
+// Swapchain destructor
 Rath::Swapchain::~Swapchain() {
 	cleanupSwapChain();
 }
 
-VkSwapchainKHR Rath::Swapchain::getSwapchain() {
-	return swapChain;
-}
-
-Rath::u32 Rath::Swapchain::getImageCount() {
-	return swapChainImages.size();
-}
-
-
-VkExtent2D Rath::Swapchain::getExtent() {
-	return swapChainExtent;
-}
-
-VkFormat Rath::Swapchain::getFormat() {
-	return swapChainImageFormat;
-}
-
-
-const std::vector<VkFramebuffer>& Rath::Swapchain::getFramebuffers() {
-	return swapChainFramebuffers;
-}
-
+// Creates the swapchain using the filled out SwapChainSupportDetails struct,
+// queueFamilies of the device, then makes the swapchain
+// After that, swapChainImages is populated with the images the swapchain already created
 void Rath::Swapchain::createSwapChain() {
 	SwapChainSupportDetails swapChainSupport = device.querySwapChainSupport(device.getPhysicalDevice());
 
@@ -119,6 +100,10 @@ void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass, VkImageView de
 	}
 }
 
+// Selects a format for the swapchain: ideally:
+// format = VK_FORMAT_B8G8R8A8_SRGB
+// colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+// if not, just choose the 1st available format
 VkSurfaceFormatKHR Rath::Swapchain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 	for (const auto& availableFormat : availableFormats) {
 		if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
@@ -130,6 +115,7 @@ VkSurfaceFormatKHR Rath::Swapchain::chooseSwapSurfaceFormat(const std::vector<Vk
 	return availableFormats[0];
 }
 
+// Returns VK_PRESENT_MODE_MAILBOX_KHR or VK_PRESENT_MODE_FIFI_KHR if mailbox isnt available
 VkPresentModeKHR Rath::Swapchain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
 	for (const auto& availablePresentMode : availablePresentModes) {
 		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
@@ -137,9 +123,11 @@ VkPresentModeKHR Rath::Swapchain::chooseSwapPresentMode(const std::vector<VkPres
 		}
 	}
 
+	std::cout << "Swapchain present mode will use FIFO since mailbox is not found" << std::endl;
 	return VK_PRESENT_MODE_FIFO_KHR;
 }
 
+// Chooses a swap extent that doesn't exceed the window's dimensions
 VkExtent2D Rath::Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	if (capabilities.currentExtent.width != std::numeric_limits<u32>::max()) {
 		return capabilities.currentExtent;
@@ -160,6 +148,8 @@ VkExtent2D Rath::Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 	}
 }
 
+// Whenever the swapchain recreates (window resize, minimize), get the current
+// window dimensions for the new framebuffer and recreate swapchain and imageviews
 void Rath::Swapchain::recreateSwapChain(VkRenderPass renderpass, VkImageView depthView) {
 	int width = 0, height = 0;
 	glfwGetFramebufferSize(window.getWindow(), &width, &height);
@@ -171,24 +161,18 @@ void Rath::Swapchain::recreateSwapChain(VkRenderPass renderpass, VkImageView dep
 	vkDeviceWaitIdle(device.getDevice());
 
 	cleanupSwapChain();
-
 	createSwapChain();
 	createImageViews();
-	
-	createFramebuffers(renderpass, depthView);
 }
 
+// Destructr for swapchain, called when swapchain goes out of scope or when swapchain needs 
+// to be recreated
 void Rath::Swapchain::cleanupSwapChain() {
 	for (auto framebuffer : swapChainFramebuffers) {
 		vkDestroyFramebuffer(device.getDevice(), framebuffer, nullptr);
 	}
-	std::cout << "Destroyed framebuffers" << std::endl;
-
 	for (auto imageView : swapChainImageViews) {
 		vkDestroyImageView(device.getDevice(), imageView, nullptr);
 	}
-	std::cout << "Destroyed imageviews" << std::endl;
-
 	vkDestroySwapchainKHR(device.getDevice(), swapChain, nullptr);
-	std::cout << "Destroyed swapchain" << std::endl;
 }

@@ -54,6 +54,7 @@ void Rath::Renderer::drawFrame() {
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
 		depth.createDepthResources();
+		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
 		return;
 	}
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -104,6 +105,7 @@ void Rath::Renderer::drawFrame() {
 		window.setFramebufferResized(false);
 		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
 		depth.createDepthResources();
+		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
 	}
 	else if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to present swap chain image");

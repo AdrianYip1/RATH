@@ -28,8 +28,9 @@ namespace Rath {
 			Context(const Context& other) = delete;
 			Context& operator=(const Context& other) = delete;
 
-			VkInstance getInstance() const;
-			VkSurfaceKHR getSurface() const;
+			VkInstance getInstance() const { return instance; };
+			VkSurfaceKHR getSurface() const { return surface; };
+
 		private:
 			Window& window;
 			VkInstance instance = VK_NULL_HANDLE;
