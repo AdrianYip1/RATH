@@ -1,12 +1,10 @@
 #pragma once
 #include <vulkan/vulkan.h>
 
-
 // Rath files
 #include "Rath/Core/defines.hpp"
 #include "../device.hpp"
 #include "../buffers/buffer.hpp"
-
 
 // std
 #include <stdexcept>
@@ -28,7 +26,6 @@ namespace Rath {
 							 VkMemoryPropertyFlags properties, VkImage& image,
 							 VkDeviceMemory& imageMemory);
 		
-
 			void transitionImageLayout(VkImage image, VkFormat format,
 				VkImageLayout oldLayout, VkImageLayout newLayout);
 			void copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, u32 height);

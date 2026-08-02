@@ -28,8 +28,9 @@ namespace Rath {
 			Pipeline(const Pipeline& other) = delete;
 			Pipeline& operator=(const Pipeline& other) = delete;
 
-			VkPipeline getGraphicsPipeline();
-			VkPipelineLayout getPipelineLayout();
+			VkPipeline getGraphicsPipeline() const { return graphicsPipeline; };
+			VkPipelineLayout getPipelineLayout() const { return pipelineLayout; };
+		
 		private:
 			Device& device;
 			Swapchain& swapchain;

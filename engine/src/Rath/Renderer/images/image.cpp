@@ -1,10 +1,12 @@
 #include "image.hpp"
 
+// Image constructor
 Rath::Image::Image(Device& _device, Buffer& _buffer) : 
 	device(_device), buffer(_buffer) {
 	
 }
 
+// Image destructor
 Rath::Image::~Image() {
 
 }

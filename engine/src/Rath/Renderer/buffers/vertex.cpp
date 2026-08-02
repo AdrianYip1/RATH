@@ -1,5 +1,6 @@
 #include "vertex.hpp"
 
+// Vertex buffer constructor
 Rath::VertexBuffer::VertexBuffer(Device& _device, Buffer& _buffer) :
 	device(_device),
 	buffer(_buffer) {
@@ -7,23 +8,19 @@ Rath::VertexBuffer::VertexBuffer(Device& _device, Buffer& _buffer) :
 	createIndexBuffer();
 }
 
+// Vertex buffer destructor
 Rath::VertexBuffer::~VertexBuffer() {
 	vkDestroyBuffer(device.getDevice(), indexBuffer, nullptr);
 	vkFreeMemory(device.getDevice(), indexBufferMemory, nullptr);
 
 	vkDestroyBuffer(device.getDevice(), vertexBuffer, nullptr);
 	vkFreeMemory(device.getDevice(), vertexBufferMemory, nullptr);
-
 }
 
-VkBuffer Rath::VertexBuffer::getVertexBuffer() {
-	return vertexBuffer;
-}
-
-VkBuffer Rath::VertexBuffer::getIndexBuffer() {
-	return indexBuffer;
-}
-
+// Wrapper for creating the vertex buffer
+// Uses a staging buffer first before copying vertices data into the actual
+// vertexBuffer (which holds the GPU optimized memory) -> staging buffer is destroyed after
+// Both the staging and vertex buffers call the createBuffer method
 void Rath::VertexBuffer::createVertexBuffer() {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
@@ -50,6 +47,10 @@ void Rath::VertexBuffer::createVertexBuffer() {
 	vkFreeMemory(device.getDevice(), stagingBufferMemory, nullptr);
 }
 
+// Wrapper for creating the index buffer
+// Staging buffer used here before copying indices data into
+// indexBuffer (which holds the GPU optimized memory) -> staging buffer destroyed after
+// Both the staging and indices buffers call createBuffer method
 void Rath::VertexBuffer::createIndexBuffer() {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 

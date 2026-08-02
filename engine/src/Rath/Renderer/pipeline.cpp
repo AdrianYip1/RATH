@@ -1,31 +1,27 @@
 #include "pipeline.hpp"
 
+// Pipeline constructor
 Rath::Pipeline::Pipeline(Device& _device, Swapchain& _swapchain, 
 						 Renderpass& _renderpass, Descriptor& _descriptor) : 
 	device(_device), swapchain(_swapchain), 
 	renderpass(_renderpass), descriptor(_descriptor) {
 
 	createGraphicsPipeline();
-	std::cout << "Created pipeline" << std::endl;
 }
 
+// Pipeline destructor
 Rath::Pipeline::~Pipeline() {
 	vkDestroyPipeline(device.getDevice(), graphicsPipeline, nullptr);
-	std::cout << "Destroyed pipeline" << std::endl;
 	vkDestroyPipelineLayout(device.getDevice(), pipelineLayout, nullptr);
-	std::cout << "Destroyed pipeline layout" << std::endl;
-
-
 }
 
-VkPipeline Rath::Pipeline::getGraphicsPipeline() {
-	return graphicsPipeline;
-}
-
-VkPipelineLayout Rath::Pipeline::getPipelineLayout() {
-	return pipelineLayout;
-}
-
+// Makes all the required struct stages for the graphics pipeline, then makes
+// the layout and pipeline
+// Programmable stages are the vertex and fragment shader modules
+// Fixed functions: vertex input, input assembly, viewport, rtasterization, 
+// multisampling, depth stencil, and colour blending
+// The viewport and scissor stages are dynamic and are set at record time
+// The descriptor set layout goes in the pipeline layout
 void Rath::Pipeline::createGraphicsPipeline() {
 	auto vertShaderCode = readFile("../../../../engine/shaders/basic.vert.spv");
 	auto fragShaderCode = readFile("../../../../engine/shaders/basic.frag.spv");
@@ -107,7 +103,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_B_BIT |
+	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
 										  VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	colorBlendAttachment.blendEnable = VK_FALSE;
 
@@ -135,6 +131,8 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	VkDescriptorSetLayout setLayouts = descriptor.getDescriptorSetLayout();
 	pipelineLayoutInfo.pSetLayouts = &setLayouts;
 
+	// The pipeline layout declares the resources shaders can access
+	// Currently uniforms and textures -> binding 0: uniform, binding 1: sampler
 	if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create pipeline layout");
 	}
@@ -167,6 +165,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	vkDestroyShaderModule(device.getDevice(), vertShaderModule, nullptr);
 }
 
+// Takes the byte data of a shader and returns a corresponding shader module
 VkShaderModule Rath::Pipeline::createShaderModule(const std::vector<char>& code) {
 	VkShaderModuleCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -181,6 +180,8 @@ VkShaderModule Rath::Pipeline::createShaderModule(const std::vector<char>& code)
 	return shaderModule;
 }
 
+// Reads the file at each path of a shader and returns the byte data of its code
+// Read in binary and the size is computed from opening the file at the end
 std::vector<char> Rath::Pipeline::readFile(const std::string& fileName) {
 	std::ifstream file(fileName, std::ios::ate | std::ios::binary);
 

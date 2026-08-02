@@ -17,6 +17,8 @@
 
 namespace Rath {
 
+	// Vertex struct: holds info about pos, color, texCoords
+	// Contains helpers to set binding + attribute descriptions
 	struct Vertex {
 		enginemath::Vec3 pos;
 		enginemath::Vec3 color;
@@ -51,6 +53,7 @@ namespace Rath {
 		}
 	};
 
+	// Vertex data being drawn
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
@@ -63,6 +66,7 @@ namespace Rath {
 		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 	};
 
+	// Indices for vertices
 	const std::vector<uint16_t> indices = {
 		0, 1, 2, 2, 3, 0,
 		4, 5, 6, 6, 7, 4
@@ -75,8 +79,9 @@ namespace Rath {
 			VertexBuffer(const VertexBuffer& other) = delete;
 			VertexBuffer& operator=(const VertexBuffer& other) = delete;
 
-			VkBuffer getVertexBuffer();
-			VkBuffer getIndexBuffer();
+			VkBuffer getVertexBuffer() const { return vertexBuffer; };
+			VkBuffer getIndexBuffer() const { return indexBuffer; };
+
 		private:
 			Device& device;
 			Buffer& buffer;

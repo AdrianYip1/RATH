@@ -28,6 +28,7 @@ namespace Rath {
 
 			void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 			u32 findMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
+
 			VkCommandBuffer beginSingleTimeCommands();
 			void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
