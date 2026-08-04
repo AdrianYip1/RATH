@@ -4,9 +4,11 @@
 #include <enginemath/vec3.hpp>
 
 // Rath files
+#include "../vertexData.hpp"
 #include "Rath/Core/defines.hpp"
 #include "../device.hpp"
 #include "buffer.hpp"
+#include "../models/model.hpp"
 
 // std
 #include <stdexcept>
@@ -17,64 +19,9 @@
 
 namespace Rath {
 
-	// Vertex struct: holds info about pos, color, texCoords
-	// Contains helpers to set binding + attribute descriptions
-	struct Vertex {
-		enginemath::Vec3 pos;
-		enginemath::Vec3 color;
-		enginemath::Vec2 texCoord;
-
-		static VkVertexInputBindingDescription getBindingDescription() {
-			VkVertexInputBindingDescription bindingDescription{};
-			bindingDescription.binding = 0;
-			bindingDescription.stride = sizeof(Vertex);
-			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			return bindingDescription;
-		}
-
-		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-			attributeDescriptions[0].binding = 0;
-			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-			attributeDescriptions[1].binding = 0;
-			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-			attributeDescriptions[2].binding = 0;
-			attributeDescriptions[2].location = 2;
-			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-			return attributeDescriptions;
-		}
-	};
-
-	// Vertex data being drawn
-	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-		{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-	};
-
-	// Indices for vertices
-	const std::vector<uint16_t> indices = {
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4
-	};
-
 	class VertexBuffer {
 		public:
-			VertexBuffer(Device& _device, Buffer& _buffer);
+			VertexBuffer(Device& _device, Buffer& _buffer, Model& _model);
 			~VertexBuffer();
 			VertexBuffer(const VertexBuffer& other) = delete;
 			VertexBuffer& operator=(const VertexBuffer& other) = delete;
@@ -85,9 +32,14 @@ namespace Rath {
 			// Returns indexBuffer
 			VkBuffer getIndexBuffer() const { return indexBuffer; };
 
+			// Vertex and indices for models
+			std::vector<Vertex> vertices;
+			std::vector<u32> indices;
+
 		private:
 			Device& device;
 			Buffer& buffer;
+			Model& model;
 
 			VkBuffer vertexBuffer;
 			VkDeviceMemory vertexBufferMemory;

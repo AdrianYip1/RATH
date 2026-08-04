@@ -16,6 +16,7 @@
 #include "descriptor.hpp"
 #include "images/texture.hpp"
 #include "images/depth.hpp"
+#include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
 
 // std
@@ -46,6 +47,7 @@ namespace Rath {
 			Device device;
 			Swapchain swapchain;
 			Buffer buffer;
+			Model model;
 			VertexBuffer vertexBuffer;
 			Image image;
 			Depth depth;

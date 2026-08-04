@@ -7,7 +7,8 @@ Rath::Renderer::Renderer(Window& _window) :
 	device(context),
 	swapchain(_window, context, device),
 	buffer(device),
-	vertexBuffer(device, buffer),
+	model(),
+	vertexBuffer(device, buffer, model),
 	image(device, buffer),
 	depth(device, swapchain, image),
 	renderpass(device, swapchain, depth),
@@ -212,14 +213,14 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+	vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
 	VkDescriptorSet set = descriptor.getDescriptorSet(currentFrame);
 
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
 
-	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indices.size()), 1, 0, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(vertexBuffer.indices.size()), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 

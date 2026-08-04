@@ -1,9 +1,10 @@
 #include "vertex.hpp"
 
 // Vertex buffer constructor
-Rath::VertexBuffer::VertexBuffer(Device& _device, Buffer& _buffer) :
+Rath::VertexBuffer::VertexBuffer(Device& _device, Buffer& _buffer, Model& _model) :
 	device(_device),
-	buffer(_buffer) {
+	buffer(_buffer),
+	model(_model) {
 	createVertexBuffer();
 	createIndexBuffer();
 }
@@ -22,6 +23,9 @@ Rath::VertexBuffer::~VertexBuffer() {
 // vertexBuffer (which holds the GPU optimized memory) -> staging buffer is destroyed after
 // Both the staging and vertex buffers call the createBuffer method
 void Rath::VertexBuffer::createVertexBuffer() {
+	vertices = model.getVertices();
+	indices = model.getIndices();
+
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 	VkBuffer stagingBuffer;

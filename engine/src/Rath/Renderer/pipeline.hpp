@@ -2,6 +2,7 @@
 #include <vulkan/vulkan.h>
 
 // Rath files
+#include "vertexData.hpp"
 #include "device.hpp"
 #include "swapchain.hpp"
 #include "renderpass.hpp"
