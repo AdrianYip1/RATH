@@ -5,6 +5,7 @@
 
 // std
 #include <array>
+#include <functional>
 
 namespace Rath {
 	// Vertex struct: holds info about pos, color, texCoords
@@ -41,5 +42,32 @@ namespace Rath {
 
 			return attributeDescriptions;
 		}
+
+		bool operator==(const Vertex& other) const {
+			return pos == other.pos && color == other.color && texCoord == other.texCoord;
+		}
 	};
 } // namespace Rath
+
+// Hash for Vertex
+namespace std {
+	template<> struct hash<Rath::Vertex> {
+		size_t operator()(Rath::Vertex const& vertex) const {
+			size_t seed = 0;
+			auto combine = [&seed](float value) {
+				seed ^= std::hash<float>()(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+				};
+
+			combine(vertex.pos.x);
+			combine(vertex.pos.y);
+			combine(vertex.pos.z);
+			combine(vertex.color.x);
+			combine(vertex.color.y);
+			combine(vertex.color.z);
+			combine(vertex.texCoord.x);
+			combine(vertex.texCoord.y);
+
+			return seed;
+		}
+	};
+} // namespace std

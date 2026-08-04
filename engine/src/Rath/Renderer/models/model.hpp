@@ -11,6 +11,7 @@
 #include <vector>
 #include <cstring>
 #include <array>
+#include <unordered_map>
 
 namespace Rath {
 	class Model {
@@ -24,6 +25,7 @@ namespace Rath {
 			std::vector<u32> getIndices() const { return indices; };
 
 		private:
+			std::unordered_map<Vertex, u32> uniqueVertices{};
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
 

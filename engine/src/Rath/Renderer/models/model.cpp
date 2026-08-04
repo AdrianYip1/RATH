@@ -41,8 +41,13 @@ void Rath::Model::loadModel() {
 
 			vertex.color = { 1.0f, 1.0f, 1.0f };
 
-			vertices.push_back(vertex);
-			indices.push_back(indices.size());
+			if (uniqueVertices.count(vertex) == 0) {
+				// Key matches with the order the vertex was placed into vertices
+				uniqueVertices[vertex] = static_cast<u32>(vertices.size());
+				vertices.push_back(vertex);
+			}
+
+			indices.push_back(uniqueVertices[vertex]);
 		}
 	}
 }
