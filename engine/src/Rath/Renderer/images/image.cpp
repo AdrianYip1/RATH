@@ -15,7 +15,7 @@ Rath::Image::~Image() {
 // in the passed image and memory parameters. The memory is bounded to the image
 // The function takes the format, tiling, usage, and properties to create
 // a specific image
-void Rath::Image::createImage(u32 width, u32 height, VkFormat format,
+void Rath::Image::createImage(u32 width, u32 height, u32 mipLevels, VkFormat format,
 							  VkImageTiling tiling, VkImageUsageFlags usage,
 							  VkMemoryPropertyFlags properties, VkImage& image,
 							  VkDeviceMemory& imageMemory) {
@@ -25,8 +25,8 @@ void Rath::Image::createImage(u32 width, u32 height, VkFormat format,
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
 	imageInfo.extent.width = width;
 	imageInfo.extent.height = height;
+	imageInfo.mipLevels = mipLevels;
 	imageInfo.extent.depth = 1;
-	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
 	imageInfo.format = format;
 	imageInfo.tiling = tiling;
@@ -57,7 +57,8 @@ void Rath::Image::createImage(u32 width, u32 height, VkFormat format,
 // Helper function for creating image views, a specific way of accessing
 // the provided image. The imageView is stored in the imageView reference
 void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat format, 
-								  VkImageAspectFlags aspectFlags, VkImageView& imageView) {
+								  VkImageAspectFlags aspectFlags, VkImageView& imageView, 
+								  u32 mipLevels) {
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
@@ -65,7 +66,7 @@ void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat forma
 	viewInfo.format = format;
 	viewInfo.subresourceRange.aspectMask = aspectFlags;
 	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.levelCount = mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
 
@@ -79,8 +80,8 @@ void Rath::Image::createImageView(VkDevice device, VkImage image, VkFormat forma
 // (UNDEFINED to TRANSFER_DST_OPTIMAL) or depth images
 // (UNDEFINED to DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 // the format is used only to check if stencil is used
-void Rath::Image::transitionImageLayout(VkImage image, VkFormat format,
-										 VkImageLayout oldLayout, VkImageLayout newLayout) {
+void Rath::Image::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, 
+									    VkImageLayout newLayout, u32 mipLevels) {
 	VkCommandBuffer commandBuffer = buffer.beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier{};
@@ -91,7 +92,7 @@ void Rath::Image::transitionImageLayout(VkImage image, VkFormat format,
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image;
 	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.levelCount = mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 1;
 

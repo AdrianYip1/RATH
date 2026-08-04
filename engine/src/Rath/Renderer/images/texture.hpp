@@ -1,3 +1,4 @@
+// Texture images + mip levels
 #pragma once
 #include <vulkan/vulkan.h>
 
@@ -34,6 +35,7 @@ namespace Rath {
 			Image& image;
 			Buffer& buffer;
 
+			u32 mipLevels;
 			VkImage textureImage;
 			VkDeviceMemory textureImageMemory;
 
@@ -50,5 +52,6 @@ namespace Rath {
 			// Creates the sampler, a reusable set of rules for how any image is sampled
 			void createTextureSampler();
 
+			void generateMipmaps(VkImage image, u32 texWidth, u32 texHeight, u32 mipLevels);
 	};
 } // namespace Rath
