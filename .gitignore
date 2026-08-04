@@ -11,4 +11,5 @@ cmake-build-*/
 # compiled
 *.o
 *.obj
+!engine/models/*.obj
 *.exe
