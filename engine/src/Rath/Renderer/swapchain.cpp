@@ -78,13 +78,14 @@ void Rath::Swapchain::createImageViews() {
 
 // Creates a framebuffer for every swapchainImage I have
 // Each framebuffer holds my required attachments and the depth format
-void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass, VkImageView depthView) {
+void Rath::Swapchain::createFramebuffers(VkRenderPass renderpass, VkImageView depthView, VkImageView colorView) {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 
 	for (size i = 0; i < swapChainFramebuffers.size(); i++) {
-		std::array<VkImageView, 2> attachments = {
-			swapChainImageViews[i],
-			depthView
+		std::array<VkImageView, 3> attachments = {
+			colorView,
+			depthView,
+			swapChainImageViews[i]
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{};

@@ -35,7 +35,7 @@ namespace Rath {
 
 		VkRenderPass renderPass;
 
-		// Creates the render pass from the colour and depth attachment descriptions,
+		// Creates the render pass from the color and depth attachment descriptions,
 		// their references, the single subpass, and the subpass dependency that
 		// orders this pass after everything before it
 		void createRenderPass();

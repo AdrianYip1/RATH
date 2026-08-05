@@ -19,7 +19,7 @@ Rath::Pipeline::~Pipeline() {
 // the layout and pipeline
 // Programmable stages are the vertex and fragment shader modules
 // Fixed functions: vertex input, input assembly, viewport, rtasterization, 
-// multisampling, depth stencil, and colour blending
+// multisampling, depth stencil, and color blending
 // The viewport and scissor stages are dynamic and are set at record time
 // The descriptor set layout goes in the pipeline layout
 void Rath::Pipeline::createGraphicsPipeline() {
@@ -100,7 +100,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisampling.rasterizationSamples = device.getMSAASampleCount();
 
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |

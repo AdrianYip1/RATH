@@ -57,6 +57,9 @@ namespace Rath {
 			// Returns commandPool
 			VkCommandPool getCommandPool() const { return commandPool; };
 
+			// Returns msaaSamples
+			VkSampleCountFlagBits getMSAASampleCount() { return msaaSamples; };
+
 			// Queries the surface's capabilities, formats, and present modes
 			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
@@ -78,6 +81,7 @@ namespace Rath {
 			VkQueue graphicsQueue = VK_NULL_HANDLE;
 			VkQueue presentQueue = VK_NULL_HANDLE;
 			VkCommandPool commandPool;
+			VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
 			// Picks the first suitable physical device
 			void pickPhysicalDevice();
@@ -96,6 +100,12 @@ namespace Rath {
 			// Creates the command pool that owns the memory command buffers record into,
 			// destroying the pool frees every buffer allocated from it
 			void createCommandPool();
+
+			// Returns the max samples usable by the physical
+			// device (VkPhysicalDeviceLimits)
+			// Needed for multisampling
+			VkSampleCountFlagBits getMaxUsableSampleCount();
+
 		
 	};
 } // namespace Rath

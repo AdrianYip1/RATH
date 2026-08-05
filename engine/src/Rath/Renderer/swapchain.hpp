@@ -43,7 +43,7 @@ namespace Rath {
 
 			// Creates a framebuffer per swapchain image, each holding that image's
 			// view and the depth view. Call this after the graphics pipeline is created
-			void createFramebuffers(VkRenderPass renderpass, VkImageView depthView);
+			void createFramebuffers(VkRenderPass renderpass, VkImageView depthView, VkImageView colorView);
 
 			// On resize or minimize, waits for the window to have a size then rebuilds
 			// the swapchain, image views and framebuffers
@@ -77,7 +77,7 @@ namespace Rath {
 			// and before every recreation
 			void cleanupSwapChain();
 
-			// Returns B8G8R8A8_SRGB with a nonlinear sRGB colour space if available,
+			// Returns B8G8R8A8_SRGB with a nonlinear sRGB color space if available,
 			// otherwise the first available format
 			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 

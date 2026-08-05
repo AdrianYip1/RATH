@@ -23,8 +23,8 @@ namespace Rath {
 
 			// Creates the image and its memory, storing them in the passed references,
 			// then binds the memory to the image
-			void createImage(u32 width, u32 height, u32 mipLevels, VkFormat format,
-							 VkImageTiling tiling, VkImageUsageFlags usage,
+			void createImage(u32 width, u32 height, u32 mipLevels, VkSampleCountFlagBits numSamples, 
+							 VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 							 VkMemoryPropertyFlags properties, VkImage& image,
 							 VkDeviceMemory& imageMemory);
 
@@ -45,7 +45,5 @@ namespace Rath {
 		private:
 			Device& device;
 			Buffer& buffer;	
-
-
 	};
 } // namespace Rath

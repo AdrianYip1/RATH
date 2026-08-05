@@ -17,6 +17,8 @@ world rendering and generation capabilities.
 
 ## Implemented
 
+- Multisampling
+- Mipmaps
 - OBJ model loading with vertex deduplication
 - Texture mapping
 - Depth buffering

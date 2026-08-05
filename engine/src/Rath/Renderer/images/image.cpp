@@ -15,8 +15,8 @@ Rath::Image::~Image() {
 // in the passed image and memory parameters. The memory is bounded to the image
 // The function takes the format, tiling, usage, and properties to create
 // a specific image
-void Rath::Image::createImage(u32 width, u32 height, u32 mipLevels, VkFormat format,
-							  VkImageTiling tiling, VkImageUsageFlags usage,
+void Rath::Image::createImage(u32 width, u32 height, u32 mipLevels, VkSampleCountFlagBits numSamples,
+						      VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 							  VkMemoryPropertyFlags properties, VkImage& image,
 							  VkDeviceMemory& imageMemory) {
 
@@ -32,7 +32,7 @@ void Rath::Image::createImage(u32 width, u32 height, u32 mipLevels, VkFormat for
 	imageInfo.tiling = tiling;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.usage = usage;
-	imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+	imageInfo.samples = numSamples;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 	if (vkCreateImage(device.getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
@@ -158,4 +158,3 @@ void Rath::Image::copyBufferToImage(VkBuffer _buffer, VkImage image, u32 width, 
 
 	buffer.endSingleTimeCommands(commandBuffer);
 }
-

@@ -10,6 +10,7 @@ Rath::Renderer::Renderer(Window& _window) :
 	model(),
 	vertexBuffer(device, buffer, model),
 	image(device, buffer),
+	color(device, swapchain, image),
 	depth(device, swapchain, image),
 	renderpass(device, swapchain, depth),
 	texture(device, image, buffer),
@@ -17,7 +18,7 @@ Rath::Renderer::Renderer(Window& _window) :
 	descriptor(device, texture, uniformBuffer),
 	pipeline(device, swapchain, renderpass, descriptor) {
 
-	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
+	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -52,8 +53,9 @@ void Rath::Renderer::drawFrame() {
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
+		color.createColorResources();
 		depth.createDepthResources();
-		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
+		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 		return;
 	}
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -103,8 +105,9 @@ void Rath::Renderer::drawFrame() {
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.getFramebufferResized()) {
 		window.setFramebufferResized(false);
 		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
+		color.createColorResources();
 		depth.createDepthResources();
-		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView());
+		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 	}
 	else if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to present swap chain image");

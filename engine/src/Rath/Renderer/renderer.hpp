@@ -15,6 +15,7 @@
 #include "images/image.hpp"
 #include "descriptor.hpp"
 #include "images/texture.hpp"
+#include "images/color.hpp"
 #include "images/depth.hpp"
 #include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
@@ -50,6 +51,7 @@ namespace Rath {
 			Model model;
 			VertexBuffer vertexBuffer;
 			Image image;
+			Color color;
 			Depth depth;
 			Renderpass renderpass;
 			Texture texture;
