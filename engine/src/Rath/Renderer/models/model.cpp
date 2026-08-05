@@ -36,7 +36,8 @@ void Rath::Model::loadModel() {
 
 			vertex.texCoord = {
 				attrib.texcoords[2 * index.texcoord_index + 0],
-				attrib.texcoords[2 * index.texcoord_index + 1],
+				// OBJ format assumes 0 is the bottom, in Vulkan top is bottom
+				1.0f - attrib.texcoords[2 * index.texcoord_index + 1],
 			};
 
 			vertex.color = { 1.0f, 1.0f, 1.0f };

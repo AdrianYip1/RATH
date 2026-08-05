@@ -41,9 +41,9 @@ void Rath::Texture::createTextureImage() {
 	VkDeviceMemory stagingBufferMemory;
 
 	buffer.createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-						VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-						VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-						stagingBuffer, stagingBufferMemory);
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		stagingBuffer, stagingBufferMemory);
 
 	void* data;
 	vkMapMemory(device.getDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
@@ -53,15 +53,15 @@ void Rath::Texture::createTextureImage() {
 	stbi_image_free(pixels);
 
 	image.createImage(texWidth, texHeight, mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-					  VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
-					  VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-					  textureImage, textureImageMemory);
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+		VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		textureImage, textureImageMemory);
 
 	image.transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-								VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
 	image.copyBufferToImage(stagingBuffer, textureImage, static_cast<u32>(texWidth), static_cast<u32>(texHeight));
 
-	generateMipmaps(textureImage, texWidth, texHeight, mipLevels);
+	generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
 
 	vkDestroyBuffer(device.getDevice(), stagingBuffer, nullptr);
 	vkFreeMemory(device.getDevice(), stagingBufferMemory, nullptr);
@@ -95,14 +95,22 @@ void Rath::Texture::createTextureSampler() {
 	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	samplerInfo.mipLodBias = 0.0f;
 	samplerInfo.minLod = 0.0f;
-	samplerInfo.maxLod = 0.0f;
+	samplerInfo.maxLod = VK_LOD_CLAMP_NONE;
 
 	if (vkCreateSampler(device.getDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create texture sampler");
 	}
 }
 
-void Rath::Texture::generateMipmaps(VkImage image, u32 texWidth, u32 texHeight, u32 mipLevels) {
+void Rath::Texture::generateMipmaps(VkImage image, VkFormat imageFormat, u32 texWidth, u32 texHeight, u32 mipLevels) {
+	// Blitting requires linear filtering
+	VkFormatProperties formatProperties;
+	vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), imageFormat, &formatProperties);
+
+	if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+		throw std::runtime_error("Texture image doesn't support linear blitting");
+	}
+
 	VkCommandBuffer commandBuffer = buffer.beginSingleTimeCommands();
 	
 	VkImageMemoryBarrier barrier{};

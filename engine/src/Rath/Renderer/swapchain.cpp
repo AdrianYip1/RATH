@@ -72,7 +72,7 @@ void Rath::Swapchain::createImageViews() {
 	swapChainImageViews.resize(swapChainImages.size());
 
 	for (size i = 0; i < swapChainImages.size(); i++) {
-		Image::createImageView(device.getDevice(), swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, swapChainImageViews[i]);
+		Image::createImageView(device.getDevice(), swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, swapChainImageViews[i], 1);
 	}
 }
 

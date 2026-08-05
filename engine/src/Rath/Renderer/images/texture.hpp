@@ -52,6 +52,6 @@ namespace Rath {
 			// Creates the sampler, a reusable set of rules for how any image is sampled
 			void createTextureSampler();
 
-			void generateMipmaps(VkImage image, u32 texWidth, u32 texHeight, u32 mipLevels);
+			void generateMipmaps(VkImage image, VkFormat imageFormat, u32 texWidth, u32 texHeight, u32 mipLevels);
 	};
 } // namespace Rath
