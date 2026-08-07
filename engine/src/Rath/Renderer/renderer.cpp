@@ -15,7 +15,8 @@ Rath::Renderer::Renderer(Window& _window) :
 	renderpass(device, swapchain, depth),
 	texture(device, image, buffer),
 	uniformBuffer(device, swapchain, buffer),
-	descriptor(device, texture, uniformBuffer),
+	storage(device, buffer),
+	descriptor(device, texture, uniformBuffer, storage),
 	pipeline(device, swapchain, renderpass, descriptor) {
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());

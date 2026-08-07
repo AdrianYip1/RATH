@@ -56,4 +56,6 @@ std::vector<Rath::Particle> Rath::Storage::initParticles() {
 		particle.velocity = enginemath::Vec2(x, y).normalized() * 0.00025f;
 		particle.color = enginemath::Vec4(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine), 1.0f);
 	}
+
+	return particles;
 }

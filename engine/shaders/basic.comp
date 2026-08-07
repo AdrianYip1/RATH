@@ -17,5 +17,5 @@ layout (std140, binding = 4) buffer ParticleSSBOOut {
 
 void main()
 {
-    
+    return;
 }

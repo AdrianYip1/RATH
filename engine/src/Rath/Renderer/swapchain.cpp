@@ -38,9 +38,9 @@ void Rath::Swapchain::createSwapChain() {
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 	QueueFamilyIndices indices = device.findQueueFamilies(device.getPhysicalDevice());
-	u32 queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+	u32 queueFamilyIndices[] = { indices.graphicsAndComputeFamily.value(), indices.presentFamily.value() };
 
-	if (indices.graphicsFamily != indices.presentFamily) {
+	if (indices.graphicsAndComputeFamily != indices.presentFamily) {
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilyIndices;

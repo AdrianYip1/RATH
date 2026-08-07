@@ -16,6 +16,7 @@
 #include "descriptor.hpp"
 #include "images/texture.hpp"
 #include "images/color.hpp"
+#include "buffers/storage.hpp"
 #include "images/depth.hpp"
 #include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
@@ -25,7 +26,6 @@
 
 
 namespace Rath {
-
 	class Renderer {
 		public:
 
@@ -56,6 +56,7 @@ namespace Rath {
 			Renderpass renderpass;
 			Texture texture;
 			UniformBuffer uniformBuffer;
+			Storage storage;
 			Descriptor descriptor;
 			Pipeline pipeline;
 			

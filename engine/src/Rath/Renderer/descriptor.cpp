@@ -7,6 +7,7 @@ Rath::Descriptor::Descriptor(Device& _device, Texture& _texture, UniformBuffer& 
 	createComputeDescriptorSetLayout();
 	createDescriptorPool();
 	createDescriptorSets();
+	createComputeDescriptorSets();
 }
 
 // Descriptor destructor
@@ -146,7 +147,7 @@ void Rath::Descriptor::createComputeDescriptorSetLayout() {
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<u32>(sizeof(layoutBindings));
+	layoutInfo.bindingCount = static_cast<u32>(layoutBindings.size());
 	layoutInfo.pBindings = layoutBindings.data();
 
 	if (vkCreateDescriptorSetLayout(device.getDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS) {
@@ -177,7 +178,7 @@ void Rath::Descriptor::createComputeDescriptorSets() {
 		uniformBufferInfo.range = sizeof(UniformBufferObject);
 
 		VkDescriptorBufferInfo storageBufferInfoLastFrame{};
-		storageBufferInfoLastFrame.buffer = storage.getStorageBuffer(i);
+		storageBufferInfoLastFrame.buffer = storage.getStorageBuffer((i - 1) % MAX_FRAMES_IN_FLIGHT);
 		storageBufferInfoLastFrame.offset = 0;
 		storageBufferInfoLastFrame.range = sizeof(Particle) * PARTICLE_COUNT;
 
@@ -196,7 +197,7 @@ void Rath::Descriptor::createComputeDescriptorSets() {
 
 		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[1].dstSet = computeDescriptorSets[(i - 1) % MAX_FRAMES_IN_FLIGHT];
+		descriptorWrites[1].dstSet = computeDescriptorSets[i];
 		descriptorWrites[1].dstBinding = 1;
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorCount = 1;
