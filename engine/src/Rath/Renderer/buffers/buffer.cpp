@@ -92,7 +92,7 @@ VkCommandBuffer Rath::Buffer::beginSingleTimeCommands() {
 }
 
 // Takes a command buffer that has started command buffer recording.
-// Ends recording, submits to graphics queue, then blocks until GPU is done
+// Ends recording, submits to graphics, then blocks until GPU is done
 void Rath::Buffer::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
 	vkEndCommandBuffer(commandBuffer);
 

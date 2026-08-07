@@ -47,13 +47,22 @@ std::vector<Rath::Particle> Rath::Storage::initParticles() {
 
 	std::vector<Particle> particles(PARTICLE_COUNT);
 
+	const float radius = 1.0f;
+	const float speed = 0.00025f;
+
 	for (auto& particle : particles) {
-		float r = 0.25f * sqrt(rndDist(rndEngine));
-		float theta = rndDist(rndEngine) * 2 * enginemath::PI;
-		float x = r * std::cos(theta) * 1600 * 1200;
-		float y = r * std::sin(theta);
-		particle.position = enginemath::Vec2(x, y);
-		particle.velocity = enginemath::Vec2(x, y).normalized() * 0.00025f;
+		// Uniform point inside a ball: cbrt for radius, acos for even polar spread
+		float r = radius * std::cbrt(rndDist(rndEngine));
+		float theta = rndDist(rndEngine) * 2.0f * enginemath::PI;
+		float phi = std::acos(2.0f * rndDist(rndEngine) - 1.0f);
+
+		float sinPhi = std::sin(phi);
+		float nx = sinPhi * std::cos(theta);
+		float ny = sinPhi * std::sin(theta);
+		float nz = std::cos(phi);
+
+		particle.position = enginemath::Vec4(nx * r, ny * r, nz * r, 1.0f);
+		particle.velocity = enginemath::Vec4(nx * speed, ny * speed, nz * speed, 0.0f);
 		particle.color = enginemath::Vec4(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine), 1.0f);
 	}
 

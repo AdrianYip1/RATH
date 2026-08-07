@@ -21,16 +21,21 @@ Rath::UniformBuffer::~UniformBuffer() {
 // to the uniformBuffer's memory
 void Rath::UniformBuffer::updateUniformBuffer(u32 currentImage) {
 	static auto startTime = std::chrono::high_resolution_clock::now();
+	static auto lastTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	
+	float deltaTime = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastTime).count();
+	lastTime = currentTime;
 	
 	UniformBufferObject ubo{
 		enginemath::Mat4::identity(),
 		enginemath::Mat4::identity(),
 		enginemath::Mat4::identity(),
-		time
+		deltaTime * 2.0f
 	};
+
 	ubo.model = enginemath::Mat4::rotateZ(enginemath::toRad(std::sin(time)) * 90.0f);
 	ubo.view = enginemath::Mat4::lookAtM(enginemath::Vec3(2.0f, 2.0f, 2.0f), 
 										 enginemath::Vec3(0.0f, 0.0f, 0.0f), 

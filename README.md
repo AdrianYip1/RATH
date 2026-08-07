@@ -17,6 +17,7 @@ world rendering and generation capabilities.
 
 ## Implemented
 
+- Compute Shaders with particle simulation
 - Multisampling
 - Mipmaps
 - OBJ model loading with vertex deduplication
@@ -26,8 +27,6 @@ world rendering and generation capabilities.
 - Frames in flight with fences and semaphores
 - Swapchain recreation on resize
 - Validation layers
-
-Mipmaps and multisampling are not done yet.
 
 ## Architecture
 

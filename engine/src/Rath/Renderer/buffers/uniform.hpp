@@ -53,7 +53,7 @@ namespace Rath {
 			std::vector<VkBuffer> uniformBuffers;
 			std::vector<VkDeviceMemory> uniformBuffersMemory;
 			std::vector<void*> uniformBuffersMapped;
-			
+
 			// Creates a uniform buffer and memory per frame in flight, then
 			// persistently maps them into uniformBuffersMapped
 			void createUniformBuffers();
