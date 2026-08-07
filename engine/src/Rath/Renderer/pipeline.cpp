@@ -99,7 +99,8 @@ void Rath::Pipeline::createGraphicsPipeline() {
 
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = VK_FALSE;
+	multisampling.sampleShadingEnable = VK_TRUE;
+	multisampling.minSampleShading = 0.2f; // closer to 1 means smoother
 	multisampling.rasterizationSamples = device.getMSAASampleCount();
 
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
@@ -163,6 +164,40 @@ void Rath::Pipeline::createGraphicsPipeline() {
 
 	vkDestroyShaderModule(device.getDevice(), fragShaderModule, nullptr);
 	vkDestroyShaderModule(device.getDevice(), vertShaderModule, nullptr);
+}
+
+void Rath::Pipeline::createComputePipeline() {
+	auto computeShaderCode = readFile("../../../../engine/shaders/basic.comp.spv");
+
+	VkShaderModule computeShaderModule = createShaderModule(computeShaderCode);
+
+	VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+	computeShaderStageInfo.module = computeShaderModule;
+	computeShaderStageInfo.pName = "main";
+
+	VkPipelineLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	layoutInfo.setLayoutCount = 1;
+
+	VkDescriptorSetLayout descriptorSetLayout = descriptor.getComputeDescriptorSetLayout();
+	layoutInfo.pSetLayouts = &descriptorSetLayout;
+
+	if (vkCreatePipelineLayout(device.getDevice(), &layoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create compute pipeline layout");
+	}
+
+	VkComputePipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	pipelineInfo.layout = computePipelineLayout;
+	pipelineInfo.stage = computeShaderStageInfo;
+
+	if (vkCreateComputePipelines(device.getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &computePipeline) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create compute pipeline");
+	}
+
+	vkDestroyShaderModule(device.getDevice(), computeShaderModule, nullptr);
 }
 
 // Takes the byte data of a shader and returns a corresponding shader module

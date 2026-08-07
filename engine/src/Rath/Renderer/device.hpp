@@ -20,11 +20,16 @@ namespace Rath {
 	};
 
 	struct QueueFamilyIndices {
-		std::optional<u32> graphicsFamily;
+		//std::optional<u32> graphicsFamily;
+		// Checking for a queue family that supports both 
+		// graphics and compute operations
+		// TODO: its also possible to have a dedicated compute queue
+		// research asynchronous compute queue
+		std::optional<u32> graphicsAndComputeFamily;
 		std::optional<u32> presentFamily;
 
 		bool isComplete() {
-			return graphicsFamily.has_value() && 
+			return graphicsAndComputeFamily.has_value() &&
 				   presentFamily.has_value();
 		}
 	};
@@ -54,6 +59,9 @@ namespace Rath {
 			// Returns presentQueue
 			VkQueue getPresentQueue() const { return presentQueue; };
 
+			// Returns computeQueue
+			VkQueue getComputeQueue() const { return computeQueue; };
+
 			// Returns commandPool
 			VkCommandPool getCommandPool() const { return commandPool; };
 
@@ -80,6 +88,7 @@ namespace Rath {
 			// Retrieve queue handles using vkGetDeviceQueue
 			VkQueue graphicsQueue = VK_NULL_HANDLE;
 			VkQueue presentQueue = VK_NULL_HANDLE;
+			VkQueue computeQueue = VK_NULL_HANDLE;
 			VkCommandPool commandPool;
 			VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 

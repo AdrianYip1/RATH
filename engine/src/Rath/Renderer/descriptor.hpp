@@ -12,6 +12,7 @@
 #include "buffers/buffer.hpp"
 #include "buffers/uniform.hpp"
 #include "images/texture.hpp"
+#include "buffers/storage.hpp"
 
 // std
 #include <stdexcept>
@@ -23,7 +24,7 @@
 namespace Rath {
 	class Descriptor {
 		public:
-			Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform);
+			Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform, Storage& _storage);
 			~Descriptor();
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
@@ -34,14 +35,24 @@ namespace Rath {
 			// Returns descriptorSets at frame
 			VkDescriptorSet getDescriptorSet(u32 frame) const { return descriptorSets[frame]; };
 		
+			// Returns computeDescriptorSetLayout
+			VkDescriptorSetLayout getComputeDescriptorSetLayout() const { return computeDescriptorSetLayout; };
+
+			// Returns computeDescriptorSets at frame
+			VkDescriptorSet getComputeDescriptorSet(u32 frame) const { return computeDescriptorSets[frame]; };
+
 		private:
 			Device& device;
 			Texture& texture;
 			UniformBuffer& uniform;
+			Storage& storage;
 
 			VkDescriptorSetLayout descriptorSetLayout;
 			VkDescriptorPool descriptorPool;
 			std::vector<VkDescriptorSet> descriptorSets;
+
+			VkDescriptorSetLayout computeDescriptorSetLayout;
+			std::vector<VkDescriptorSet> computeDescriptorSets;
 
 			// Creates the shape of a descriptor set: what type sits at each binding
 			// number and which shader stages can see it
@@ -54,6 +65,10 @@ namespace Rath {
 			// Allocates a set per frame in flight, then writes the uniform buffer
 			// and the texture view + sampler into them with vkUpdateDescriptorSets
 			void createDescriptorSets();
+
+			void createComputeDescriptorSetLayout();
+
+			void createComputeDescriptorSets();
 			
 	};
 } // namespace Rath

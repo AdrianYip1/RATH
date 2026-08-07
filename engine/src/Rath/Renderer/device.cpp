@@ -22,7 +22,7 @@ void Rath::Device::createCommandPool() {
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();
 
 	if (vkCreateCommandPool(getDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create command pool");
@@ -62,7 +62,7 @@ void Rath::Device::createLogicalDevice() {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	std::set<u32> uniqueQueueFamilies = { indices.graphicsFamily.value(),
+	std::set<u32> uniqueQueueFamilies = { indices.graphicsAndComputeFamily.value(),
 										  indices.presentFamily.value() };
 	f32 queuePriority = 1.0f;
 
@@ -78,6 +78,7 @@ void Rath::Device::createLogicalDevice() {
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
+	deviceFeatures.sampleRateShading = VK_TRUE;
 
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -102,12 +103,13 @@ void Rath::Device::createLogicalDevice() {
 		throw std::runtime_error("Failed to create logical device");
 	}
 
-	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	vkGetDeviceQueue(device, indices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
+	vkGetDeviceQueue(device, indices.graphicsAndComputeFamily.value(), 0, &computeQueue);
 	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
 
 // Determine if a physical device is suitable based on
-// extension support, swapChain support, queue family indices filled out
+// features, extension support, swapChain support, queue family indices filled out
 bool Rath::Device::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -122,7 +124,11 @@ bool Rath::Device::isDeviceSuitable(VkPhysicalDevice device) {
 	VkPhysicalDeviceFeatures supportedFeatures;
 	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+	return indices.isComplete() && 
+		   extensionsSupported && 
+		   swapChainAdequate && 
+		   supportedFeatures.samplerAnisotropy &&
+		   supportedFeatures.sampleRateShading;
 }
 
 // Checks if the physical device has the extensions wanted by deviceExtensions
@@ -155,9 +161,10 @@ Rath::QueueFamilyIndices Rath::Device::findQueueFamilies(VkPhysicalDevice device
 
 	int i = 0;
 	for (const auto& queueFamily : queueFamilies) {
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-			indices.graphicsFamily = i;
-		}
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && 
+			queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			indices.graphicsAndComputeFamily = i;
+		} 
 		VkBool32 presentSupport = VK_FALSE;
 		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, context.getSurface(), &presentSupport);
 		if (presentSupport) {

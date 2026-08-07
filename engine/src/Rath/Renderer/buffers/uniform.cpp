@@ -28,7 +28,8 @@ void Rath::UniformBuffer::updateUniformBuffer(u32 currentImage) {
 	UniformBufferObject ubo{
 		enginemath::Mat4::identity(),
 		enginemath::Mat4::identity(),
-		enginemath::Mat4::identity()
+		enginemath::Mat4::identity(),
+		time
 	};
 	ubo.model = enginemath::Mat4::rotateZ(enginemath::toRad(std::sin(time)) * 90.0f);
 	ubo.view = enginemath::Mat4::lookAtM(enginemath::Vec3(2.0f, 2.0f, 2.0f), 

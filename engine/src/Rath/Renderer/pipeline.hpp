@@ -42,11 +42,15 @@ namespace Rath {
 			Descriptor& descriptor;
 
 			VkPipelineLayout pipelineLayout;
+			VkPipelineLayout computePipelineLayout;
 			VkPipeline graphicsPipeline;
+			VkPipeline computePipeline;
 
 			// Builds every create info the pipeline needs, then creates the layout
 			// and the pipeline. Viewport and scissor are dynamic, set at record time
 			void createGraphicsPipeline();
+
+			void createComputePipeline();
 
 			// Takes the byte data of a shader and returns a corresponding shader module
 			VkShaderModule createShaderModule(const std::vector<char>& code);
