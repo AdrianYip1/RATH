@@ -3,6 +3,7 @@
 // Renderer constructor
 Rath::Renderer::Renderer(Window& _window) :
 	window(_window),
+	input(_window),
 	context(_window),
 	device(context),
 	swapchain(_window, context, device),
@@ -54,7 +55,10 @@ void Rath::Renderer::drawFrame() {
 
 	// Reset fences only when submitting work
 	vkResetFences(device.getDevice(), 1, &computeInFlightFences[currentFrame]);
-	vkResetCommandBuffer(computeCommandBuffers[currentFrame], 0);
+
+	// vkResetCommandBuffer is redundant since the pool is created with 
+	// VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
+	// vkResetCommandBuffer(computeCommandBuffers[currentFrame], 0);
 	recordComputeCommandBuffer(computeCommandBuffers[currentFrame]);
 
 	VkSubmitInfo computeSubmitInfo{};
@@ -64,6 +68,8 @@ void Rath::Renderer::drawFrame() {
 	computeSubmitInfo.pSignalSemaphores = &computeFinishedSemaphores[currentFrame];
 	computeSubmitInfo.signalSemaphoreCount = 1;
 
+	// Both the semaphore and fence signal when the GPU finished executing every
+	// command in the submit
 	if (vkQueueSubmit(device.getComputeQueue(), 1, &computeSubmitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to submit to compute queue");
 	}
@@ -87,7 +93,9 @@ void Rath::Renderer::drawFrame() {
 
 	vkResetFences(device.getDevice(), 1, &inFlightFences[currentFrame]);
 
-	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+	// vkResetCommandBuffer is redundant since the pool is created with 
+	// VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
+	// vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
 	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
@@ -279,6 +287,7 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	}
 }
 
+// Begins a command buffer (compute), binds compute descriptor set, then dispatches
 void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

@@ -20,6 +20,7 @@
 #include "images/depth.hpp"
 #include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
+#include "Rath/Platform/input.hpp"
 
 // std
 #include <stdexcept>
@@ -44,6 +45,7 @@ namespace Rath {
 
 		private:
 			Window& window;
+			Input input;
 			Context context;
 			Device device;
 			Swapchain swapchain;
@@ -67,6 +69,8 @@ namespace Rath {
 			std::vector<VkSemaphore> imageAvailableSemaphores;
 			std::vector<VkSemaphore> renderFinishedSemaphores;
 			std::vector<VkFence> inFlightFences;
+
+			// Sync objects for compute
 			std::vector<VkSemaphore> computeFinishedSemaphores;
 			std::vector<VkFence> computeInFlightFences;
 
@@ -84,6 +88,7 @@ namespace Rath {
 			// index data before drawing
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
 			
+			// Begins a command buffer (compute), binds compute descriptor set, then dispatches
 			void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
 	};
 } // namespace Rath

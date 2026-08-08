@@ -172,6 +172,7 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	vkDestroyShaderModule(device.getDevice(), vertShaderModule, nullptr);
 }
 
+// Compute pipeline that reads the compute shader and the compute descriptor set
 void Rath::Pipeline::createComputePipeline() {
 	auto computeShaderCode = readFile("../../../../engine/shaders/particle.comp.spv");
 
@@ -206,6 +207,8 @@ void Rath::Pipeline::createComputePipeline() {
 	vkDestroyShaderModule(device.getDevice(), computeShaderModule, nullptr);
 }
 
+// Pipeline that reads the particle vert/frag shaders
+// Sets the vertexAssembly to point line
 void Rath::Pipeline::createParticlePipeline() {
 	auto vertShaderCode = readFile("../../../../engine/shaders/particle.vert.spv");
 	auto fragShaderCode = readFile("../../../../engine/shaders/particle.frag.spv");
@@ -319,8 +322,8 @@ void Rath::Pipeline::createParticlePipeline() {
 	VkDescriptorSetLayout descriptorSet = descriptor.getDescriptorSetLayout();
 	pipelineLayoutInfo.pSetLayouts = &descriptorSet;
 
-	// The pipeline layout declares the resources shaders can access
-	// Currently uniforms and textures -> binding 0: uniform, binding 1: sampler
+	// Uses the graphics descriptor set layout and can access both the ubo and sampler
+	// But the vert shader only uses the UBO 
 	if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &particlePipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create pipeline layout");
 	}
@@ -352,6 +355,7 @@ void Rath::Pipeline::createParticlePipeline() {
 	vkDestroyShaderModule(device.getDevice(), fragShaderModule, nullptr);
 	vkDestroyShaderModule(device.getDevice(), vertShaderModule, nullptr);
 }
+
 // Takes the byte data of a shader and returns a corresponding shader module
 VkShaderModule Rath::Pipeline::createShaderModule(const std::vector<char>& code) {
 	VkShaderModuleCreateInfo createInfo{};
