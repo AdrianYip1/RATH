@@ -8,7 +8,8 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera) :
 	device(context),
 	swapchain(_window, context, device),
 	buffer(device),
-	model(device, buffer),
+	room(device, buffer, MODEL_PATH),
+	cup(device, buffer, MODEL2_PATH),
 	image(device, buffer),
 	color(device, swapchain, image),
 	depth(device, swapchain, image),
@@ -260,14 +261,18 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	scissor.extent = swapchain.getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	model.bind(commandBuffer);
-
+	room.bind(commandBuffer);
 	VkDescriptorSet set = descriptor.getDescriptorSet(currentFrame);
-
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
+	room.draw(commandBuffer);
 
-	model.draw(commandBuffer);
+
+	cup.bind(commandBuffer);
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
+		0, 1, &set, 0, nullptr);
+	cup.draw(commandBuffer);
+
 
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
 	VkDeviceSize offsets[] = { 0 };

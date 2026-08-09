@@ -23,6 +23,7 @@
 
 // std
 #include <stdexcept>
+#include <memory>
 
 
 namespace Rath {
@@ -49,7 +50,8 @@ namespace Rath {
 			Device device;
 			Swapchain swapchain;
 			Buffer buffer;
-			Model model;
+			Model room;
+			Model cup;
 			Image image;
 			Color color;
 			Depth depth;

@@ -18,17 +18,19 @@
 namespace Rath {
 	class Model {
 		public:
-			Model(Device& _device, Buffer& _buffer);
+			Model(Device& _device, Buffer& _buffer, const std::string& path);
 			~Model();
 			Model(const Model& other) = delete;
 			Model& operator=(const Model& other) = delete;
 
 			void bind(VkCommandBuffer commandBuffer);
-			void draw(VkCommandBuffer);
+			void draw(VkCommandBuffer commandBuffer);
 
 		private:
 			Device& device;
 			Buffer& buffer;
+			// Model that is being loaded
+			const std::string modelPath;
 
 			std::unordered_map<Vertex, u32> uniqueVertices{};
 			std::vector<Vertex> vertices;

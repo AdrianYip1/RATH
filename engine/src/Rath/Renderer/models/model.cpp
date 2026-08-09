@@ -3,8 +3,8 @@
 #include "vendor/tiny_obj_loader.h"
 
 // Model constructor
-Rath::Model::Model(Device& _device, Buffer& _buffer) : 
-	device(_device), buffer(_buffer) {
+Rath::Model::Model(Device& _device, Buffer& _buffer, const std::string& path) :
+	device(_device), buffer(_buffer), modelPath(path) {
 	loadModel();
 	createVertexBuffer();
 	createIndexBuffer();
@@ -26,7 +26,7 @@ void Rath::Model::loadModel() {
 	std::string err;
 	std::string warn;
 
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
 		throw std::runtime_error(err);
 	}
 
