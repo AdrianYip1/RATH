@@ -41,10 +41,10 @@ void Rath::Application::mainLoop() {
 		camera.setDeltaTime(deltaTime);
 
 		window.pollEvents();
-		renderer->drawFrame();
 		// Accumulate controls before updating camera
 		cameraController.checkCameraMovement();
 		cameraController.updateCamera();
+		renderer->drawFrame();
 	}
 	renderer->wait();
 } 
