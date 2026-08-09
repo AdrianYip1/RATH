@@ -8,8 +8,7 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera) :
 	device(context),
 	swapchain(_window, context, device),
 	buffer(device),
-	model(),
-	vertexBuffer(device, buffer, model),
+	model(device, buffer),
 	image(device, buffer),
 	color(device, swapchain, image),
 	depth(device, swapchain, image),
@@ -261,20 +260,18 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	scissor.extent = swapchain.getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	VkBuffer vertexBuffers[] = {vertexBuffer.getVertexBuffer()};
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-	vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+	model.bind(commandBuffer);
 
 	VkDescriptorSet set = descriptor.getDescriptorSet(currentFrame);
 
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
 
-	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(vertexBuffer.indices.size()), 1, 0, 0, 0);
+	model.draw(commandBuffer);
 
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
+	VkDeviceSize offsets[] = { 0 };
+
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipeline());
 
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipelineLayout(), 0, 1, &set, 0, nullptr);

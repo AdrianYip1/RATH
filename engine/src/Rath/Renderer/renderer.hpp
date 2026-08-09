@@ -9,7 +9,6 @@
 #include "swapchain.hpp"
 #include "renderpass.hpp"
 #include "pipeline.hpp"
-#include "buffers/vertex.hpp"
 #include "buffers/buffer.hpp"
 #include "buffers/uniform.hpp"
 #include "images/image.hpp"
@@ -51,7 +50,6 @@ namespace Rath {
 			Swapchain swapchain;
 			Buffer buffer;
 			Model model;
-			VertexBuffer vertexBuffer;
 			Image image;
 			Color color;
 			Depth depth;

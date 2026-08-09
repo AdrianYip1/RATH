@@ -9,7 +9,6 @@ add_library(rath_engine STATIC
      "src/Rath/Renderer/swapchain.cpp" 
      "src/Rath/Renderer/pipeline.cpp" 
      "src/Rath/Renderer/renderpass.cpp" 
-     "src/Rath/Renderer/buffers/vertex.cpp" 
      "src/Rath/Renderer/buffers/buffer.cpp" 
      "src/Rath/Renderer/buffers/uniform.cpp" 
      "src/Rath/Renderer/images/image.cpp" 
