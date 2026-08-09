@@ -8,20 +8,25 @@
 
 // std
 #include <cmath>
+#include <algorithm>
 
 namespace Rath {
 	class Camera {
 		public:
-			Camera(enginemath::Vec3 _position, f32 aspect, f32 yaw = enginemath::toRad(-90.0),
-				  f32 pitch = 0.0f, f32 fov = enginemath::toRad(45.0f), 
-				  f32 near = 0.1f, f32 far = 10.0f);
-			~Camera();
-
+			Camera(enginemath::Vec3 _position, f32 _aspect, f32 _yaw = enginemath::toRad(-90.0f),
+				  f32 _pitch = 0.0f, f32 _fov = enginemath::toRad(45.0f), 
+				  f32 _nearPlane = 0.1f, f32 _farPlane = 10.0f);
+			
 			enginemath::Vec3 getWorldUp() const;
 			enginemath::Vec3 getForward() const;
 			enginemath::Vec3 getRight() const;
 			enginemath::Mat4 getView() const;
 			enginemath::Mat4 getProj() const;
+
+			// no roll for now
+			void rotate(f32 dYaw, f32 dPitch);
+
+			void move(enginemath::Vec3 delta);
 
 			// Called on swapchain recreation
 			void setAspect(f32 newAspect);
@@ -34,7 +39,7 @@ namespace Rath {
 			f32 yaw;
 			f32 pitch;
 			f32 fov;
-			f32 near;
-			f32 far;
+			f32 nearPlane;
+			f32 farPlane;
 	};
 } // namespace Rath
