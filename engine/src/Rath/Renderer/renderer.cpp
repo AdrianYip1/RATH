@@ -261,19 +261,24 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	scissor.extent = swapchain.getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	room.bind(commandBuffer);
 	VkDescriptorSet set = descriptor.getDescriptorSet(currentFrame);
+
+	room.bind(commandBuffer);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
-	room.draw(commandBuffer);
 
+	for (size i = 0; i < NUMBER_OF_ROOMS; i++) {
+		// A * B * v
+		// this applies B first so you rotate THEN translate
+		MeshPushConstant constants{ enginemath::Mat4::translationM(enginemath::Vec3(2.0f * i, 0.0f, 1.0f)) *
+			enginemath::Mat4::rotateY(camera.getElapsedTime() * enginemath::toRad(90.0f)) *
+			enginemath::Mat4::rotateX(enginemath::toRad(-90.0f)),
+									enginemath::Vec3(std::sin(i * enginemath::toRad(camera.getElapsedTime())), 1.0f, 1.0f)};
 
-	cup.bind(commandBuffer);
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
-		0, 1, &set, 0, nullptr);
-	cup.draw(commandBuffer);
-
-
+		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
+		room.draw(commandBuffer);
+	}
+	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
 	VkDeviceSize offsets[] = { 0 };
 

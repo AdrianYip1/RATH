@@ -2,12 +2,19 @@
 #include "vulkan/vulkan.h"
 #include "enginemath/vec2.hpp"
 #include "enginemath/vec3.hpp"
+#include "enginemath/mat4.hpp"
 
 // std
 #include <array>
 #include <functional>
 
 namespace Rath {
+	// Push constant struct (move later)
+	struct MeshPushConstant {
+		enginemath::Mat4 model;
+		enginemath::Vec3 color;
+	};
+
 	// Vertex struct: holds info about pos, color, texCoords
 	// Contains helpers to set binding + attribute descriptions
 	struct Vertex {

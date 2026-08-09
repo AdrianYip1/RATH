@@ -22,7 +22,6 @@
 
 namespace Rath {
 	struct UniformBufferObject {
-		enginemath::Mat4 model;
 		enginemath::Mat4 view;
 		enginemath::Mat4 proj;
 		f32 uTime;

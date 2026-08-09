@@ -138,6 +138,15 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	VkDescriptorSetLayout setLayouts = descriptor.getDescriptorSetLayout();
 	pipelineLayoutInfo.pSetLayouts = &setLayouts;
 
+	// Push constants
+	VkPushConstantRange pushConstantRange{};
+	pushConstantRange.offset = 0;
+	pushConstantRange.size = sizeof(Rath::MeshPushConstant);
+	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+
 	// The pipeline layout declares the resources shaders can access
 	// Currently uniforms and textures -> binding 0: uniform, binding 1: sampler
 	if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {

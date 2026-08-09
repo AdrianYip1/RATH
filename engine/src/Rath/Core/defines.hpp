@@ -36,4 +36,7 @@ namespace Rath {
 
 	using f32 = float;
 	using f64 = double;
+
+	// Placeholder for push constants -> drawing multiple objects 
+	const u32 NUMBER_OF_ROOMS = 4;
 } // namespace Rath

@@ -28,12 +28,8 @@ void Rath::UniformBuffer::updateUniformBuffer(u32 currentImage) {
 	UniformBufferObject ubo{
 		enginemath::Mat4::identity(),
 		enginemath::Mat4::identity(),
-		enginemath::Mat4::identity(),
 		deltaTime
 	};
-
-	ubo.model = enginemath::Mat4::rotateY(time * enginemath::toRad(90.0f))
-				* enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
 	ubo.view = camera.getView();
 	ubo.proj = camera.getProj();
 
