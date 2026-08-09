@@ -20,7 +20,7 @@
 #include "images/depth.hpp"
 #include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
-#include "Rath/Platform/input.hpp"
+#include "Rath/Core/camera/camera.hpp"
 
 // std
 #include <stdexcept>
@@ -30,7 +30,7 @@ namespace Rath {
 	class Renderer {
 		public:
 
-			Renderer(Window& window);
+			Renderer(Window& _window, Camera& _camera);
 			~Renderer();
 			Renderer(const Renderer& other) = delete;
 			Renderer& operator=(const Renderer& other) = delete;
@@ -45,7 +45,7 @@ namespace Rath {
 
 		private:
 			Window& window;
-			Input input;
+			Camera& camera;
 			Context context;
 			Device device;
 			Swapchain swapchain;

@@ -1,8 +1,9 @@
 #include "uniform.hpp"
 
 // Uniform buffer constructor
-Rath::UniformBuffer::UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer) :
-	device(_device), swapchain(_swapchain), buffer(_buffer) {
+Rath::UniformBuffer::UniformBuffer(Device& _device, Swapchain& _swapchain, 
+								   Buffer& _buffer, Camera& _camera) :
+	device(_device), swapchain(_swapchain), buffer(_buffer), camera(_camera) {
 	createUniformBuffers();
 }
 
@@ -20,32 +21,21 @@ Rath::UniformBuffer::~UniformBuffer() {
 // This is possible since uniformBufferMapped is persistently mapped
 // to the uniformBuffer's memory
 void Rath::UniformBuffer::updateUniformBuffer(u32 currentImage) {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	static auto lastTime = std::chrono::high_resolution_clock::now();
+	
+	f32 deltaTime = camera.getDeltaTime();
+	f32 time = camera.getElapsedTime();
 
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-	
-	float deltaTime = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastTime).count();
-	lastTime = currentTime;
-	
 	UniformBufferObject ubo{
 		enginemath::Mat4::identity(),
 		enginemath::Mat4::identity(),
 		enginemath::Mat4::identity(),
-		deltaTime * 2.0f
+		deltaTime
 	};
 
-	ubo.model = enginemath::Mat4::rotateZ(enginemath::toRad(std::sin(time)) * 90.0f);
-	ubo.view = enginemath::Mat4::lookAtM(enginemath::Vec3(2.0f, 2.0f, 2.0f), 
-										 enginemath::Vec3(0.0f, 0.0f, 0.0f), 
-										 enginemath::Vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = enginemath::Mat4::projectionM(enginemath::toRad(45.0f), 
-									   	 swapchain.getExtent().width / (f32) swapchain.getExtent().height,
-										 0.1f, 10.0f);
-
-	// Vulkan's Y coord in clip space is inverted compared to OpenGL's
-	ubo.proj.m[1][1] *= -1; // or ubo.proj.col1.y *= -1; per enginemath's conventions
+	ubo.model = enginemath::Mat4::rotateY(time * enginemath::toRad(90.0f))
+				* enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
+	ubo.view = camera.getView();
+	ubo.proj = camera.getProj();
 
 	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }

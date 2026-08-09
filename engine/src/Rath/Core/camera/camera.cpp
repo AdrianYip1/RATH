@@ -5,7 +5,8 @@ Rath::Camera::Camera(enginemath::Vec3 _position, f32 _aspect, f32 _yaw,
 					 f32 _near, f32 _far) : 
 	position(_position), aspect(_aspect), yaw(_yaw), pitch(_pitch), fov(_fov),
 	nearPlane(_near), farPlane(_far) {
-
+	deltaTime = 0.0f;
+	elapsedTime = 0.0f;
 }
 
 
@@ -14,7 +15,7 @@ enginemath::Vec3 Rath::Camera::getWorldUp() const {
 }
 
 // Returns the forward vector of the camera
-// Convention is Y on the top, Z into page, X to the right
+// Convention is Y on the top, -Z into page, X to the right
 enginemath::Vec3 Rath::Camera::getForward() const {
 	enginemath::Vec3 forward;
 	forward.x = std::cos(pitch) * std::cos(yaw);
@@ -38,7 +39,7 @@ enginemath::Mat4 Rath::Camera::getView() const {
 }
 
 enginemath::Mat4 Rath::Camera::getProj() const {
-	enginemath::Mat4 proj = enginemath::Mat4::projectionM(fov, aspect, near, far);
+	enginemath::Mat4 proj = enginemath::Mat4::projectionM(fov, aspect, nearPlane, farPlane);
 	// Vulkan's Y coord in clip space is inverted compared to OpenGL's
 	proj.m[1][1] *= -1;
 	return proj;
@@ -66,4 +67,9 @@ void Rath::Camera::move(enginemath::Vec3 delta) {
 // Called on swapchain recreation
 void Rath::Camera::setAspect(f32 newAspect) {
 	aspect = newAspect;
+}
+
+void Rath::Camera::setDeltaTime(f32 _deltaTime) {
+	deltaTime = _deltaTime;
+	elapsedTime += _deltaTime;
 }

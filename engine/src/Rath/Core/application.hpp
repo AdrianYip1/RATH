@@ -2,8 +2,12 @@
 
 // Rath files
 #include "Rath/Platform/window.hpp"
+#include "Rath/Platform/input.hpp"
+#include "camera/camera.hpp"
+#include "camera/cameraController.hpp"
 
 // std
+#include <chrono>
 #include <memory>
 
 namespace Rath {
@@ -21,9 +25,11 @@ namespace Rath {
 
 	private:
 		Window window;
-		
-		// Smmart pointer used for renderer to automatically manage
-		// memory
+		Input input;
+		Camera camera;
+		CameraController cameraController;
+
+		// Smart pointer used for renderer to automatically manage memory
 		std::unique_ptr<Renderer> renderer;
 
 		// Main loop which polls for window resize/close/minimize and starts the drawing loop

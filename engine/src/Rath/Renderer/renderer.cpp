@@ -1,9 +1,9 @@
 #include "renderer.hpp"
 
 // Renderer constructor
-Rath::Renderer::Renderer(Window& _window) :
+Rath::Renderer::Renderer(Window& _window, Camera& _camera) :
 	window(_window),
-	input(_window),
+	camera(_camera),
 	context(_window),
 	device(context),
 	swapchain(_window, context, device),
@@ -15,12 +15,13 @@ Rath::Renderer::Renderer(Window& _window) :
 	depth(device, swapchain, image),
 	renderpass(device, swapchain, depth),
 	texture(device, image, buffer),
-	uniformBuffer(device, swapchain, buffer),
+	uniformBuffer(device, swapchain, buffer, camera),
 	storage(device, buffer),
 	descriptor(device, texture, uniformBuffer, storage),
 	pipeline(device, swapchain, renderpass, descriptor) {
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
+	camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -84,6 +85,7 @@ void Rath::Renderer::drawFrame() {
 		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
 		color.createColorResources();
 		depth.createDepthResources();
+		camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
 		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 		return;
 	}
@@ -136,6 +138,7 @@ void Rath::Renderer::drawFrame() {
 		swapchain.recreateSwapChain(renderpass.getRenderPass(), depth.getDepthImageView());
 		color.createColorResources();
 		depth.createDepthResources();
+		camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
 		swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 	}
 	else if (result != VK_SUCCESS) {

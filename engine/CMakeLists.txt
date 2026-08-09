@@ -20,8 +20,8 @@ add_library(rath_engine STATIC
      "src/Rath/Renderer/images/color.cpp"  
      "src/Rath/Renderer/buffers/storage.cpp" 
      "src/Rath/Platform/input.cpp" 
-     "src/Rath/Renderer/camera/cameraController.cpp" 
-     "src/Rath/Renderer/camera/camera.cpp")
+     "src/Rath/Core/camera/cameraController.cpp" 
+     "src/Rath/Core/camera/camera.cpp")
 
 target_include_directories(rath_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

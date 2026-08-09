@@ -48,7 +48,7 @@ std::vector<Rath::Particle> Rath::Storage::initParticles() {
 	std::vector<Particle> particles(PARTICLE_COUNT);
 
 	const float radius = 1.0f;
-	const float speed = 0.00025f;
+	const float speed = 0.5f;
 
 	for (auto& particle : particles) {
 		// Uniform point inside a ball: cbrt for radius, acos for even polar spread

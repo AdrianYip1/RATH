@@ -7,6 +7,7 @@
 
 // Rath files
 #include "Rath/Core/defines.hpp"
+#include "Rath/Core/camera/camera.hpp"
 #include "../device.hpp"
 #include "../swapchain.hpp"
 #include "buffer.hpp"
@@ -29,7 +30,8 @@ namespace Rath {
 
 	class UniformBuffer {
 		public:
-			UniformBuffer(Device& _device, Swapchain& _swapchain, Buffer& _buffer);
+			UniformBuffer(Device& _device, Swapchain& _swapchain, 
+						  Buffer& _buffer, Camera& _camera);
 			~UniformBuffer();
 			UniformBuffer(const UniformBuffer& other) = delete;
 			UniformBuffer& operator=(const UniformBuffer& other) = delete;
@@ -45,6 +47,7 @@ namespace Rath {
 			Device& device;
 			Swapchain& swapchain;
 			Buffer& buffer;
+			Camera& camera;
 
 			// New data is copied into uniform buffer every frame
 			// no point in having staging buffer

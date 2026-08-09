@@ -31,6 +31,11 @@ namespace Rath {
 			// Called on swapchain recreation
 			void setAspect(f32 newAspect);
 
+			void setDeltaTime(f32 _deltaTime);
+			f32 getDeltaTime() { return deltaTime; };
+			f32 getElapsedTime() { return elapsedTime; };
+			
+
 		private:
 			enginemath::Vec3 worldUp = enginemath::Vec3(0.0f, 1.0f, 0.0f);
 
@@ -41,5 +46,8 @@ namespace Rath {
 			f32 fov;
 			f32 nearPlane;
 			f32 farPlane;
+
+			f32 deltaTime;
+			f32 elapsedTime;
 	};
 } // namespace Rath

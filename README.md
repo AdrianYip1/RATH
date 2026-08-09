@@ -17,6 +17,7 @@ world rendering and generation capabilities.
 
 ## Implemented
 
+- Camera class with WASD movement -> lookaround with mouse next
 - Compute Shaders with particle simulation
 - Multisampling
 - Mipmaps
