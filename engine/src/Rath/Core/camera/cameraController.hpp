@@ -32,8 +32,9 @@ namespace Rath {
 			Camera& camera;
 			f32 cameraSpeed = 20.0f;
 			f64 previousX = 0.0f, previousY = 0.0f;
+			f32 smoothX = 0.0f, smoothY = 0.0f;
 			f64 xPos = 0.0f, yPos = 0.0f;
-
+			f32 smoothFactor = 0.3f;
 			// Accumulates the WASD movement per check 
 			// to normalize and update camera at the end;
 			enginemath::Vec3 movementCollector;

@@ -46,7 +46,15 @@ void Rath::CameraController::checkMouse() {
 	f32 dX = static_cast<f32>(xPos - previousX);
 	f32 dY = static_cast<f32>(yPos - previousY);
 
-	camera.rotate(dX, dY);
+	// Lerp to smooth cursor
+	// Gives the camera a fraction of the mouse movement every frame where the
+	// rest carry over into the next frame.
+	// Example: a flick from 2 corners is gradually given to the camera rotate instead of all
+	// at once, giving a smoother effect
+	smoothX = smoothX + (dX - smoothX) * smoothFactor;
+	smoothY = smoothY + (dY - smoothY) * smoothFactor;
+
+	camera.rotate(smoothX, smoothY);
 
 	previousX = xPos;
 	previousY = yPos;
