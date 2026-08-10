@@ -13,5 +13,5 @@ layout (push_constant) uniform Push {
 } PushConstants;
 
 void main() {
-    outColor = vec4(PushConstants.color * fragColor * texture(texSampler, fragTexCoord).rgb, 1.0);
+    outColor = vec4(0.5 * PushConstants.color * fragColor * texture(texSampler, fragTexCoord).rgb, 1.0);
 }
