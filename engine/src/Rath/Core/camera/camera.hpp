@@ -49,5 +49,6 @@ namespace Rath {
 
 			f32 deltaTime;
 			f32 elapsedTime;
+			f32 rotateSpeed = 0.005f;
 	};
 } // namespace Rath

@@ -12,7 +12,7 @@ namespace Rath {
 	// Push constant struct (move later)
 	struct MeshPushConstant {
 		enginemath::Mat4 model;
-		enginemath::Vec3 color;
+		alignas(16) enginemath::Vec3 color;
 	};
 
 	// Vertex struct: holds info about pos, color, texCoords

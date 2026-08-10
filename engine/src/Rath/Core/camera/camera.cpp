@@ -46,7 +46,10 @@ enginemath::Mat4 Rath::Camera::getProj() const {
 }
 
 void Rath::Camera::rotate(f32 dYaw, f32 dPitch) {
-	yaw += dYaw;
+	yaw += rotateSpeed * dYaw;
+	// GLFW's cursor origin is at top left -> going down means +Y so reverse this
+	pitch -= rotateSpeed * dPitch;
+
 	// To wrap around the yaw (left/right turning) so it doesn't get super large
 	// while keeping the same values
 	if (yaw >= 2 * enginemath::PI) {
@@ -57,7 +60,8 @@ void Rath::Camera::rotate(f32 dYaw, f32 dPitch) {
 	}
 
 	// Clamp pitch (looking up and down) 
-	pitch = std::clamp(pitch + dPitch, enginemath::toRad(-89.0f), enginemath::toRad(89.0f));
+	pitch = std::clamp(pitch, enginemath::toRad(-89.0f), enginemath::toRad(89.0f));
+
 }
 
 void Rath::Camera::move(enginemath::Vec3 delta) {

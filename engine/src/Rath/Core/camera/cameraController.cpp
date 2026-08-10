@@ -1,9 +1,14 @@
 #include "cameraController.hpp"
 #include <GLFW/glfw3.h>
 
-Rath::CameraController::CameraController(Input& _input, Camera& _camera) : 
-	input(_input), camera(_camera) {
-
+Rath::CameraController::CameraController(Window& _window, Input& _input, Camera& _camera) :
+	input(_input), camera(_camera), window(_window) {
+	glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	
+	if (glfwRawMouseMotionSupported()) {
+		glfwSetInputMode(window.getWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+	}
+	glfwGetCursorPos(window.getWindow(), &previousX, &previousY);
 }
 
 Rath::CameraController::~CameraController() {
@@ -33,6 +38,18 @@ void Rath::CameraController::checkCameraMovement() {
 	if (!movementCollector.basicallyZero()) {
 		movementCollector.normalize();
 	}
+}
+
+void Rath::CameraController::checkMouse() {
+	glfwGetCursorPos(window.getWindow(), &xPos, &yPos);
+
+	f32 dX = static_cast<f32>(xPos - previousX);
+	f32 dY = static_cast<f32>(yPos - previousY);
+
+	camera.rotate(dX, dY);
+
+	previousX = xPos;
+	previousY = yPos;
 }
 
 void Rath::CameraController::updateCamera() {

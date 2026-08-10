@@ -8,7 +8,7 @@ Rath::Application::Application(u32 width, u32 height,
 	const char* title) : 
 	window(width, height, title),
 	input(window), camera(enginemath::Vec3(0.0f, 0.5f, 4.0f), width / (f32)height), 
-	cameraController(input, camera),
+	cameraController(window, input, camera),
 	renderer(std::make_unique<Renderer>(window, camera)) 
 {
 
@@ -43,6 +43,7 @@ void Rath::Application::mainLoop() {
 		window.pollEvents();
 		// Accumulate controls before updating camera
 		cameraController.checkCameraMovement();
+		cameraController.checkMouse();
 		cameraController.updateCamera();
 		renderer->drawFrame();
 	}
