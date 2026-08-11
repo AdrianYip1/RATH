@@ -29,17 +29,14 @@ namespace Rath {
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
 
-			// Returns descriptorSetLayout
-			VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; };
+			// Returns descriptorSetLayouts
+			VkDescriptorSetLayout getUBOSetLayout() const { return uboSetLayout; };
+			VkDescriptorSetLayout getSamplerLayout() const { return samplerSetLayout; };
+			VkDescriptorSetLayout getComputeSetLayout() const { return computeSetLayout; };
 
 			// Returns descriptorSets at frame
 			VkDescriptorSet getDescriptorSet(u32 frame) const { return descriptorSets[frame]; };
-		
-			// Returns computeDescriptorSetLayout
-			VkDescriptorSetLayout getComputeDescriptorSetLayout() const { return computeDescriptorSetLayout; };
 
-			// Returns computeDescriptorSets at frame
-			VkDescriptorSet getComputeDescriptorSet(u32 frame) const { return computeDescriptorSets[frame]; };
 
 		private:
 			Device& device;
@@ -47,16 +44,12 @@ namespace Rath {
 			UniformBuffer& uniform;
 			Storage& storage;
 
-			VkDescriptorSetLayout descriptorSetLayout;
+			VkDescriptorSetLayout uboSetLayout = VK_NULL_HANDLE;
+			VkDescriptorSetLayout samplerSetLayout = VK_NULL_HANDLE;
+			VkDescriptorSetLayout computeSetLayout = VK_NULL_HANDLE;
+
 			VkDescriptorPool descriptorPool;
 			std::vector<VkDescriptorSet> descriptorSets;
-
-			VkDescriptorSetLayout computeDescriptorSetLayout;
-			std::vector<VkDescriptorSet> computeDescriptorSets;
-
-			// Creates the shape of a descriptor set: what type sits at each binding
-			// number and which shader stages can see it
-			void createDescriptorSetLayout();
 
 			// Creates the pool the sets are allocated from, poolSizes determines
 			// how many descriptors of each type exist
@@ -64,11 +57,9 @@ namespace Rath {
 
 			// Allocates a set per frame in flight, then writes the uniform buffer
 			// and the texture view + sampler into them with vkUpdateDescriptorSets
-			void createDescriptorSets();
+			void createDescriptorSets(R_DESCRIPTOR_TYPE type, VkDescriptorSetLayout descriptorSetLayout);
 
-			void createComputeDescriptorSetLayout();
-
-			void createComputeDescriptorSets();
+			VkDescriptorSetLayout createDescriptorSetLayout(R_DESCRIPTOR_TYPE type);
 			
 	};
 } // namespace Rath

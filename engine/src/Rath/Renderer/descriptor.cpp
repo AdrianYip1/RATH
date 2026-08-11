@@ -3,45 +3,74 @@
 // Descriptor constructor
 Rath::Descriptor::Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform, Storage& _storage) :
 	device(_device), texture(_texture), uniform(_uniform), storage(_storage) {
-	createDescriptorSetLayout();
-	createComputeDescriptorSetLayout();
-	createDescriptorPool();
-	createDescriptorSets();
-	createComputeDescriptorSets();
+
+	uboSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_UNIFORM);
+	samplerSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_SAMPLER);
+	computeSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_COMPUTE);
 }
 
 // Descriptor destructor
 Rath::Descriptor::~Descriptor() {
 	vkDestroyDescriptorPool(device.getDevice(), descriptorPool, nullptr);
-	vkDestroyDescriptorSetLayout(device.getDevice(), descriptorSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device.getDevice(), computeDescriptorSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device.getDevice(), uboSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device.getDevice(), samplerSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device.getDevice(), computeSetLayout, nullptr);
 }
 
-// Creates the descriptor set layout, which has the shape of a descriptor set and
-// their binding layout indices used in shaders (and determines which shaders can access it)
-void Rath::Descriptor::createDescriptorSetLayout() {
-	VkDescriptorSetLayoutBinding uboLayoutBinding{};
-	uboLayoutBinding.binding = 0;
-	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount = 1;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_TYPE type) {
+	std::array<VkDescriptorSetLayoutBinding, 2> layoutBinding{};
 
-	VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-	samplerLayoutBinding.binding = 1;
-	samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	samplerLayoutBinding.descriptorCount = 1;
-	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	samplerLayoutBinding.pImmutableSamplers = nullptr;
+	const u32 bindingCount = (type == R_DESCRIPTOR_TYPE::R_COMPUTE ? 2 : 1);
 
-	std::array<VkDescriptorSetLayoutBinding, 2> layoutBindings = { uboLayoutBinding, samplerLayoutBinding };
+	switch (type) {
+		case R_DESCRIPTOR_TYPE::R_SAMPLER: {
+			layoutBinding[0].binding = 0;
+			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			layoutBinding[0].descriptorCount = 1;
+			layoutBinding[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+			layoutBinding[0].pImmutableSamplers = nullptr;
+
+			break;
+		}
+
+		case R_DESCRIPTOR_TYPE::R_UNIFORM: {
+			layoutBinding[0].binding = 0;
+			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			layoutBinding[0].descriptorCount = 1;
+			layoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+			layoutBinding[0].pImmutableSamplers = nullptr;
+
+			break;
+		}
+		case R_DESCRIPTOR_TYPE::R_COMPUTE: {
+			layoutBinding[0].binding = 0;
+			layoutBinding[0].descriptorCount = 1;
+			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			layoutBinding[0].pImmutableSamplers = nullptr;
+			layoutBinding[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+			layoutBinding[1].binding = 1;
+			layoutBinding[1].descriptorCount = 1;
+			layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			layoutBinding[1].pImmutableSamplers = nullptr;
+			layoutBinding[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+			break;
+		}
+	}
+	
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.pBindings = layoutBindings.data();
-	layoutInfo.bindingCount = static_cast<u32>(layoutBindings.size());
-	
+	layoutInfo.pBindings = layoutBinding.data();
+	layoutInfo.bindingCount = bindingCount;
+
+	VkDescriptorSetLayout descriptorSetLayout;
+
 	if (vkCreateDescriptorSetLayout(device.getDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create descriptor set layout");
 	}
+
+	return descriptorSetLayout;
 }
 
 // Creates the descriptor pool for both the uniform and texture
@@ -76,7 +105,7 @@ void Rath::Descriptor::createDescriptorPool() {
 // Descriptor writes also specifies the binding layout of these
 // and vkUpdateDescriptorSets writes descriptorWrites into the set
 // the descriptorSet is then binded to the command buffer during rendering
-void Rath::Descriptor::createDescriptorSets() {
+void Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR_TYPE type, VkDescriptorSetLayout descriptorSetLayout) {
 	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
 
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -91,126 +120,79 @@ void Rath::Descriptor::createDescriptorSets() {
 	}
 
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = uniform.getUniformBuffer(i);
-		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(UniformBufferObject);
-
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = texture.getTextureImageView();
-		imageInfo.sampler = texture.getSampler();
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
-		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[0].dstSet = descriptorSets[i];
-		descriptorWrites[0].dstBinding = 0;
-		descriptorWrites[0].dstArrayElement = 0;
-		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorWrites[0].descriptorCount = 1;
-		descriptorWrites[0].pBufferInfo = &bufferInfo;
+		switch (type) {
+			case R_DESCRIPTOR_TYPE::R_UNIFORM: {
+				VkDescriptorBufferInfo bufferInfo{};
+				bufferInfo.buffer = uniform.getUniformBuffer(i);
+				bufferInfo.offset = 0;
+				bufferInfo.range = sizeof(UniformBufferObject);
 
-		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[1].dstSet = descriptorSets[i];
-		descriptorWrites[1].dstBinding = 1;
-		descriptorWrites[1].dstArrayElement = 0;
-		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[1].descriptorCount = 1;
-		descriptorWrites[1].pImageInfo = &imageInfo;
+				descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[0].dstSet = descriptorSets[i];
+				descriptorWrites[0].dstBinding = 0;
+				descriptorWrites[0].dstArrayElement = 0;
+				descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				descriptorWrites[0].descriptorCount = 1;
+				descriptorWrites[0].pBufferInfo = &bufferInfo;
 
-		vkUpdateDescriptorSets(device.getDevice(), static_cast<u32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-	}
-}
 
-void Rath::Descriptor::createComputeDescriptorSetLayout() {
-	std::array<VkDescriptorSetLayoutBinding, 3> layoutBindings{};
-	layoutBindings[0].binding = 0;
-	layoutBindings[0].descriptorCount = 1;
-	layoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	layoutBindings[0].pImmutableSamplers = nullptr;
-	layoutBindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+				vkUpdateDescriptorSets(device.getDevice(), 1, descriptorWrites.data(), 0, nullptr);
+				break;
+			}
 
-	// 2 layout bindings for shader storage buffer objects:
-	// 1 to read and 1 to write
-	layoutBindings[1].binding = 1;
-	layoutBindings[1].descriptorCount = 1;
-	layoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	layoutBindings[1].pImmutableSamplers = nullptr;
-	layoutBindings[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+			case R_DESCRIPTOR_TYPE::R_SAMPLER: {
+				VkDescriptorImageInfo imageInfo{};
+				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				imageInfo.imageView = texture.getTextureImageView();
+				imageInfo.sampler = texture.getSampler();
 
-	layoutBindings[2].binding = 2;
-	layoutBindings[2].descriptorCount = 1;
-	layoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	layoutBindings[2].pImmutableSamplers = nullptr;
-	layoutBindings[2].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+				descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[0].dstSet = descriptorSets[i];
+				descriptorWrites[0].dstBinding = 0;
+				descriptorWrites[0].dstArrayElement = 0;
+				descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				descriptorWrites[0].descriptorCount = 1;
+				descriptorWrites[0].pImageInfo = &imageInfo;
 
-	VkDescriptorSetLayoutCreateInfo layoutInfo{};
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<u32>(layoutBindings.size());
-	layoutInfo.pBindings = layoutBindings.data();
 
-	if (vkCreateDescriptorSetLayout(device.getDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to create compute descriptor set layout");
-	}
-}
+				vkUpdateDescriptorSets(device.getDevice(), 1, descriptorWrites.data(), 0, nullptr);
+				break;
+			}
 
-void Rath::Descriptor::createComputeDescriptorSets() {
-	std::vector<VkDescriptorSetLayout> layout(MAX_FRAMES_IN_FLIGHT, computeDescriptorSetLayout);
+			case R_DESCRIPTOR_TYPE::R_COMPUTE: {
+				VkDescriptorBufferInfo storageBufferInfoLastFrame{};
+				storageBufferInfoLastFrame.buffer = storage.getStorageBuffer((i - 1) % MAX_FRAMES_IN_FLIGHT);
+				storageBufferInfoLastFrame.offset = 0;
+				storageBufferInfoLastFrame.range = sizeof(Particle) * PARTICLE_COUNT;
 
-	VkDescriptorSetAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	allocInfo.descriptorPool = descriptorPool;
-	allocInfo.descriptorSetCount = static_cast<u32>(layout.size());
-	allocInfo.pSetLayouts = layout.data();
+				VkDescriptorBufferInfo storageBufferInfoCurrentFrame{};
+				storageBufferInfoCurrentFrame.buffer = storage.getStorageBuffer(i);
+				storageBufferInfoCurrentFrame.offset = 0;
+				storageBufferInfoCurrentFrame.range = sizeof(Particle) * PARTICLE_COUNT;
 
-	computeDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-	if (vkAllocateDescriptorSets(device.getDevice(), &allocInfo, computeDescriptorSets.data()) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to allocate compute descriptor set");
-	}
+				descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+				descriptorWrites[0].dstSet = descriptorSets[i];
+				descriptorWrites[0].dstBinding = 0;
+				descriptorWrites[0].dstArrayElement = 0;
+				descriptorWrites[0].descriptorCount = 1;
+				descriptorWrites[0].pBufferInfo = &storageBufferInfoLastFrame;
 
-	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+				descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+				descriptorWrites[1].dstSet = descriptorSets[i];
+				descriptorWrites[1].dstBinding = 1;
+				descriptorWrites[1].dstArrayElement = 0;
+				descriptorWrites[1].descriptorCount = 1;
+				descriptorWrites[1].pBufferInfo = &storageBufferInfoCurrentFrame;
 
-		VkDescriptorBufferInfo uniformBufferInfo{};
-		uniformBufferInfo.buffer = uniform.getUniformBuffer(i);
-		uniformBufferInfo.offset = 0;
-		uniformBufferInfo.range = sizeof(UniformBufferObject);
 
-		VkDescriptorBufferInfo storageBufferInfoLastFrame{};
-		storageBufferInfoLastFrame.buffer = storage.getStorageBuffer((i - 1) % MAX_FRAMES_IN_FLIGHT);
-		storageBufferInfoLastFrame.offset = 0;
-		storageBufferInfoLastFrame.range = sizeof(Particle) * PARTICLE_COUNT;
-
-		VkDescriptorBufferInfo storageBufferInfoCurrentFrame{};
-		storageBufferInfoCurrentFrame.buffer = storage.getStorageBuffer(i);
-		storageBufferInfoCurrentFrame.offset = 0;
-		storageBufferInfoCurrentFrame.range = sizeof(Particle) * PARTICLE_COUNT;
-
-		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorWrites[0].dstSet = computeDescriptorSets[i];
-		descriptorWrites[0].dstBinding = 0;
-		descriptorWrites[0].dstArrayElement = 0;
-		descriptorWrites[0].descriptorCount = 1;
-		descriptorWrites[0].pBufferInfo = &uniformBufferInfo;
-
-		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[1].dstSet = computeDescriptorSets[i];
-		descriptorWrites[1].dstBinding = 1;
-		descriptorWrites[1].dstArrayElement = 0;
-		descriptorWrites[1].descriptorCount = 1;
-		descriptorWrites[1].pBufferInfo = &storageBufferInfoLastFrame;
-
-		descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[2].dstSet = computeDescriptorSets[i];
-		descriptorWrites[2].dstBinding = 2;
-		descriptorWrites[2].dstArrayElement = 0;
-		descriptorWrites[2].descriptorCount = 1;
-		descriptorWrites[2].pBufferInfo = &storageBufferInfoCurrentFrame;
-
-		vkUpdateDescriptorSets(device.getDevice(), static_cast<u32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+				vkUpdateDescriptorSets(device.getDevice(), 2, descriptorWrites.data(), 0, nullptr);
+				break;
+			}
+		}
 	}
 }
