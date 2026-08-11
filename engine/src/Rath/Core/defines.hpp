@@ -39,4 +39,13 @@ namespace Rath {
 
 	// Placeholder for push constants -> drawing multiple objects 
 	const u32 NUMBER_OF_ROOMS = 4;
+
+	// Specify the type of descriptor layout is being passed
+	// into createDescriptorSetLayout()
+	enum class R_DESCRIPTOR_TYPE {
+		R_UNIFORM,
+		R_SAMPLER,
+		R_COMPUTE
+	};
+
 } // namespace Rath
