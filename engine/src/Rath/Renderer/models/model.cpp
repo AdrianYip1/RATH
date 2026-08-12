@@ -25,6 +25,8 @@ bool Rath::Model::rCreateModel(Device& _device, Buffer& _buffer,
 	_model->buffer = &_buffer;
 	_model->modelPath = info.modelPath;
 	_model->material = info.material;
+	_model->pipeline = info.pipeline;
+	_model->pipelineLayout = info.pipelineLayout;
 
 	_model->loadModel();
 	_model->createVertexBuffer();
@@ -156,6 +158,9 @@ void Rath::Model::draw(VkCommandBuffer commandBuffer) {
 // Set 2: per object
 void Rath::Model::bindDescriptors(VkCommandBuffer commandBuffer) {
 	VkDescriptorSet set = material->getDescriptorSet();
-	VkPipelineLayout layout = material->getPipelineLayout();
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 1, 1, &set, 0, nullptr);
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 1, 1, &set, 0, nullptr);
+}
+
+void Rath::Model::bindPipeline(VkCommandBuffer commandBuffer) {
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 }

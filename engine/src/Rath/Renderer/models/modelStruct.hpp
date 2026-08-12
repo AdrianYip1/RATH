@@ -22,6 +22,11 @@ namespace Rath {
 	// The expanding model struct for RATH
 	// The create info describes the mesh asset, no placements etc
 	struct R_ModelCreateInfo {
+		// In future for material to select how it is drawn,
+		// the field needs VkPipeline and VkPipelineLayout instead
+		//Pipeline* pipeline = nullptr;
+		VkPipeline pipeline = VK_NULL_HANDLE;
+		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		std::string modelPath;
 		R_Material* material = nullptr;
 	};

@@ -17,7 +17,7 @@ namespace Rath {
 	const std::string TEXTURE_PATH = "../../../../engine/textures/viking_room.png";
 
 	const std::string MODEL2_PATH = "../../../../engine/models/donut2.obj";
-	const std::string TEXTURE2_PATH = "../../../../engine/textures/viking_room.png";
+	const std::string TEXTURE2_PATH = "../../../../engine/textures/texture.jpg";
 	
 	// The amount of frames that can be processed at the same time
 	const int MAX_FRAMES_IN_FLIGHT = 2;

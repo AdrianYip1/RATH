@@ -245,7 +245,7 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getGraphicsPipeline());
+	//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getGraphicsPipeline());
 
 	VkViewport viewport{};
 	viewport.x = 0.0f;
@@ -267,7 +267,8 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 							0, 1, &set, 0, nullptr);
 
 	rModel.bind(commandBuffer);
-	
+	rModel.bindPipeline(commandBuffer);
+
 	// per material bind
 	rModel.bindDescriptors(commandBuffer);
 
@@ -284,9 +285,8 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	}
 
 	cupModel.bind(commandBuffer);
-
-	//cupModel.bindDescriptors(commandBuffer, pipeline.getPipelineLayout());
-
+	cupModel.bindPipeline(commandBuffer);
+	cupModel.bindDescriptors(commandBuffer);
 	cupModel.draw(commandBuffer);
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
@@ -333,8 +333,6 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 
 void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, Model* model) {
 	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
-	rMaterialCreateInfo.pipeline = pipeline.getGraphicsPipeline();
-	rMaterialCreateInfo.pipelineLayout = pipeline.getPipelineLayout();
 	rMaterialCreateInfo.texturePath = texturePath;
 
 	if (!R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material)) {
@@ -342,6 +340,8 @@ void Rath::Renderer::setUpModel(const std::string modelPath, const std::string t
 	}
 
 	R_ModelCreateInfo rModelInfo{};
+	rModelInfo.pipeline = pipeline.getGraphicsPipeline();
+	rModelInfo.pipelineLayout = pipeline.getPipelineLayout();
 	rModelInfo.material = material;
 	rModelInfo.modelPath = modelPath;
 
