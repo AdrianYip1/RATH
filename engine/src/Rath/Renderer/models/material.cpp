@@ -18,7 +18,9 @@ bool Rath::R_Material::rCreateMaterial(Device& _device, Buffer& _buffer,
 	_material->buffer = &_buffer;
 	_material->descriptor = &_descriptor;
 	_material->image = &_image;
+	//_material->pipeline = materialCreateInfo.pipeline;
 	_material->pipeline = materialCreateInfo.pipeline;
+	_material->pipelineLayout = materialCreateInfo.pipelineLayout;
 	_material->texture = std::make_unique<Texture>(_device, _image, _buffer, materialCreateInfo.texturePath);
 	
 

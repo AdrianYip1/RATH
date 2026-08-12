@@ -30,7 +30,7 @@ namespace Rath {
 
 			void bind(VkCommandBuffer commandBuffer);
 			void draw(VkCommandBuffer commandBuffer);
-			void bindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout layout);
+			void bindDescriptors(VkCommandBuffer commandBuffer);
 
 
 		private:
@@ -50,6 +50,7 @@ namespace Rath {
 
 			// Model stores the material
 			R_Material* material = nullptr;
+			
 
 			// Uses a staging buffer to copy vertices into the device local vertexBuffer,
 			// staging buffer is destroyed after

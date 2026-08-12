@@ -154,7 +154,8 @@ void Rath::Model::draw(VkCommandBuffer commandBuffer) {
 // Set 0: per frame
 // Set 1: per material (shared by every object using this material)
 // Set 2: per object
-void Rath::Model::bindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout layout) {
+void Rath::Model::bindDescriptors(VkCommandBuffer commandBuffer) {
 	VkDescriptorSet set = material->getDescriptorSet();
+	VkPipelineLayout layout = material->getPipelineLayout();
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 1, 1, &set, 0, nullptr);
 }

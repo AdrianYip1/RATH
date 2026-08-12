@@ -29,7 +29,9 @@ namespace Rath{
 	struct R_ModelMaterialCreateInfo {
 		// In future for material to select how it is drawn,
 		// the field needs VkPipeline and VkPipelineLayout instead
-		Pipeline* pipeline = nullptr;
+		//Pipeline* pipeline = nullptr;
+		VkPipeline pipeline = VK_NULL_HANDLE;
+		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		std::string texturePath;
 	};
 
@@ -46,13 +48,15 @@ namespace Rath{
 										R_Material* _material);
 
 			VkDescriptorSet getDescriptorSet() const { return descriptorSet; }
-
+			VkPipelineLayout getPipelineLayout() const { return pipelineLayout; };
 		private:
 			Device* device = nullptr;
 			Buffer* buffer = nullptr;
 			Descriptor* descriptor = nullptr;
 			Image* image = nullptr;
-			Pipeline* pipeline = nullptr;
+			//Pipeline* pipeline = nullptr;
+			VkPipeline pipeline;
+			VkPipelineLayout pipelineLayout;
 			std::unique_ptr<Texture> texture;
 			VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 			VkDescriptorPool materialDescriptorPool = VK_NULL_HANDLE;

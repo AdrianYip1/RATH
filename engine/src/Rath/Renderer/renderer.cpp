@@ -268,7 +268,8 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 
 	rModel.bind(commandBuffer);
 	
-	rModel.bindDescriptors(commandBuffer, pipeline.getPipelineLayout());
+	// per material bind
+	rModel.bindDescriptors(commandBuffer);
 
 	for (size i = 0; i < NUMBER_OF_ROOMS; i++) {
 		// A * B * v
@@ -284,9 +285,14 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 
 	cupModel.bind(commandBuffer);
 
+	//cupModel.bindDescriptors(commandBuffer, pipeline.getPipelineLayout());
+
 	cupModel.draw(commandBuffer);
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
+	VkDescriptorSet particleSet = descriptor.getUBOSet(currentFrame);
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipelineLayout(),
+		0, 1, &particleSet, 0, nullptr);
 	VkDeviceSize offsets[] = { 0 };
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipeline());
@@ -327,7 +333,8 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 
 void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, Model* model) {
 	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
-	rMaterialCreateInfo.pipeline = &pipeline;
+	rMaterialCreateInfo.pipeline = pipeline.getGraphicsPipeline();
+	rMaterialCreateInfo.pipelineLayout = pipeline.getPipelineLayout();
 	rMaterialCreateInfo.texturePath = texturePath;
 
 	if (!R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material)) {
