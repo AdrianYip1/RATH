@@ -1,5 +1,3 @@
-find_package(Vulkan REQUIRED)
-
 # auto compile shaders
 set(SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
 file(GLOB SHADER_SOURCES
@@ -40,13 +38,16 @@ add_library(rath_engine STATIC
      "src/Rath/Platform/input.cpp" 
      "src/Rath/Core/camera/cameraController.cpp" 
      "src/Rath/Core/camera/camera.cpp"
-     "src/Rath/Renderer/models/material.cpp")
+     "src/Rath/Renderer/models/material.cpp" 
+     "src/Rath/Renderer/ui/ui.cpp")
+
 
 target_include_directories(rath_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(rath_engine
     PUBLIC  enginemath::enginemath 
     PRIVATE glfw Vulkan::Vulkan
+    PRIVATE imgui
 )
 
 add_dependencies(rath_engine shaders)

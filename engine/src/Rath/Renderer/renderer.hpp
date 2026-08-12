@@ -22,6 +22,7 @@
 #include "Rath/Core/camera/camera.hpp"
 #include "models/material.hpp"
 #include "models/modelStruct.hpp"
+#include "ui/ui.hpp"
 
 // std
 #include <stdexcept>
@@ -61,6 +62,7 @@ namespace Rath {
 			Storage storage;
 			Descriptor descriptor;
 			Pipeline pipeline;
+			UI ui;
 
 			// RATH members
 			R_Material rMaterial;

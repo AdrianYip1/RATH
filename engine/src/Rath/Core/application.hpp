@@ -16,6 +16,7 @@ namespace Rath {
 	class Device;
 	class Buffer;
 	class Renderer;
+	class UI;
 
 	class Application {
 	public:

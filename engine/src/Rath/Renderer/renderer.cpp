@@ -16,7 +16,8 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	uniformBuffer(device, swapchain, buffer, camera),
 	storage(device, buffer),
 	descriptor(device, uniformBuffer, storage),
-	pipeline(device, swapchain, renderpass, descriptor) {
+	pipeline(device, swapchain, renderpass, descriptor),
+	ui(){
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 	camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
