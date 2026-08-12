@@ -2,21 +2,31 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "vendor/tiny_obj_loader.h"
 
-// Model constructor
-Rath::Model::Model(Device& _device, Buffer& _buffer, const std::string& path) :
-	device(_device), buffer(_buffer), modelPath(path) {
-	loadModel();
-	createVertexBuffer();
-	createIndexBuffer();
-}
-
 // Model destructor
 Rath::Model::~Model() {
-	vkDestroyBuffer(device.getDevice(), indexBuffer, nullptr);
-	vkFreeMemory(device.getDevice(), indexBufferMemory, nullptr);
+	if (device == nullptr) return;
 
-	vkDestroyBuffer(device.getDevice(), vertexBuffer, nullptr);
-	vkFreeMemory(device.getDevice(), vertexBufferMemory, nullptr);
+	vkDestroyBuffer(device->getDevice(), indexBuffer, nullptr);
+	vkFreeMemory(device->getDevice(), indexBufferMemory, nullptr);
+
+	vkDestroyBuffer(device->getDevice(), vertexBuffer, nullptr);
+	vkFreeMemory(device->getDevice(), vertexBufferMemory, nullptr);
+}
+
+bool Rath::Model::rCreateModel(Device& _device, Buffer& _buffer,
+				  const R_ModelCreateInfo& info, Model* _model) {
+	// Needs a value model to fill information about
+	if (_model == nullptr) return false;
+
+	_model->device = &_device;
+	_model->buffer = &_buffer;
+	_model->modelPath = info.modelPath;
+
+	_model->loadModel();
+	_model->createVertexBuffer();
+	_model->createIndexBuffer();
+	
+	return true;
 }
 
 void Rath::Model::loadModel() {
@@ -69,25 +79,25 @@ void Rath::Model::createVertexBuffer() {
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
-	buffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	buffer->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		stagingBuffer, stagingBufferMemory);
 
 	void* data;
-	vkMapMemory(device.getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+	vkMapMemory(device->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 	memcpy(data, vertices.data(), (size)bufferSize);
-	vkUnmapMemory(device.getDevice(), stagingBufferMemory);
+	vkUnmapMemory(device->getDevice(), stagingBufferMemory);
 
-	buffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+	buffer->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		vertexBuffer, vertexBufferMemory);
 
-	buffer.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+	buffer->copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-	vkDestroyBuffer(device.getDevice(), stagingBuffer, nullptr);
-	vkFreeMemory(device.getDevice(), stagingBufferMemory, nullptr);
+	vkDestroyBuffer(device->getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(device->getDevice(), stagingBufferMemory, nullptr);
 }
 
 // Wrapper for creating the index buffer
@@ -99,24 +109,24 @@ void Rath::Model::createIndexBuffer() {
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
-	buffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	buffer->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
 		stagingBuffer, stagingBufferMemory);
 
 	void* data;
-	vkMapMemory(device.getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+	vkMapMemory(device->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 	memcpy(data, indices.data(), (size)bufferSize);
-	vkUnmapMemory(device.getDevice(), stagingBufferMemory);
+	vkUnmapMemory(device->getDevice(), stagingBufferMemory);
 
-	buffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+	buffer->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
 		VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		indexBuffer, indexBufferMemory);
-	buffer.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+	buffer->copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
-	vkDestroyBuffer(device.getDevice(), stagingBuffer, nullptr);
-	vkFreeMemory(device.getDevice(), stagingBufferMemory, nullptr);
+	vkDestroyBuffer(device->getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(device->getDevice(), stagingBufferMemory, nullptr);
 
 }
 

@@ -15,11 +15,12 @@
 #include <vector>
 #include <cstring>
 #include <array>
+#include <string>
 
 namespace Rath {
 	class Texture {
 		public:
-			Texture(Device& _device, Image& _image, Buffer& _buffer);
+			Texture(Device& _device, Image& _image, Buffer& _buffer, const std::string texturePath);
 			~Texture();
 			Texture(const Texture& other) = delete;
 			Texture& operator=(const Texture& other) = delete;
@@ -44,7 +45,7 @@ namespace Rath {
 
 			// Loads the pixel data with stb_image, stages it into textureImage, and
 			// transitions the image to TRANSFER_DST_OPTIMAL then SHADER_READ_ONLY_OPTIMAL
-			void createTextureImage();
+			void createTextureImage(const std::string texturePath);
 
 			// Creates the view used to access textureImage
 			void createTextureImageView();

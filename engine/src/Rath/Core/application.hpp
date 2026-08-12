@@ -6,11 +6,15 @@
 #include "camera/camera.hpp"
 #include "camera/cameraController.hpp"
 
+
 // std
 #include <chrono>
 #include <memory>
 
 namespace Rath {
+	class Context;
+	class Device;
+	class Buffer;
 	class Renderer;
 
 	class Application {
@@ -28,6 +32,9 @@ namespace Rath {
 		Input input;
 		Camera camera;
 		CameraController cameraController;
+		std::unique_ptr<Context> context;
+		std::unique_ptr<Device> device;
+		std::unique_ptr<Buffer> buffer;
 
 		// Smart pointer used for renderer to automatically manage memory
 		std::unique_ptr<Renderer> renderer;

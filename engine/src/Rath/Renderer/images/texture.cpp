@@ -3,9 +3,9 @@
 #include "vendor/stb_image.h"
 
 // Texture constructor
-Rath::Texture::Texture(Device& _device, Image& _image, Buffer& _buffer) :
+Rath::Texture::Texture(Device& _device, Image& _image, Buffer& _buffer, const std::string texturePath) :
 	device(_device), image(_image), buffer(_buffer) {
-	createTextureImage();
+	createTextureImage(texturePath);
 	createTextureImageView();
 	createTextureSampler();
 }
@@ -24,9 +24,9 @@ Rath::Texture::~Texture() {
 // After the pixel data from the staging buffer is copied, the textureImage is transitioned 
 // again to LAYOUT_SHADER_READ_ONLY_OPTIMAL
 // Staging buffer + memory are destroyed and freed at the end
-void Rath::Texture::createTextureImage() {
+void Rath::Texture::createTextureImage(const std::string texturePath) {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth,
+	stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth,
 		&texHeight, &texChannels, STBI_rgb_alpha);
 
 	// The 1 is added for the original image's mip level

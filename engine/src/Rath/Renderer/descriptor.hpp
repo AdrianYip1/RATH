@@ -24,7 +24,7 @@
 namespace Rath {
 	class Descriptor {
 		public:
-			Descriptor(Device& _device, Texture& _texture, UniformBuffer& _uniform, Storage& _storage);
+			Descriptor(Device& _device, UniformBuffer& _uniform, Storage& _storage);
 			~Descriptor();
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
@@ -34,13 +34,16 @@ namespace Rath {
 			VkDescriptorSetLayout getSamplerLayout() const { return samplerSetLayout; };
 			VkDescriptorSetLayout getComputeSetLayout() const { return computeSetLayout; };
 
-			// Returns descriptorSets at frame
-			VkDescriptorSet getDescriptorSet(u32 frame) const { return descriptorSets[frame]; };
-
+			VkDescriptorSet getUBOSet(u32 frame) const { return uboSets[frame]; }
+			VkDescriptorSet getComputeSet(u32 frame) const { return computeSets[frame]; }
+			
+			// Allocates a set per frame in flight, then writes the uniform buffer
+			// and the texture view + sampler into them with vkUpdateDescriptorSets
+			std::vector<VkDescriptorSet> createDescriptorSets(R_DESCRIPTOR_TYPE type, VkDescriptorPool descriptorPool,
+				VkDescriptorSetLayout descriptorSetLayout, Texture* texture);
 
 		private:
 			Device& device;
-			Texture& texture;
 			UniformBuffer& uniform;
 			Storage& storage;
 
@@ -48,18 +51,16 @@ namespace Rath {
 			VkDescriptorSetLayout samplerSetLayout = VK_NULL_HANDLE;
 			VkDescriptorSetLayout computeSetLayout = VK_NULL_HANDLE;
 
-			VkDescriptorPool descriptorPool;
-			std::vector<VkDescriptorSet> descriptorSets;
-
-			// Creates the pool the sets are allocated from, poolSizes determines
-			// how many descriptors of each type exist
-			void createDescriptorPool();
-
-			// Allocates a set per frame in flight, then writes the uniform buffer
-			// and the texture view + sampler into them with vkUpdateDescriptorSets
-			void createDescriptorSets(R_DESCRIPTOR_TYPE type, VkDescriptorSetLayout descriptorSetLayout);
-
 			VkDescriptorSetLayout createDescriptorSetLayout(R_DESCRIPTOR_TYPE type);
-			
+
+			VkDescriptorPool uboPool = VK_NULL_HANDLE;
+			VkDescriptorPool computePool = VK_NULL_HANDLE;
+			std::vector<VkDescriptorSet> uboSets;
+			std::vector<VkDescriptorSet> computeSets;
 	};
+
+	// move somewhere else later
+	// General function for creating descriptor pools
+	VkDescriptorPool createDescriptorPool(Device& device, R_DESCRIPTOR_TYPE type, u32 setCount);
+
 } // namespace Rath

@@ -2,6 +2,9 @@
 
 // Rath files
 #include "Rath/Renderer/renderer.hpp"
+#include "Rath/Renderer/context.hpp"
+#include "Rath/Renderer/device.hpp"
+#include "Rath/Renderer/buffers/buffer.hpp"
 
 // Application Constructor
 Rath::Application::Application(u32 width, u32 height, 
@@ -9,7 +12,10 @@ Rath::Application::Application(u32 width, u32 height,
 	window(width, height, title),
 	input(window), camera(enginemath::Vec3(0.0f, 0.5f, 4.0f), width / (f32)height), 
 	cameraController(window, input, camera),
-	renderer(std::make_unique<Renderer>(window, camera)) 
+	context(std::make_unique<Context>(window)),
+	device(std::make_unique<Device>(*context)),
+	buffer(std::make_unique<Buffer>(*device)),
+	renderer(std::make_unique<Renderer>(window, camera, *context, *device, *buffer)) 
 {
 
 }

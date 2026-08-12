@@ -135,8 +135,9 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	// getDescriptorSetLayout returns by value so you can immediately
 	// get the address with &. Need to create setLayouts and write those bits into stack
 	// to have it in memory first beofre referencing with &
-	VkDescriptorSetLayout setLayouts = descriptor.getDescriptorSetLayout();
-	pipelineLayoutInfo.pSetLayouts = &setLayouts;
+	VkDescriptorSetLayout setLayouts[2] = { descriptor.getUBOSetLayout(), descriptor.getSamplerLayout() };
+	pipelineLayoutInfo.setLayoutCount = 2;
+	pipelineLayoutInfo.pSetLayouts = setLayouts;
 
 	// Push constants
 	VkPushConstantRange pushConstantRange{};
@@ -197,7 +198,7 @@ void Rath::Pipeline::createComputePipeline() {
 	layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layoutInfo.setLayoutCount = 1;
 
-	VkDescriptorSetLayout descriptorSetLayout = descriptor.getComputeDescriptorSetLayout();
+	VkDescriptorSetLayout descriptorSetLayout = descriptor.getComputeSetLayout();
 	layoutInfo.pSetLayouts = &descriptorSetLayout;
 
 	if (vkCreatePipelineLayout(device.getDevice(), &layoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS) {
@@ -328,7 +329,7 @@ void Rath::Pipeline::createParticlePipeline() {
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 1;
 
-	VkDescriptorSetLayout descriptorSet = descriptor.getDescriptorSetLayout();
+	VkDescriptorSetLayout descriptorSet = descriptor.getUBOSetLayout();
 	pipelineLayoutInfo.pSetLayouts = &descriptorSet;
 
 	// Uses the graphics descriptor set layout and can access both the ubo and sampler

@@ -6,6 +6,8 @@
 #include "../vertexData.hpp"
 #include "../device.hpp"
 #include "../buffers/buffer.hpp"
+#include "modelStruct.hpp"
+#include "material.hpp"
 
 // std
 #include <stdexcept>
@@ -18,28 +20,32 @@
 namespace Rath {
 	class Model {
 		public:
-			Model(Device& _device, Buffer& _buffer, const std::string& path);
+			Model() = default;
 			~Model();
 			Model(const Model& other) = delete;
 			Model& operator=(const Model& other) = delete;
+
+			static bool rCreateModel(Device& _device, Buffer& _buffer,
+									 const R_ModelCreateInfo& info, Model* _model);
 
 			void bind(VkCommandBuffer commandBuffer);
 			void draw(VkCommandBuffer commandBuffer);
 
 		private:
-			Device& device;
-			Buffer& buffer;
+			Device* device = nullptr;
+			Buffer* buffer = nullptr;
+
 			// Model that is being loaded
-			const std::string modelPath;
+			std::string modelPath;
 
 			std::unordered_map<Vertex, u32> uniqueVertices{};
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
 
-			VkBuffer vertexBuffer;
-			VkDeviceMemory vertexBufferMemory;
-			VkBuffer indexBuffer;
-			VkDeviceMemory indexBufferMemory;
+			VkBuffer vertexBuffer = VK_NULL_HANDLE;
+			VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;;
+			VkBuffer indexBuffer = VK_NULL_HANDLE;;
+			VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;;
 
 			// Uses a staging buffer to copy vertices into the device local vertexBuffer,
 			// staging buffer is destroyed after

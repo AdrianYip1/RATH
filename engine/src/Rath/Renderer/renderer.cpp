@@ -1,29 +1,30 @@
 #include "renderer.hpp"
 
 // Renderer constructor
-Rath::Renderer::Renderer(Window& _window, Camera& _camera) :
+Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context, 
+						 Device& _device, Buffer& _buffer) :
 	window(_window),
 	camera(_camera),
-	context(_window),
-	device(context),
+	context(_context),
+	device(_device),
+	buffer(_buffer),
 	swapchain(_window, context, device),
-	buffer(device),
-	room(device, buffer, MODEL_PATH),
-	cup(device, buffer, MODEL2_PATH),
 	image(device, buffer),
 	color(device, swapchain, image),
 	depth(device, swapchain, image),
 	renderpass(device, swapchain, depth),
-	texture(device, image, buffer),
 	uniformBuffer(device, swapchain, buffer, camera),
 	storage(device, buffer),
-	descriptor(device, texture, uniformBuffer, storage),
+	descriptor(device, uniformBuffer, storage),
 	pipeline(device, swapchain, renderpass, descriptor) {
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 	camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
 	createCommandBuffers();
 	createSyncObjects();
+	setUpModel(MODEL_PATH, TEXTURE_PATH);
+
+
 }
 
 // Renderer destructor
@@ -261,11 +262,16 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	scissor.extent = swapchain.getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	VkDescriptorSet set = descriptor.getDescriptorSet(currentFrame);
+	VkDescriptorSet set = descriptor.getUBOSet(currentFrame);
 
-	room.bind(commandBuffer);
+	rModel.bind(commandBuffer);
+	
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
+
+	VkDescriptorSet materialSet = rMaterial.getDescriptorSet();
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
+							1, 1, &materialSet, 0, nullptr);
 
 	for (size i = 0; i < NUMBER_OF_ROOMS; i++) {
 		// A * B * v
@@ -276,7 +282,7 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 									enginemath::Vec3(std::sin(i * enginemath::toRad(camera.getElapsedTime())), 1.0f, 1.0f)};
 
 		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
-		room.draw(commandBuffer);
+		rModel.draw(commandBuffer);
 	}
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
@@ -308,7 +314,7 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.getComputePipeline());
 
-	VkDescriptorSet set = descriptor.getComputeDescriptorSet(currentFrame);
+	VkDescriptorSet set = descriptor.getComputeSet(currentFrame);
 
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.getComputePipelineLayout(),
 							0, 1, &set, 0, nullptr);
@@ -318,4 +324,18 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to end command buffer");
 	}
+}
+
+void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath) {
+	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
+	rMaterialCreateInfo.pipeline = &pipeline;
+	rMaterialCreateInfo.texturePath = texturePath;
+
+	R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, &rMaterial);
+
+	R_ModelCreateInfo rModelInfo{};
+	rModelInfo.material = &rMaterial;
+	rModelInfo.modelPath = modelPath;
+
+	Model::rCreateModel(device, buffer, rModelInfo, &rModel);
 }

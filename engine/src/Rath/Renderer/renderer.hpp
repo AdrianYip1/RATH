@@ -20,6 +20,8 @@
 #include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
 #include "Rath/Core/camera/camera.hpp"
+#include "models/material.hpp"
+#include "models/modelStruct.hpp"
 
 // std
 #include <stdexcept>
@@ -30,7 +32,7 @@ namespace Rath {
 	class Renderer {
 		public:
 
-			Renderer(Window& _window, Camera& _camera);
+			Renderer(Window& _window, Camera& _camera, Context& _context, Device& _device, Buffer& _buffer);
 			~Renderer();
 			Renderer(const Renderer& other) = delete;
 			Renderer& operator=(const Renderer& other) = delete;
@@ -46,23 +48,24 @@ namespace Rath {
 		private:
 			Window& window;
 			Camera& camera;
-			Context context;
-			Device device;
+			Context& context;
+			Device& device;
+			Buffer& buffer;
+
 			Swapchain swapchain;
-			Buffer buffer;
-			Model room;
-			Model cup;
 			Image image;
 			Color color;
 			Depth depth;
 			Renderpass renderpass;
-			Texture texture;
 			UniformBuffer uniformBuffer;
 			Storage storage;
 			Descriptor descriptor;
 			Pipeline pipeline;
-			
 
+			// RATH members
+			R_Material rMaterial;
+			Model rModel;
+			
 			std::vector<VkCommandBuffer> commandBuffers;
 			std::vector<VkCommandBuffer> computeCommandBuffers;
 
@@ -90,5 +93,7 @@ namespace Rath {
 			
 			// Begins a command buffer (compute), binds compute descriptor set, then dispatches
 			void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
+			
+			void setUpModel(const std::string modelPath, const std::string texturePath);
 	};
 } // namespace Rath
