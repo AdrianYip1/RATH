@@ -22,7 +22,8 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
 	createCommandBuffers();
 	createSyncObjects();
-	setUpModel(MODEL_PATH, TEXTURE_PATH);
+	setUpModel(MODEL_PATH, TEXTURE_PATH, &rMaterial, &rModel);
+	setUpModel(MODEL2_PATH, TEXTURE2_PATH, &rCupMaterial, &cupModel);
 
 
 }
@@ -284,6 +285,10 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
 		rModel.draw(commandBuffer);
 	}
+
+	cupModel.bind(commandBuffer);
+
+	cupModel.draw(commandBuffer);
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
 	VkDeviceSize offsets[] = { 0 };
@@ -326,16 +331,16 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 	}
 }
 
-void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath) {
+void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, Model* model) {
 	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
 	rMaterialCreateInfo.pipeline = &pipeline;
 	rMaterialCreateInfo.texturePath = texturePath;
 
-	R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, &rMaterial);
+	R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material);
 
 	R_ModelCreateInfo rModelInfo{};
-	rModelInfo.material = &rMaterial;
+	rModelInfo.material = material;
 	rModelInfo.modelPath = modelPath;
 
-	Model::rCreateModel(device, buffer, rModelInfo, &rModel);
+	Model::rCreateModel(device, buffer, rModelInfo, model);
 }

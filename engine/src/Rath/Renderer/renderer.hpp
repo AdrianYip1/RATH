@@ -64,7 +64,9 @@ namespace Rath {
 
 			// RATH members
 			R_Material rMaterial;
+			R_Material rCupMaterial;
 			Model rModel;
+			Model cupModel;
 			
 			std::vector<VkCommandBuffer> commandBuffers;
 			std::vector<VkCommandBuffer> computeCommandBuffers;
@@ -94,6 +96,6 @@ namespace Rath {
 			// Begins a command buffer (compute), binds compute descriptor set, then dispatches
 			void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
 			
-			void setUpModel(const std::string modelPath, const std::string texturePath);
+			void setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, Model* model);
 	};
 } // namespace Rath
