@@ -2,6 +2,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "vendor/tiny_obj_loader.h"
 
+// std
+#include <unordered_map>
+
 // Model destructor
 Rath::Model::~Model() {
 	if (device == nullptr) return;
@@ -21,6 +24,7 @@ bool Rath::Model::rCreateModel(Device& _device, Buffer& _buffer,
 	_model->device = &_device;
 	_model->buffer = &_buffer;
 	_model->modelPath = info.modelPath;
+	_model->material = info.material;
 
 	_model->loadModel();
 	_model->createVertexBuffer();
@@ -40,6 +44,8 @@ void Rath::Model::loadModel() {
 		throw std::runtime_error(err);
 	}
 
+	std::unordered_map<Vertex, u32> uniqueVertices{};
+
 	// Combine all the shapes into a single model
 	for (const auto& shape : shapes) {
 		for (const auto& index : shape.mesh.indices) {
@@ -58,6 +64,7 @@ void Rath::Model::loadModel() {
 			};
 
 			vertex.color = { 1.0f, 1.0f, 1.0f };
+
 
 			if (uniqueVertices.count(vertex) == 0) {
 				// Key matches with the order the vertex was placed into vertices
@@ -141,4 +148,13 @@ void Rath::Model::bind(VkCommandBuffer commandBuffer) {
 
 void Rath::Model::draw(VkCommandBuffer commandBuffer) {
 	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indices.size()), 1, 0, 0, 0);
+}
+
+// Binds sets 1 and 2 later on
+// Set 0: per frame
+// Set 1: per material (shared by every object using this material)
+// Set 2: per object
+void Rath::Model::bindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout layout) {
+	VkDescriptorSet set = material->getDescriptorSet();
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 1, 1, &set, 0, nullptr);
 }

@@ -4,12 +4,13 @@
 #include "../descriptor.hpp"
 
 Rath::R_Material::~R_Material() {
+	if (device == nullptr) return;
 	vkDestroyDescriptorPool(device->getDevice(), materialDescriptorPool, nullptr);
 }
 
 bool Rath::R_Material::rCreateMaterial(Device& _device, Buffer& _buffer,
 									  Descriptor& _descriptor, Image& _image,
-									  R_ModelMaterialCreateInfo& materialCreateInfo,
+									  const R_ModelMaterialCreateInfo& materialCreateInfo,
 									  R_Material* _material) {
 	if (_material == nullptr) return false;
 

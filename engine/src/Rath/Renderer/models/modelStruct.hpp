@@ -23,7 +23,7 @@ namespace Rath {
 	// The create info describes the mesh asset, no placements etc
 	struct R_ModelCreateInfo {
 		std::string modelPath;
-		R_Material* material;
+		R_Material* material = nullptr;
 	};
 
 } // namespace Rath

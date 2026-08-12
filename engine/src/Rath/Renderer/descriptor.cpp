@@ -8,6 +8,7 @@ Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, Storage& 
 	samplerSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_SAMPLER);
 	computeSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_COMPUTE);
 
+	// REFACTOR: remove these and add them into material
 	uboPool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_UNIFORM, MAX_FRAMES_IN_FLIGHT);
 	computePool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_COMPUTE, MAX_FRAMES_IN_FLIGHT);
 
@@ -24,6 +25,7 @@ Rath::Descriptor::~Descriptor() {
 	vkDestroyDescriptorSetLayout(device.getDevice(), computeSetLayout, nullptr);
 }
 
+// Creates and returns a descriptor set layout depending on R_DESCRIPTOR_TYPE
 VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_TYPE type) {
 	std::array<VkDescriptorSetLayoutBinding, 3> layoutBinding{};
 
@@ -95,6 +97,7 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR_TYPE type, 
 	VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, Texture* texture) {
 
+	// Compute and uniform need a set per frame
 	const u32 setCount = (type == R_DESCRIPTOR_TYPE::R_SAMPLER ? 1 : MAX_FRAMES_IN_FLIGHT);
 
 	std::vector<VkDescriptorSetLayout> layouts(setCount, descriptorSetLayout);
@@ -105,6 +108,8 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 	allocInfo.descriptorSetCount = static_cast<u32>(setCount);
 	allocInfo.pSetLayouts = layouts.data();
 
+	// creates a vector of setCount size for the descriptor set
+	// which gets returned at the end after it is updated with the writes
 	std::vector<VkDescriptorSet> sets(setCount);
 	if (vkAllocateDescriptorSets(device.getDevice(), &allocInfo, sets.data()) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to allocate descriptor sets");
@@ -114,6 +119,7 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 
 		std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
 
+		// Chooses functionality based on the R_DESCRIPTOR_TYPE
 		switch (type) {
 			case R_DESCRIPTOR_TYPE::R_UNIFORM: {
 				VkDescriptorBufferInfo bufferInfo{};
@@ -128,7 +134,6 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				descriptorWrites[0].descriptorCount = 1;
 				descriptorWrites[0].pBufferInfo = &bufferInfo;
-
 
 				vkUpdateDescriptorSets(device.getDevice(), 1, descriptorWrites.data(), 0, nullptr);
 				break;
@@ -147,7 +152,6 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 				descriptorWrites[0].descriptorCount = 1;
 				descriptorWrites[0].pImageInfo = &imageInfo;
-
 
 				vkUpdateDescriptorSets(device.getDevice(), 1, descriptorWrites.data(), 0, nullptr);
 				break;
@@ -193,7 +197,6 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				descriptorWrites[2].descriptorCount = 1;
 				descriptorWrites[2].pBufferInfo = &storageBufferInfoCurrentFrame;
 
-
 				vkUpdateDescriptorSets(device.getDevice(), 3, descriptorWrites.data(), 0, nullptr);
 				break;
 			}
@@ -211,29 +214,29 @@ VkDescriptorPool Rath::createDescriptorPool(Device& device, R_DESCRIPTOR_TYPE ty
 	const u32 poolSizeCount = (type == R_DESCRIPTOR_TYPE::R_COMPUTE ? 2 : 1);
 
 	switch (type) {
-	case R_DESCRIPTOR_TYPE::R_SAMPLER: {
-		poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
+		case R_DESCRIPTOR_TYPE::R_SAMPLER: {
+			poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
 
-		break;
-	}
+			break;
+		}
 
-	case R_DESCRIPTOR_TYPE::R_UNIFORM: {
-		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
+		case R_DESCRIPTOR_TYPE::R_UNIFORM: {
+			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
 
-		break;
-	}
+			break;
+		}
 
-	case R_DESCRIPTOR_TYPE::R_COMPUTE: {
-		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
-		poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		// 2 storage buffers
-		poolSizes[1].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT) * 2;
+		case R_DESCRIPTOR_TYPE::R_COMPUTE: {
+			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
+			poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			// 2 storage buffers
+			poolSizes[1].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT) * 2;
 
-		break;
-	}
+			break;
+		}
 	}
 
 	VkDescriptorPoolCreateInfo poolInfo{};

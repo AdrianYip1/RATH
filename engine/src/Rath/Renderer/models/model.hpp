@@ -15,7 +15,7 @@
 #include <vector>
 #include <cstring>
 #include <array>
-#include <unordered_map>
+
 
 namespace Rath {
 	class Model {
@@ -30,6 +30,8 @@ namespace Rath {
 
 			void bind(VkCommandBuffer commandBuffer);
 			void draw(VkCommandBuffer commandBuffer);
+			void bindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout layout);
+
 
 		private:
 			Device* device = nullptr;
@@ -38,14 +40,16 @@ namespace Rath {
 			// Model that is being loaded
 			std::string modelPath;
 
-			std::unordered_map<Vertex, u32> uniqueVertices{};
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
 
 			VkBuffer vertexBuffer = VK_NULL_HANDLE;
-			VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;;
-			VkBuffer indexBuffer = VK_NULL_HANDLE;;
-			VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;;
+			VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
+			VkBuffer indexBuffer = VK_NULL_HANDLE;
+			VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
+
+			// Model stores the material
+			R_Material* material = nullptr;
 
 			// Uses a staging buffer to copy vertices into the device local vertexBuffer,
 			// staging buffer is destroyed after
@@ -56,5 +60,6 @@ namespace Rath {
 			void createIndexBuffer();
 
 			void loadModel();
+
 	};
 } // namespace Rath

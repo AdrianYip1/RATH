@@ -29,14 +29,27 @@ namespace Rath {
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
 
-			// Returns descriptorSetLayouts
+			// Returns uniform descriptor set layout
 			VkDescriptorSetLayout getUBOSetLayout() const { return uboSetLayout; };
+			// Returns sampler (texture) descriptor set layout
 			VkDescriptorSetLayout getSamplerLayout() const { return samplerSetLayout; };
+			// Returns compute descriptor set layout
 			VkDescriptorSetLayout getComputeSetLayout() const { return computeSetLayout; };
 
+			// Returns the uniform descriptor set at a specified frame 
+			// TODO/REFACTOR: move getUBOSet and getComputeSet out of descriptor
+			// and have the same behaviour as rMaterial
 			VkDescriptorSet getUBOSet(u32 frame) const { return uboSets[frame]; }
+			// Returns the compute descriptor set at a specified frame 
+			// TODO/REFACTOR: move getUBOSet and getComputeSet out of descriptor
+			// and have the same behaviour as rMaterial
 			VkDescriptorSet getComputeSet(u32 frame) const { return computeSets[frame]; }
 			
+			// R_DESCRIPTOR_TYPE determines what kind of descriptor set will be made
+			// Takes in the pool and setlayout (which work with the passed R_RESCRIPTOR_TYPE)
+			// Passes a pointer to texture object 
+			// TODO: remove unifrombuffer and storage as members and pass them as pointers
+			// aswell, nullptr as defaults
 			// Allocates a set per frame in flight, then writes the uniform buffer
 			// and the texture view + sampler into them with vkUpdateDescriptorSets
 			std::vector<VkDescriptorSet> createDescriptorSets(R_DESCRIPTOR_TYPE type, VkDescriptorPool descriptorPool,

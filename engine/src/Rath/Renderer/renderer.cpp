@@ -24,8 +24,6 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	createSyncObjects();
 	setUpModel(MODEL_PATH, TEXTURE_PATH, &rMaterial, &rModel);
 	setUpModel(MODEL2_PATH, TEXTURE2_PATH, &rCupMaterial, &cupModel);
-
-
 }
 
 // Renderer destructor
@@ -263,16 +261,14 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	scissor.extent = swapchain.getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+	// per frame bind (set 0)
 	VkDescriptorSet set = descriptor.getUBOSet(currentFrame);
-
-	rModel.bind(commandBuffer);
-	
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
 
-	VkDescriptorSet materialSet = rMaterial.getDescriptorSet();
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
-							1, 1, &materialSet, 0, nullptr);
+	rModel.bind(commandBuffer);
+	
+	rModel.bindDescriptors(commandBuffer, pipeline.getPipelineLayout());
 
 	for (size i = 0; i < NUMBER_OF_ROOMS; i++) {
 		// A * B * v
@@ -294,8 +290,6 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	VkDeviceSize offsets[] = { 0 };
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipeline());
-
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipelineLayout(), 0, 1, &set, 0, nullptr);
 
 	VkBuffer particleBuffers[] = { storage.getStorageBuffer(currentFrame) };
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, particleBuffers, offsets);
@@ -336,11 +330,15 @@ void Rath::Renderer::setUpModel(const std::string modelPath, const std::string t
 	rMaterialCreateInfo.pipeline = &pipeline;
 	rMaterialCreateInfo.texturePath = texturePath;
 
-	R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material);
+	if (!R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material)) {
+		throw std::runtime_error("Failed to create material for model");
+	}
 
 	R_ModelCreateInfo rModelInfo{};
 	rModelInfo.material = material;
 	rModelInfo.modelPath = modelPath;
 
-	Model::rCreateModel(device, buffer, rModelInfo, model);
+	if (!Model::rCreateModel(device, buffer, rModelInfo, model)) {
+		throw std::runtime_error("Failed to create model");
+	}
 }
