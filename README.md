@@ -17,7 +17,9 @@ world rendering and generation capabilities.
 
 ## Implemented
 
-- Camera class with WASD movement -> lookaround with mouse next
+- ImGui integration
+- Custom material and model objects (R_Material and R_Model) that are craeated with createInfo structs
+- Camera class with WASD movement + camera rotations with right mouse button held
 - Compute Shaders with particle simulation
 - Multisampling
 - Mipmaps
