@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 // Model destructor
-Rath::Model::~Model() {
+Rath::R_Model::~R_Model() {
 	if (device == nullptr) return;
 
 	vkDestroyBuffer(device->getDevice(), indexBuffer, nullptr);
@@ -16,8 +16,8 @@ Rath::Model::~Model() {
 	vkFreeMemory(device->getDevice(), vertexBufferMemory, nullptr);
 }
 
-bool Rath::Model::rCreateModel(Device& _device, Buffer& _buffer,
-				  const R_ModelCreateInfo& info, Model* _model) {
+bool Rath::R_Model::rCreateModel(Device& _device, Buffer& _buffer,
+				  const R_ModelCreateInfo& info, R_Model* _model) {
 	// Needs a value model to fill information about
 	if (_model == nullptr) return false;
 
@@ -35,7 +35,7 @@ bool Rath::Model::rCreateModel(Device& _device, Buffer& _buffer,
 	return true;
 }
 
-void Rath::Model::loadModel() {
+void Rath::R_Model::loadModel() {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -83,7 +83,7 @@ void Rath::Model::loadModel() {
 // Uses a staging buffer first before copying vertices data into the actual
 // vertexBuffer (which holds the GPU optimized memory) -> staging buffer is destroyed after
 // Both the staging and vertex buffers call the createBuffer method
-void Rath::Model::createVertexBuffer() {
+void Rath::R_Model::createVertexBuffer() {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 	VkBuffer stagingBuffer;
@@ -113,7 +113,7 @@ void Rath::Model::createVertexBuffer() {
 // Staging buffer used here before copying indices data into
 // indexBuffer (which holds the GPU optimized memory) -> staging buffer destroyed after
 // Both the staging and indices buffers call createBuffer method
-void Rath::Model::createIndexBuffer() {
+void Rath::R_Model::createIndexBuffer() {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
 	VkBuffer stagingBuffer;
@@ -139,7 +139,7 @@ void Rath::Model::createIndexBuffer() {
 
 }
 
-void Rath::Model::bind(VkCommandBuffer commandBuffer) {
+void Rath::R_Model::bind(VkCommandBuffer commandBuffer) {
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
 
@@ -148,7 +148,7 @@ void Rath::Model::bind(VkCommandBuffer commandBuffer) {
 
 }
 
-void Rath::Model::draw(VkCommandBuffer commandBuffer) {
+void Rath::R_Model::draw(VkCommandBuffer commandBuffer) {
 	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indices.size()), 1, 0, 0, 0);
 }
 
@@ -156,11 +156,11 @@ void Rath::Model::draw(VkCommandBuffer commandBuffer) {
 // Set 0: per frame
 // Set 1: per material (shared by every object using this material)
 // Set 2: per object
-void Rath::Model::bindDescriptors(VkCommandBuffer commandBuffer) {
+void Rath::R_Model::bindDescriptors(VkCommandBuffer commandBuffer) {
 	VkDescriptorSet set = material->getDescriptorSet();
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 1, 1, &set, 0, nullptr);
 }
 
-void Rath::Model::bindPipeline(VkCommandBuffer commandBuffer) {
+void Rath::R_Model::bindPipeline(VkCommandBuffer commandBuffer) {
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 }

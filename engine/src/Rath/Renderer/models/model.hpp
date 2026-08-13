@@ -18,15 +18,15 @@
 
 
 namespace Rath {
-	class Model {
+	class R_Model {
 		public:
-			Model() = default;
-			~Model();
-			Model(const Model& other) = delete;
-			Model& operator=(const Model& other) = delete;
+			R_Model() = default;
+			~R_Model();
+			R_Model(const R_Model& other) = delete;
+			R_Model& operator=(const R_Model& other) = delete;
 
 			static bool rCreateModel(Device& _device, Buffer& _buffer,
-									 const R_ModelCreateInfo& info, Model* _model);
+									 const R_ModelCreateInfo& info, R_Model* _model);
 
 			void bind(VkCommandBuffer commandBuffer);
 			void draw(VkCommandBuffer commandBuffer);

@@ -24,13 +24,15 @@
 #include <string>
 
 namespace Rath {
+	// Placeholder for push constants -> drawing multiple objects 
+	inline i32 NUMBER_OF_ROOMS = 4;
 	class UI {
 		public:
 			UI(Window& _window, Context& _context, Device& _device, 
 				Renderpass& _renderpass, Swapchain& _swapchain, Pipeline& _pipeline);
 			~UI();
 			UI(const UI& other) = delete;
-			UI& operator=(const UI& other);
+			UI& operator=(const UI& other) = delete;
 
 			void startFrame();
 			void drawUI();

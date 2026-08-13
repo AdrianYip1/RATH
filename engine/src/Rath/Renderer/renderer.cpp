@@ -336,7 +336,7 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 	}
 }
 
-void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, Model* model) {
+void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model) {
 	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
 	rMaterialCreateInfo.texturePath = texturePath;
 
@@ -350,7 +350,7 @@ void Rath::Renderer::setUpModel(const std::string modelPath, const std::string t
 	rModelInfo.material = material;
 	rModelInfo.modelPath = modelPath;
 
-	if (!Model::rCreateModel(device, buffer, rModelInfo, model)) {
+	if (!R_Model::rCreateModel(device, buffer, rModelInfo, model)) {
 		throw std::runtime_error("Failed to create model");
 	}
 }

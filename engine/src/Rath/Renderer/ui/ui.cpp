@@ -45,9 +45,9 @@ void Rath::UI::startFrame() {
 
 void Rath::UI::drawUI() {
 	// Creating a window called Hello, and append into it
-	ImGui::Begin("Hello");
+	ImGui::Begin("UI");
 
-	ImGui::Text("Placeholder Text");
+	ImGui::SliderInt("Number of rooms", &NUMBER_OF_ROOMS, 1, 5);
 	ImGui::End();
 	ImGui::Render();
 }
