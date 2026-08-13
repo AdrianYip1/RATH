@@ -17,7 +17,7 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	storage(device, buffer),
 	descriptor(device, uniformBuffer, storage),
 	pipeline(device, swapchain, renderpass, descriptor),
-	ui(){
+	ui(window, context, device, renderpass, swapchain, pipeline){
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
 	camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
@@ -301,6 +301,10 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	VkBuffer particleBuffers[] = { storage.getStorageBuffer(currentFrame) };
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, particleBuffers, offsets);
 	vkCmdDraw(commandBuffer, PARTICLE_COUNT, 1, 0, 0);
+
+	ui.startFrame();
+	ui.drawUI();
+	ui.draw(commandBuffer);
 
 	vkCmdEndRenderPass(commandBuffer);
 

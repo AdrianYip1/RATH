@@ -10,6 +10,12 @@
 
 // Rath files
 #include "Rath/Core/defines.hpp"
+#include "Rath/Platform/window.hpp"
+#include "../context.hpp"
+#include "../device.hpp"
+#include "../pipeline.hpp"
+#include "../swapchain.hpp"
+#include "../renderpass.hpp"
 
 // std
 #include <map>
@@ -20,12 +26,23 @@
 namespace Rath {
 	class UI {
 		public:
-			UI();
+			UI(Window& _window, Context& _context, Device& _device, 
+				Renderpass& _renderpass, Swapchain& _swapchain, Pipeline& _pipeline);
 			~UI();
 			UI(const UI& other) = delete;
 			UI& operator=(const UI& other);
 
+			void startFrame();
+			void drawUI();
+			void draw(VkCommandBuffer commandBuffer);
+
 		private:
+			Window& window;
+			Context& context;
+			Device& device;
+			Renderpass& renderpass;
+			Swapchain& swapchain;
+			Pipeline& pipeline;
 
 	};
 } // namespace Rath
