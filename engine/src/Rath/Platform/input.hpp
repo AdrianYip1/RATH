@@ -13,6 +13,7 @@ namespace Rath {
 			Input& operator=(const Input& other) = delete;
 
 			bool isKeyPressed(int key);
+			bool isMousePressed(int button);
 
 		private:
 			Window& window;

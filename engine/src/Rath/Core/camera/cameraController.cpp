@@ -3,7 +3,7 @@
 
 Rath::CameraController::CameraController(Window& _window, Input& _input, Camera& _camera) :
 	input(_input), camera(_camera), window(_window) {
-	glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	
 	if (glfwRawMouseMotionSupported()) {
 		glfwSetInputMode(window.getWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -43,18 +43,27 @@ void Rath::CameraController::checkCameraMovement() {
 void Rath::CameraController::checkMouse() {
 	glfwGetCursorPos(window.getWindow(), &xPos, &yPos);
 
-	f32 dX = static_cast<f32>(xPos - previousX);
-	f32 dY = static_cast<f32>(yPos - previousY);
+	if (input.isMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 
-	// Lerp to smooth cursor
-	// Gives the camera a fraction of the mouse movement every frame where the
-	// rest carry over into the next frame.
-	// Example: a flick from 2 corners is gradually given to the camera rotate instead of all
-	// at once, giving a smoother effect
-	smoothX = smoothX + (dX - smoothX) * smoothFactor;
-	smoothY = smoothY + (dY - smoothY) * smoothFactor;
+		f32 dX = static_cast<f32>(xPos - previousX);
+		f32 dY = static_cast<f32>(yPos - previousY);
 
-	camera.rotate(smoothX, smoothY);
+		// Lerp to smooth cursor
+		// Gives the camera a fraction of the mouse movement every frame where the
+		// rest carry over into the next frame.
+		// Example: a flick from 2 corners is gradually given to the camera rotate instead of all
+		// at once, giving a smoother effect
+		smoothX = smoothX + (dX - smoothX) * smoothFactor;
+		smoothY = smoothY + (dY - smoothY) * smoothFactor;
+
+		camera.rotate(smoothX, smoothY);
+
+	}
+	else {
+		smoothX = 0.0f;
+		smoothY = 0.0f;
+
+	}
 
 	previousX = xPos;
 	previousY = yPos;

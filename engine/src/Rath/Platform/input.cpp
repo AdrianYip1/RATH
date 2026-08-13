@@ -19,3 +19,6 @@ bool Rath::Input::isKeyPressed(int key) {
 	return glfwGetKey(window.getWindow(), key) == GLFW_PRESS;
 }
 
+bool Rath::Input::isMousePressed(int button) {
+	return glfwGetMouseButton(window.getWindow(), button) == GLFW_PRESS;
+}
