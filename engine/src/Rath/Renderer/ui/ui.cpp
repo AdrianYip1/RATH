@@ -1,5 +1,6 @@
 #include "ui.hpp"
 
+
 Rath::UI::UI(Window& _window, Context& _context, Device& _device, 
 	Renderpass& _renderpass, Swapchain& _swapchain, Pipeline& _pipeline) : 
 	window(_window), context(_context), device(_device), 
@@ -43,11 +44,13 @@ void Rath::UI::startFrame() {
 	ImGui::NewFrame();
 }
 
-void Rath::UI::drawUI() {
+void Rath::UI::drawUI(R_Scene& scene) {
 	// Creating a window called Hello, and append into it
 	ImGui::Begin("UI");
 
 	ImGui::SliderInt("Number of rooms", &NUMBER_OF_ROOMS, 1, 5);
+
+	ImGui::DragFloat3("Light position", &scene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
 	ImGui::End();
 	ImGui::Render();
 }

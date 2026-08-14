@@ -315,7 +315,7 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	vkCmdDraw(commandBuffer, PARTICLE_COUNT, 1, 0, 0);
 
 	ui.startFrame();
-	ui.drawUI();
+	ui.drawUI(rScene);
 	ui.draw(commandBuffer);
 
 	vkCmdEndRenderPass(commandBuffer);

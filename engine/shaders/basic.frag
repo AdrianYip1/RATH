@@ -27,12 +27,18 @@ layout (push_constant) uniform Push {
 } PushConstants;
 
 void main() {
+    vec3 diffuse = vec3(0.0);
+
     for (int i = 0; i < MAX_LIGHTS; i++) {
         // Light dir from mesh to the light source
         vec3 lightDir = normalize(lightUbo.lights[i].position - modelLocation);
         vec3 norm = normalize(fragNormal);
-        float NDiff = dot(norm, lightDir);
+        // NDiff = 1 means theta = 0 (directly above normal)
+        float NDiff = max(dot(norm, lightDir), 0.0);
+        diffuse += NDiff * lightUbo.lights[i].color;
     }
 
-    outColor = vec4(0.5 * PushConstants.color * fragColor * texture(texSampler, fragTexCoord).rgb, 1.0);
+    vec3 result = diffuse * PushConstants.color * texture(texSampler, fragTexCoord).rgb;
+
+    outColor = vec4(result, 1.0);
 }

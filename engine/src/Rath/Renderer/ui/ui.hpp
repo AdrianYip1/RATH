@@ -7,6 +7,7 @@
 // output (imgui's list of shapes into vulkan calls
 #include <imgui_impl_vulkan.h>
 #include <GLFW/glfw3.h>
+#include "enginemath/vec3.hpp"
 
 // Rath files
 #include "Rath/Core/defines.hpp"
@@ -16,6 +17,7 @@
 #include "../pipeline.hpp"
 #include "../swapchain.hpp"
 #include "../renderpass.hpp"
+#include "../scenes/scene.hpp"
 
 // std
 #include <map>
@@ -26,6 +28,8 @@
 namespace Rath {
 	// Placeholder for push constants -> drawing multiple objects 
 	inline i32 NUMBER_OF_ROOMS = 4;
+	inline enginemath::Vec3 position = enginemath::Vec3(0.0f);
+
 	class UI {
 		public:
 			UI(Window& _window, Context& _context, Device& _device, 
@@ -35,7 +39,7 @@ namespace Rath {
 			UI& operator=(const UI& other) = delete;
 
 			void startFrame();
-			void drawUI();
+			void drawUI(R_Scene& scene);
 			void draw(VkCommandBuffer commandBuffer);
 
 		private:
