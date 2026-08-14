@@ -25,6 +25,7 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	createSyncObjects();
 	setUpModel(MODEL_PATH, TEXTURE_PATH, &rMaterial, &rModel);
 	setUpModel(MODEL2_PATH, TEXTURE2_PATH, &rCupMaterial, &cupModel);
+	setUpScene();
 }
 
 // Renderer destructor
@@ -267,28 +268,23 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
 
-	rModel.bind(commandBuffer);
-	rModel.bindPipeline(commandBuffer);
+	for (size i = 0; i < rScene.objects.size(); i++) {
+		rScene.objects[i].model->bind(commandBuffer);
+		rScene.objects[i].model->bindPipeline(commandBuffer);
+		// per material bind (set 1)
+		rScene.objects[i].model->bindDescriptors(commandBuffer);
 
-	// per material bind
-	rModel.bindDescriptors(commandBuffer);
+		for (size j = 0; j < NUMBER_OF_ROOMS; j++) {
+			// A * B * v
+			// this applies B first so you rotate THEN translate
+			MeshPushConstant constants{ rScene.objects[i].transform * enginemath::Mat4::translationM(j, i, j),
+				rScene.objects[i].color + enginemath::Vec3(j * 0.004f) };
 
-	for (size i = 0; i < NUMBER_OF_ROOMS; i++) {
-		// A * B * v
-		// this applies B first so you rotate THEN translate
-		MeshPushConstant constants{ enginemath::Mat4::translationM(enginemath::Vec3(2.0f * i, 0.0f, 1.0f)) *
-			enginemath::Mat4::rotateY(camera.getElapsedTime() * enginemath::toRad(90.0f)) *
-			enginemath::Mat4::rotateX(enginemath::toRad(-90.0f)),
-									enginemath::Vec3(std::sin(i * enginemath::toRad(camera.getElapsedTime())), 1.0f, 1.0f)};
-
-		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
-		rModel.draw(commandBuffer);
+			vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | 
+							   VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
+			rScene.objects[i].model->draw(commandBuffer);
+		}
 	}
-
-	cupModel.bind(commandBuffer);
-	cupModel.bindPipeline(commandBuffer);
-	cupModel.bindDescriptors(commandBuffer);
-	cupModel.draw(commandBuffer);
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
 	VkDescriptorSet particleSet = descriptor.getUBOSet(currentFrame);
@@ -353,4 +349,19 @@ void Rath::Renderer::setUpModel(const std::string modelPath, const std::string t
 	if (!R_Model::rCreateModel(device, buffer, rModelInfo, model)) {
 		throw std::runtime_error("Failed to create model");
 	}
+}
+
+void Rath::Renderer::setUpScene() {
+	R_SceneObject roomObject{};
+	roomObject.model = &rModel;
+
+	rScene.objects.push_back(roomObject);
+
+	R_SceneObject cupObject{};
+	cupObject.model = &cupModel;
+	cupObject.transform = enginemath::Mat4::translationM(enginemath::Vec3(4.0f, 2.0f, 2.0f));
+	cupObject.color = enginemath::Vec3(1.0f, 0.0f, 0.0f);
+
+	rScene.objects.push_back(cupObject);
+	
 }

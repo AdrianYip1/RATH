@@ -24,9 +24,9 @@ namespace Rath {
 		// a pointer to a model
 		R_Model* model = nullptr;
 		// Location of object
-		enginemath::Mat4 transform;
+		enginemath::Mat4 transform = enginemath::Mat4::identity();
 		// Colour of object
-		enginemath::Vec3 colors;
+		enginemath::Vec3 color = enginemath::Vec3(1.0f, 1.0f, 1.0f);
 	};
 
 	// Scene will hold all of the model information
@@ -37,8 +37,10 @@ namespace Rath {
 
 	class Scene {
 		public:
+			Scene();
+			~Scene();
 
 		private:
-			R_Scene scenee;
+
 	};
 } // namespace Rath

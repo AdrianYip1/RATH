@@ -2,6 +2,8 @@
 // pools/sets, draw loop
 #pragma once
 #include <vulkan/vulkan.h>
+#include "enginemath/mat4.hpp"
+#include "enginemath/vec3.hpp"
 
 // Rath files
 #include "context.hpp"
@@ -23,6 +25,8 @@
 #include "models/material.hpp"
 #include "models/modelStruct.hpp"
 #include "ui/ui.hpp"
+#include "scenes/scene.hpp"
+#include "scenes/sceneManager.hpp"
 
 // std
 #include <stdexcept>
@@ -69,6 +73,7 @@ namespace Rath {
 			R_Material rCupMaterial;
 			R_Model rModel;
 			R_Model cupModel;
+			R_Scene rScene;
 			
 			std::vector<VkCommandBuffer> commandBuffers;
 			std::vector<VkCommandBuffer> computeCommandBuffers;
@@ -99,5 +104,7 @@ namespace Rath {
 			void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
 			
 			void setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model);
+			
+			void setUpScene();
 	};
 } // namespace Rath
