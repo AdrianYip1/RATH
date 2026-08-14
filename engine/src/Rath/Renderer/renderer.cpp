@@ -14,8 +14,9 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	depth(device, swapchain, image),
 	renderpass(device, swapchain, depth),
 	uniformBuffer(device, swapchain, buffer, camera),
+	light(device, swapchain, buffer),
 	storage(device, buffer),
-	descriptor(device, uniformBuffer, storage),
+	descriptor(device, uniformBuffer, light, storage),
 	pipeline(device, swapchain, renderpass, descriptor),
 	ui(window, context, device, renderpass, swapchain, pipeline){
 
@@ -55,6 +56,8 @@ void Rath::Renderer::drawFrame() {
 	vkWaitForFences(device.getDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 	uniformBuffer.updateUniformBuffer(currentFrame);
+	// Updates the light's ubo based on the data on the scene lights
+	light.updateLights(currentFrame, rScene.lights);
 
 	// Reset fences only when submitting work
 	vkResetFences(device.getDevice(), 1, &computeInFlightFences[currentFrame]);
@@ -285,6 +288,19 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 			rScene.objects[i].model->draw(commandBuffer);
 		}
 	}
+
+	// Lights
+	for (size i = 0; i < rScene.lights.size(); i++) {
+		rScene.lights[i].model->bind(commandBuffer);
+		rScene.lights[i].model->bindPipeline(commandBuffer);
+		rScene.lights[i].model->bindDescriptors(commandBuffer);
+
+		MeshPushConstant lightConstant{ enginemath::Mat4::translationM(rScene.lights[i].position), rScene.lights[i].color };
+		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT |
+			VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &lightConstant);
+
+		rScene.lights[i].model->draw(commandBuffer);
+	}
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
 	VkDescriptorSet particleSet = descriptor.getUBOSet(currentFrame);
@@ -363,5 +379,13 @@ void Rath::Renderer::setUpScene() {
 	cupObject.color = enginemath::Vec3(1.0f, 0.0f, 0.0f);
 
 	rScene.objects.push_back(cupObject);
-	
+
+	// Light objects
+	for (size i = 0; i < MAX_LIGHTS; i++) {
+		R_SceneLight sceneLight{};
+		sceneLight.model = &cupModel;
+		sceneLight.position = enginemath::Vec3(2.0f) * i;
+		sceneLight.color = enginemath::Vec3(1.0f);
+		rScene.lights.push_back(sceneLight);
+	}
 }

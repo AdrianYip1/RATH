@@ -13,6 +13,7 @@
 #include "buffers/uniform.hpp"
 #include "images/texture.hpp"
 #include "buffers/storage.hpp"
+#include "scenes/light.hpp"
 
 // std
 #include <stdexcept>
@@ -24,7 +25,7 @@
 namespace Rath {
 	class Descriptor {
 		public:
-			Descriptor(Device& _device, UniformBuffer& _uniform, Storage& _storage);
+			Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light, Storage& _storage);
 			~Descriptor();
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
@@ -58,6 +59,7 @@ namespace Rath {
 		private:
 			Device& device;
 			UniformBuffer& uniform;
+			R_Light& light;
 			Storage& storage;
 
 			VkDescriptorSetLayout uboSetLayout = VK_NULL_HANDLE;

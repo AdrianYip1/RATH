@@ -27,6 +27,7 @@
 #include "ui/ui.hpp"
 #include "scenes/scene.hpp"
 #include "scenes/sceneManager.hpp"
+#include "scenes/light.hpp"
 
 // std
 #include <stdexcept>
@@ -35,6 +36,7 @@
 
 namespace Rath {
 	class Renderer {
+
 		public:
 
 			Renderer(Window& _window, Camera& _camera, Context& _context, Device& _device, Buffer& _buffer);
@@ -63,6 +65,7 @@ namespace Rath {
 			Depth depth;
 			Renderpass renderpass;
 			UniformBuffer uniformBuffer;
+			R_Light light;
 			Storage storage;
 			Descriptor descriptor;
 			Pipeline pipeline;

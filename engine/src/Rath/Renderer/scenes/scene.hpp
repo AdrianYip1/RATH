@@ -9,6 +9,7 @@
 #include "../device.hpp"
 #include "../buffers/buffer.hpp"
 #include "../models/model.hpp"
+#include "light.hpp"
 
 // std
 #include <stdexcept>
@@ -26,13 +27,14 @@ namespace Rath {
 		// Location of object
 		enginemath::Mat4 transform = enginemath::Mat4::identity();
 		// Colour of object
-		enginemath::Vec3 color = enginemath::Vec3(1.0f, 1.0f, 1.0f);
+		enginemath::Vec3 color = enginemath::Vec3(1.0f);
 	};
 
 	// Scene will hold all of the model information
 	// Future: camera, lights
 	struct R_Scene {
 		std::vector<R_SceneObject> objects;
+		std::vector<R_SceneLight> lights;
 	};
 
 	class Scene {

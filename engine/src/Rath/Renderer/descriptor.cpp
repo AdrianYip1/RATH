@@ -1,8 +1,8 @@
 #include "descriptor.hpp"
 
 // Descriptor constructor
-Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, Storage& _storage) :
-	device(_device), uniform(_uniform), storage(_storage) {
+Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light, Storage& _storage) :
+	device(_device), uniform(_uniform), light(_light), storage(_storage) {
 
 	uboSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_UNIFORM);
 	samplerSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_SAMPLER);
@@ -29,7 +29,9 @@ Rath::Descriptor::~Descriptor() {
 VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_TYPE type) {
 	std::array<VkDescriptorSetLayoutBinding, 3> layoutBinding{};
 
-	const u32 bindingCount = (type == R_DESCRIPTOR_TYPE::R_COMPUTE ? 3 : 1);
+	u32 bindingCount = 1;
+	if (type == R_DESCRIPTOR_TYPE::R_UNIFORM) bindingCount = 2;
+	if (type == R_DESCRIPTOR_TYPE::R_COMPUTE) bindingCount = 3;
 
 	switch (type) {
 		case R_DESCRIPTOR_TYPE::R_SAMPLER: {
@@ -48,6 +50,12 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 			layoutBinding[0].descriptorCount = 1;
 			layoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 			layoutBinding[0].pImmutableSamplers = nullptr;
+
+			layoutBinding[1].binding = 1;
+			layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			layoutBinding[1].descriptorCount = 1;
+			layoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+			layoutBinding[1].pImmutableSamplers = nullptr;
 
 			break;
 		}
@@ -127,6 +135,11 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				bufferInfo.offset = 0;
 				bufferInfo.range = sizeof(UniformBufferObject);
 
+				VkDescriptorBufferInfo lightBufferInfo{};
+				lightBufferInfo.buffer = light.getLightBuffer(i);
+				lightBufferInfo.offset = 0;
+				lightBufferInfo.range = sizeof(R_LightUbo);
+
 				descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				descriptorWrites[0].dstSet = sets[i];
 				descriptorWrites[0].dstBinding = 0;
@@ -135,7 +148,15 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				descriptorWrites[0].descriptorCount = 1;
 				descriptorWrites[0].pBufferInfo = &bufferInfo;
 
-				vkUpdateDescriptorSets(device.getDevice(), 1, descriptorWrites.data(), 0, nullptr);
+				descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[1].dstSet = sets[i];
+				descriptorWrites[1].dstBinding = 1;
+				descriptorWrites[1].dstArrayElement = 0;
+				descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				descriptorWrites[1].descriptorCount = 1;
+				descriptorWrites[1].pBufferInfo = &lightBufferInfo;
+
+				vkUpdateDescriptorSets(device.getDevice(), 2, descriptorWrites.data(), 0, nullptr);
 				break;
 			}
 
@@ -223,7 +244,7 @@ VkDescriptorPool Rath::createDescriptorPool(Device& device, R_DESCRIPTOR_TYPE ty
 
 		case R_DESCRIPTOR_TYPE::R_UNIFORM: {
 			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
+			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT) * 2;
 
 			break;
 		}
