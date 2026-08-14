@@ -15,7 +15,7 @@ namespace Rath {
 		public:
 			Camera(enginemath::Vec3 _position, f32 _aspect, f32 _yaw = enginemath::toRad(-90.0f),
 				  f32 _pitch = 0.0f, f32 _fov = enginemath::toRad(45.0f), 
-				  f32 _nearPlane = 0.1f, f32 _farPlane = 10.0f);
+				  f32 _nearPlane = 0.1f, f32 _farPlane = 100.0f);
 			
 			enginemath::Vec3 getWorldUp() const;
 			enginemath::Vec3 getForward() const;
