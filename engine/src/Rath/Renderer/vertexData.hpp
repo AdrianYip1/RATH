@@ -21,6 +21,7 @@ namespace Rath {
 		enginemath::Vec3 pos;
 		enginemath::Vec3 color;
 		enginemath::Vec2 texCoord;
+		enginemath::Vec3 normal;
 
 		static VkVertexInputBindingDescription getBindingDescription() {
 			VkVertexInputBindingDescription bindingDescription{};
@@ -30,8 +31,8 @@ namespace Rath {
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+		static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+			std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 			attributeDescriptions[0].binding = 0;
 			attributeDescriptions[0].location = 0;
 			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -47,11 +48,19 @@ namespace Rath {
 			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
 			attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
+			attributeDescriptions[3].binding = 0;
+			attributeDescriptions[3].location = 3;
+			attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[3].offset = offsetof(Vertex, normal);
+
 			return attributeDescriptions;
 		}
 
 		bool operator==(const Vertex& other) const {
-			return pos == other.pos && color == other.color && texCoord == other.texCoord;
+			return normal == other.normal && 
+				   pos == other.pos && 
+				   color == other.color && 
+				   texCoord == other.texCoord;
 		}
 	};
 } // namespace Rath
