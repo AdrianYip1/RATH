@@ -6,6 +6,8 @@
 #include "camera/camera.hpp"
 #include "camera/cameraController.hpp"
 
+#include "Rath/Renderer/scenes/scene.hpp"
+
 
 // std
 #include <chrono>
@@ -18,30 +20,50 @@ namespace Rath {
 	class Renderer;
 	class UI;
 
+	class R_Model;
+	class R_Material;
+
+
 	class Application {
-	public:
-		Application(u32 width, u32 height, const char* title);
-		~Application();
-		Application& operator=(const Application& other) = delete;
-		Application(Application&& other) = delete;
+		public:
+			Application(u32 width, u32 height, const char* title);
+			~Application();
+			Application& operator=(const Application& other) = delete;
+			Application(Application&& other) = delete;
 
-		// Entrypoint to the application, runs mainLoop
-		void run();
+			// Entrypoint to the application, runs mainLoop
+			void run();
 
-	private:
-		Window window;
-		Input input;
-		Camera camera;
-		CameraController cameraController;
-		std::unique_ptr<Context> context;
-		std::unique_ptr<Device> device;
-		std::unique_ptr<Buffer> buffer;
+		private:
 
-		// Smart pointer used for renderer to automatically manage memory
-		std::unique_ptr<Renderer> renderer;
+			Window window;
+			Input input;
+			Camera camera;
+			CameraController cameraController;
+			std::unique_ptr<Context> context;
+			std::unique_ptr<Device> device;
+			std::unique_ptr<Buffer> buffer;
 
-		// Main loop which polls for window resize/close/minimize and starts the drawing loop
-		void mainLoop();
+			// Smart pointer used for renderer to automatically manage memory
+			std::unique_ptr<Renderer> renderer;
 
+			// Application will manage the scene objects
+			R_Scene rScene;
+			std::unique_ptr<R_Model> roomModel;
+			std::unique_ptr<R_Model> cupModel;
+			std::unique_ptr<R_Material> rMaterial;
+			std::unique_ptr<R_Material> rCupMaterial;
+			u32 roomIndex;
+
+			// Main loop which polls for window resize/close/minimize and starts the drawing loop
+			void mainLoop();
+
+			void setUpModels();
+
+			void setUpScene();
+
+			void updateScene();
+
+			
 	};
 } // namespace Rath

@@ -25,8 +25,6 @@
 #include "models/material.hpp"
 #include "models/modelStruct.hpp"
 #include "ui/ui.hpp"
-#include "scenes/scene.hpp"
-#include "scenes/sceneManager.hpp"
 #include "scenes/light.hpp"
 
 // std
@@ -46,11 +44,14 @@ namespace Rath {
 			
 			// Draws one frame: waits on the fence, acquires an image, updates the
 			// uniform buffer, records and submits, then presents
-			void drawFrame();
+			void drawFrame(R_Scene& rScene);
 
 			// Waits for all queues to finish, needed before destruction
 			// can't call vkDeviceWaitIdle(device) in application so have a function here
 			void wait();
+
+			// called by application.cpp
+			void setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model);
 
 		private:
 			Window& window;
@@ -74,10 +75,7 @@ namespace Rath {
 			// RATH members
 			R_Material rMaterial;
 			R_Material rCupMaterial;
-			R_Model rModel;
-			R_Model cupModel;
-			R_Scene rScene;
-			
+
 			std::vector<VkCommandBuffer> commandBuffers;
 			std::vector<VkCommandBuffer> computeCommandBuffers;
 
@@ -103,15 +101,10 @@ namespace Rath {
 			// Begins recording, starts the render pass, binds the pipeline, sets the
 			// dynamic viewport and scissor, then binds the vertex, descriptor and
 			// index data before drawing
-			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex);
+			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex, R_Scene& rScene);
 			
 			// Begins a command buffer (compute), binds compute descriptor set, then dispatches
 			void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
 			
-			void setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model);
-			
-			void setUpScene();
-
-			void updateScene();
 	};
 } // namespace Rath

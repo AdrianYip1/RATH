@@ -6,6 +6,10 @@
 #include "Rath/Renderer/device.hpp"
 #include "Rath/Renderer/buffers/buffer.hpp"
 
+#include "Rath/Renderer/models/material.hpp"
+#include "Rath/Renderer/models/modelStruct.hpp"
+#include "Rath/Renderer/models/model.hpp"
+
 // Application Constructor
 Rath::Application::Application(u32 width, u32 height, 
 	const char* title) : 
@@ -17,7 +21,8 @@ Rath::Application::Application(u32 width, u32 height,
 	buffer(std::make_unique<Buffer>(*device)),
 	renderer(std::make_unique<Renderer>(window, camera, *context, *device, *buffer)) 
 {
-
+	setUpModels();
+	setUpScene();
 }
 
 // Application Destructor
@@ -51,7 +56,50 @@ void Rath::Application::mainLoop() {
 		cameraController.checkCameraMovement();
 		cameraController.checkMouse();
 		cameraController.updateCamera();
-		renderer->drawFrame();
+		updateScene();
+		renderer->drawFrame(rScene);
 	}
 	renderer->wait();
 } 
+
+void Rath::Application::setUpModels() {
+	rMaterial = std::make_unique<R_Material>();
+	roomModel = std::make_unique<R_Model>();
+	renderer->setUpModel(MODEL_PATH, TEXTURE_PATH, rMaterial.get(), roomModel.get());
+
+	rCupMaterial = std::make_unique<R_Material>();
+	cupModel = std::make_unique<R_Model>();
+	renderer->setUpModel(MODEL2_PATH, TEXTURE2_PATH, rCupMaterial.get(), cupModel.get());
+}
+
+void Rath::Application::setUpScene() {
+	R_SceneObject roomObject{};
+	roomObject.model = roomModel.get();
+	roomObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
+	roomObject.transform = roomObject.baseTransform;
+
+	roomIndex = rScene.objects.size();
+	rScene.objects.push_back(roomObject);
+
+	R_SceneObject cupObject{};
+	cupObject.model = cupModel.get();
+	cupObject.transform = enginemath::Mat4::translationM(enginemath::Vec3(4.0f, 2.0f, 2.0f));
+	cupObject.color = enginemath::Vec3(1.0f, 0.0f, 0.0f);
+
+	rScene.objects.push_back(cupObject);
+
+	// Light objects
+	for (size i = 0; i < MAX_LIGHTS; i++) {
+		R_SceneLight sceneLight{};
+		sceneLight.model = cupModel.get();
+		sceneLight.position = enginemath::Vec3(2.0f) * i;
+		sceneLight.color = enginemath::Vec3(1.0f);
+		rScene.lights.push_back(sceneLight);
+	}
+}
+
+void Rath::Application::updateScene() {
+	f32 t = camera.getElapsedTime();
+	R_SceneObject& room = rScene.objects[roomIndex];
+	room.transform = room.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
+}

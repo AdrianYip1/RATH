@@ -1,15 +1,9 @@
 #pragma once
-#include <vulkan/vulkan.h>
 #include <enginemath/mat4.hpp>
 #include <enginemath/vec3.hpp>
 
 // Rath files
 #include "Rath/Core/defines.hpp"
-#include "../vertexData.hpp"
-#include "../device.hpp"
-#include "../buffers/buffer.hpp"
-#include "../models/model.hpp"
-#include "light.hpp"
 
 // std
 #include <stdexcept>
@@ -21,6 +15,8 @@
 
 
 namespace Rath {
+	class R_Model;
+
 	struct R_SceneObject {
 		// a pointer to a model
 		R_Model* model = nullptr;
@@ -32,6 +28,15 @@ namespace Rath {
 		enginemath::Vec3 color = enginemath::Vec3(1.0f);
 	};
 
+	struct R_SceneLight {
+		// pointer to a model
+		R_Model* model = nullptr;
+		// Location of light
+		enginemath::Vec3 position = enginemath::Vec3(0.0f);
+		// Colour of light
+		enginemath::Vec3 color = enginemath::Vec3(1.0f);
+	};
+
 	// Scene will hold all of the model information
 	// Future: camera, lights
 	struct R_Scene {
@@ -39,12 +44,4 @@ namespace Rath {
 		std::vector<R_SceneLight> lights;
 	};
 
-	class Scene {
-		public:
-			Scene();
-			~Scene();
-
-		private:
-
-	};
 } // namespace Rath

@@ -44,13 +44,11 @@ void Rath::UI::startFrame() {
 	ImGui::NewFrame();
 }
 
-void Rath::UI::drawUI(R_Scene& scene) {
+void Rath::UI::drawUI(R_Scene& rScene) {
 	// Creating a window called Hello, and append into it
 	ImGui::Begin("UI");
 
-	ImGui::SliderInt("Number of rooms", &NUMBER_OF_ROOMS, 1, 5);
-
-	ImGui::DragFloat3("Light position", &scene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
+	ImGui::DragFloat3("Light position", &rScene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
 	ImGui::End();
 	ImGui::Render();
 }

@@ -26,8 +26,6 @@
 #include <string>
 
 namespace Rath {
-	// Placeholder for push constants -> drawing multiple objects 
-	inline i32 NUMBER_OF_ROOMS = 4;
 	inline enginemath::Vec3 position = enginemath::Vec3(0.0f);
 
 	class UI {

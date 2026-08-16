@@ -24,9 +24,6 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	camera.setAspect(swapchain.getExtent().width / (f32) swapchain.getExtent().height);
 	createCommandBuffers();
 	createSyncObjects();
-	setUpModel(MODEL_PATH, TEXTURE_PATH, &rMaterial, &rModel);
-	setUpModel(MODEL2_PATH, TEXTURE2_PATH, &rCupMaterial, &cupModel);
-	setUpScene();
 }
 
 // Renderer destructor
@@ -52,10 +49,10 @@ Rath::Renderer::~Renderer() {
 // 
 // having imageIndex size makes it so sem[0] is only reached when aquire returns image 0,
 // the driver can't return image 0 while image 0's present hasnt consumed yet
-void Rath::Renderer::drawFrame() {
+void Rath::Renderer::drawFrame(R_Scene& rScene) {
 	vkWaitForFences(device.getDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-	updateScene();
+	light.updateLights(currentFrame, rScene.lights);
 	uniformBuffer.updateUniformBuffer(currentFrame);
 	// Updates the light's ubo based on the data on the scene lights
 	light.updateLights(currentFrame, rScene.lights);
@@ -105,7 +102,7 @@ void Rath::Renderer::drawFrame() {
 	// VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
 	// vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
-	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+	recordCommandBuffer(commandBuffers[currentFrame], imageIndex, rScene);
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -226,7 +223,7 @@ void Rath::Renderer::createSyncObjects() {
 // Begins command buffer recording -> starts renderpass -> bind the pipeline
 // sets the viewport and scissor (since they are dynamic states)
 // then binds the vertex, descriptorSets, index to the command buffer before drawing
-void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex) {
+void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex, R_Scene& rScene) {
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	
@@ -275,26 +272,28 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	for (size i = 0; i < rScene.objects.size(); i++) {
 		rScene.objects[i].model->bind(commandBuffer);
 		rScene.objects[i].model->bindPipeline(commandBuffer);
-		// per material bind (set 1)
 		rScene.objects[i].model->bindDescriptors(commandBuffer);
 
-		MeshPushConstant constants{ rScene.objects[i].transform, rScene.objects[i].color};
+		MeshPushConstant modelPushConstant{
+			rScene.objects[i].transform, rScene.objects[i].color
+		};
 
-		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | 
-							  VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
+		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT |
+						   VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &modelPushConstant);
 		rScene.objects[i].model->draw(commandBuffer);
 	}
 
-	// Lights
 	for (size i = 0; i < rScene.lights.size(); i++) {
 		rScene.lights[i].model->bind(commandBuffer);
 		rScene.lights[i].model->bindPipeline(commandBuffer);
 		rScene.lights[i].model->bindDescriptors(commandBuffer);
 
-		MeshPushConstant lightConstant{ enginemath::Mat4::translationM(rScene.lights[i].position), rScene.lights[i].color };
-		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT |
-			VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &lightConstant);
+		MeshPushConstant lightPushConstant{
+			enginemath::Mat4::translationM(rScene.lights[i].position), rScene.lights[i].color
+		};
 
+		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT |
+			VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &lightPushConstant);
 		rScene.lights[i].model->draw(commandBuffer);
 	}
 	
@@ -363,34 +362,3 @@ void Rath::Renderer::setUpModel(const std::string modelPath, const std::string t
 	}
 }
 
-void Rath::Renderer::setUpScene() {
-	R_SceneObject roomObject{};
-	roomObject.model = &rModel;
-	roomObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
-	roomObject.transform = roomObject.baseTransform;
-
-	roomIndex = rScene.objects.size();
-	rScene.objects.push_back(roomObject);
-
-	R_SceneObject cupObject{};
-	cupObject.model = &cupModel;
-	cupObject.transform = enginemath::Mat4::translationM(enginemath::Vec3(4.0f, 2.0f, 2.0f));
-	cupObject.color = enginemath::Vec3(1.0f, 0.0f, 0.0f);
-
-	rScene.objects.push_back(cupObject);
-
-	// Light objects
-	for (size i = 0; i < MAX_LIGHTS; i++) {
-		R_SceneLight sceneLight{};
-		sceneLight.model = &cupModel;
-		sceneLight.position = enginemath::Vec3(2.0f) * i;
-		sceneLight.color = enginemath::Vec3(1.0f);
-		rScene.lights.push_back(sceneLight);
-	}
-}
-
-void Rath::Renderer::updateScene() {
-	f32 t = camera.getElapsedTime();
-	R_SceneObject& room = rScene.objects[roomIndex];
-	room.transform = room.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
-}

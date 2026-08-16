@@ -10,6 +10,7 @@
 #include "../buffers/buffer.hpp"
 #include "../swapchain.hpp"
 #include "../models/model.hpp"
+#include "scene.hpp"
 
 // std
 #include <stdexcept>
@@ -30,13 +31,6 @@ namespace Rath {
 		int lightCount;
 	};
 
-	struct R_SceneLight {
-		R_Model* model = nullptr;
-		// Location of light
-		enginemath::Vec3 position = enginemath::Vec3(0.0f);
-		// Colour of light
-		enginemath::Vec3 color = enginemath::Vec3(1.0f);
-	};
 	class R_Light {
 		public:
 			R_Light(Device& _device, Swapchain& _swapchain,
