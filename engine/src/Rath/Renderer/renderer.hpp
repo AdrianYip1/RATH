@@ -89,8 +89,6 @@ namespace Rath {
 
 			u32 currentFrame = 0;
 
-			u32 roomIndex;
-
 			// Allocates a command buffer per frame in flight from the command pool,
 			// freed when the command pool is destroyed
 			void createCommandBuffers();
