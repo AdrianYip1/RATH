@@ -23,7 +23,6 @@ namespace Rath {
 	class R_Model;
 	class R_Material;
 
-
 	class Application {
 		public:
 			Application(u32 width, u32 height, const char* title);

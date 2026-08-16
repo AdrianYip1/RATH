@@ -10,6 +10,13 @@ Rath::R_AssetManager::~R_AssetManager() {
 }
 
 Rath::R_Model* Rath::R_AssetManager::setUpModel(const std::string modelPath, const std::string texturePath) {
+	std::string key = modelPath + "|" + texturePath;
+
+	auto it = rModels.find(key);
+	if (it != rModels.end()) {
+		return it->second.get();
+	}
+
 	std::unique_ptr<R_Material> material = std::make_unique<R_Material>();
 	std::unique_ptr<R_Model> model = std::make_unique<R_Model>();
 
@@ -30,8 +37,7 @@ Rath::R_Model* Rath::R_AssetManager::setUpModel(const std::string modelPath, con
 	if (!R_Model::rCreateModel(device, buffer, rModelInfo, model.get())) {
 		throw std::runtime_error("Failed to create model");
 	}
-	rModels.push_back(std::move(model));
-	// model is empty so return rModel's most recent entry
-	return rModels.back().get();
+	rModels[key] = std::move(model);
+	return rModels[key].get();
 }
 
