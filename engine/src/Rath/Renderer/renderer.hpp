@@ -91,6 +91,8 @@ namespace Rath {
 
 			u32 currentFrame = 0;
 
+			u32 roomIndex;
+
 			// Allocates a command buffer per frame in flight from the command pool,
 			// freed when the command pool is destroyed
 			void createCommandBuffers();
@@ -109,5 +111,7 @@ namespace Rath {
 			void setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model);
 			
 			void setUpScene();
+
+			void updateScene();
 	};
 } // namespace Rath

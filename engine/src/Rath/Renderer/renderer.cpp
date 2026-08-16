@@ -55,6 +55,7 @@ Rath::Renderer::~Renderer() {
 void Rath::Renderer::drawFrame() {
 	vkWaitForFences(device.getDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
+	updateScene();
 	uniformBuffer.updateUniformBuffer(currentFrame);
 	// Updates the light's ubo based on the data on the scene lights
 	light.updateLights(currentFrame, rScene.lights);
@@ -277,16 +278,11 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 		// per material bind (set 1)
 		rScene.objects[i].model->bindDescriptors(commandBuffer);
 
-		for (size j = 0; j < NUMBER_OF_ROOMS; j++) {
-			// A * B * v
-			// this applies B first so you rotate THEN translate
-			MeshPushConstant constants{ rScene.objects[i].transform * enginemath::Mat4::translationM(j, i, j),
-				rScene.objects[i].color + enginemath::Vec3(j * 0.004f) };
+		MeshPushConstant constants{ rScene.objects[i].transform, rScene.objects[i].color};
 
-			vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | 
-							   VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
-			rScene.objects[i].model->draw(commandBuffer);
-		}
+		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | 
+							  VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &constants);
+		rScene.objects[i].model->draw(commandBuffer);
 	}
 
 	// Lights
@@ -370,7 +366,10 @@ void Rath::Renderer::setUpModel(const std::string modelPath, const std::string t
 void Rath::Renderer::setUpScene() {
 	R_SceneObject roomObject{};
 	roomObject.model = &rModel;
+	roomObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
+	roomObject.transform = roomObject.baseTransform;
 
+	roomIndex = rScene.objects.size();
 	rScene.objects.push_back(roomObject);
 
 	R_SceneObject cupObject{};
@@ -388,4 +387,10 @@ void Rath::Renderer::setUpScene() {
 		sceneLight.color = enginemath::Vec3(1.0f);
 		rScene.lights.push_back(sceneLight);
 	}
+}
+
+void Rath::Renderer::updateScene() {
+	f32 t = camera.getElapsedTime();
+	R_SceneObject& room = rScene.objects[roomIndex];
+	room.transform = room.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
 }

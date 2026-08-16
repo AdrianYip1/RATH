@@ -24,6 +24,8 @@ namespace Rath {
 	struct R_SceneObject {
 		// a pointer to a model
 		R_Model* model = nullptr;
+		// The default location of an object (starting point)
+		enginemath::Mat4 baseTransform = enginemath::Mat4::identity();
 		// Location of object
 		enginemath::Mat4 transform = enginemath::Mat4::identity();
 		// Colour of object
