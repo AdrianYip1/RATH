@@ -18,6 +18,7 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	storage(device, buffer),
 	descriptor(device, uniformBuffer, light, storage),
 	pipeline(device, swapchain, renderpass, descriptor),
+	assetManager(device, buffer, descriptor, image, pipeline),
 	ui(window, context, device, renderpass, swapchain, pipeline){
 
 	swapchain.createFramebuffers(renderpass.getRenderPass(), depth.getDepthImageView(), color.getColorImageView());
@@ -343,22 +344,6 @@ void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 	}
 }
 
-void Rath::Renderer::setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model) {
-	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
-	rMaterialCreateInfo.texturePath = texturePath;
-
-	if (!R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material)) {
-		throw std::runtime_error("Failed to create material for model");
-	}
-
-	R_ModelCreateInfo rModelInfo{};
-	rModelInfo.pipeline = pipeline.getGraphicsPipeline();
-	rModelInfo.pipelineLayout = pipeline.getPipelineLayout();
-	rModelInfo.material = material;
-	rModelInfo.modelPath = modelPath;
-
-	if (!R_Model::rCreateModel(device, buffer, rModelInfo, model)) {
-		throw std::runtime_error("Failed to create model");
-	}
+Rath::R_Model* Rath::Renderer::loadModel(const std::string modelPath, const std::string texturePath) {
+	return assetManager.setUpModel(modelPath, texturePath);
 }
-

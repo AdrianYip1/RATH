@@ -26,6 +26,7 @@
 #include "models/modelStruct.hpp"
 #include "ui/ui.hpp"
 #include "scenes/light.hpp"
+#include "models/assetManager.hpp"
 
 // std
 #include <stdexcept>
@@ -50,8 +51,7 @@ namespace Rath {
 			// can't call vkDeviceWaitIdle(device) in application so have a function here
 			void wait();
 
-			// called by application.cpp
-			void setUpModel(const std::string modelPath, const std::string texturePath, R_Material* material, R_Model* model);
+			R_Model* loadModel(const std::string modelPath, const std::string texturePath);
 
 		private:
 			Window& window;
@@ -70,6 +70,7 @@ namespace Rath {
 			Storage storage;
 			Descriptor descriptor;
 			Pipeline pipeline;
+			R_AssetManager assetManager;
 			UI ui;
 
 			// RATH members

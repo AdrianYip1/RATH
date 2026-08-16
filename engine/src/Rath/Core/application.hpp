@@ -49,16 +49,10 @@ namespace Rath {
 
 			// Application will manage the scene objects
 			R_Scene rScene;
-			std::unique_ptr<R_Model> roomModel;
-			std::unique_ptr<R_Model> cupModel;
-			std::unique_ptr<R_Material> rMaterial;
-			std::unique_ptr<R_Material> rCupMaterial;
 			u32 roomIndex;
 
 			// Main loop which polls for window resize/close/minimize and starts the drawing loop
 			void mainLoop();
-
-			void setUpModels();
 
 			void setUpScene();
 
