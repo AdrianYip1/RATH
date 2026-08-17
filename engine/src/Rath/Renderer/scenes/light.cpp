@@ -13,18 +13,22 @@ Rath::R_Light::~R_Light() {
 	}
 }
 
-void Rath::R_Light::updateLights(u32 currentImage, const std::vector<R_SceneLight>& lights) {
+void Rath::R_Light::updateLights(u32 currentImage, const std::unordered_map<u32, R_SceneLight>& lights) {
 
 	size lightCount = std::min(lights.size(), (size)MAX_LIGHTS);
 
 	R_LightUbo lightUbo{};
-
-	for (size i = 0; i < lightCount; i++) {
-		lightUbo.lights[i].position = lights[i].position;
-		lightUbo.lights[i].color = lights[i].color;
+	size i = 0;
+	for (const auto& [id, light] : lights) {
+		// since the ids may not be in order, check if the number of updated
+		// lights exceeds MAX_LIGHTS
+		if (i >= MAX_LIGHTS) break;
+		lightUbo.lights[i].position = light.position;
+		lightUbo.lights[i].color = light.color;
+		i++;
 	}
 
-	lightUbo.lightCount = lightCount;
+	lightUbo.lightCount = i;
 
 	memcpy(lightBuffersMapped[currentImage], &lightUbo, sizeof(lightUbo));
 	

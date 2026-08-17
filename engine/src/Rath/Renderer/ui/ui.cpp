@@ -44,12 +44,25 @@ void Rath::UI::startFrame() {
 	ImGui::NewFrame();
 }
 
+// ImGuiCond_FirstUseEver -> sets inital size/position and then you can drag freely after
+// ImGuiCond_Always -> force window size and pos every frame
 void Rath::UI::drawUI(R_Scene& rScene) {
-	// Creating a window called Hello, and append into it
-	ImGui::Begin("UI");
+	// Get the viewwport size to scale
+	const ImGuiViewport* vp = ImGui::GetMainViewport();
 
+	// Creating a window and append into it
+	ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x, vp->WorkPos.y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x * 0.25, vp->WorkSize.y * 0.25), ImGuiCond_Always);
+	ImGui::Begin("UI", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 	ImGui::DragFloat3("Light position", &rScene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
 	ImGui::End();
+
+	// Create another window
+	ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x, vp->WorkPos.y), ImGuiCond_Always, ImVec2(1, 0));
+	ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x * 0.25, vp->WorkSize.y * 0.25), ImGuiCond_Always);
+	ImGui::Begin("Window 2");
+	ImGui::End();
+
 	ImGui::Render();
 }
 

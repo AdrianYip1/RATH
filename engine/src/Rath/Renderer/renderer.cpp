@@ -53,7 +53,6 @@ Rath::Renderer::~Renderer() {
 void Rath::Renderer::drawFrame(R_Scene& rScene) {
 	vkWaitForFences(device.getDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-	light.updateLights(currentFrame, rScene.lights);
 	uniformBuffer.updateUniformBuffer(currentFrame);
 	// Updates the light's ubo based on the data on the scene lights
 	light.updateLights(currentFrame, rScene.lights);
@@ -270,32 +269,32 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(),
 							0, 1, &set, 0, nullptr);
 
-	for (size i = 0; i < rScene.objects.size(); i++) {
-		rScene.objects[i].model->bind(commandBuffer);
-		rScene.objects[i].model->bindPipeline(commandBuffer);
-		rScene.objects[i].model->bindDescriptors(commandBuffer);
+	for (auto& [id, obj] : rScene.objects) {
+		obj.model->bind(commandBuffer);
+		obj.model->bindPipeline(commandBuffer);
+		obj.model->bindDescriptors(commandBuffer);
 
 		MeshPushConstant modelPushConstant{
-			rScene.objects[i].transform, rScene.objects[i].color
+			obj.transform, obj.color
 		};
 
 		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT |
 						   VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &modelPushConstant);
-		rScene.objects[i].model->draw(commandBuffer);
+		obj.model->draw(commandBuffer);
 	}
 
-	for (size i = 0; i < rScene.lights.size(); i++) {
-		rScene.lights[i].model->bind(commandBuffer);
-		rScene.lights[i].model->bindPipeline(commandBuffer);
-		rScene.lights[i].model->bindDescriptors(commandBuffer);
+	for (auto& [id, light] : rScene.lights) {
+		light.model->bind(commandBuffer);
+		light.model->bindPipeline(commandBuffer);
+		light.model->bindDescriptors(commandBuffer);
 
 		MeshPushConstant lightPushConstant{
-			enginemath::Mat4::translationM(rScene.lights[i].position), rScene.lights[i].color
+			enginemath::Mat4::translationM(light.position), light.color
 		};
 
 		vkCmdPushConstants(commandBuffer, pipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT |
 			VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshPushConstant), &lightPushConstant);
-		rScene.lights[i].model->draw(commandBuffer);
+		light.model->draw(commandBuffer);
 	}
 	
 	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE

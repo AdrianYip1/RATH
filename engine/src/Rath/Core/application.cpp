@@ -68,16 +68,17 @@ void Rath::Application::setUpScene() {
 	roomObject.model = renderer->loadModel(MODEL_PATH, TEXTURE_PATH);
 	roomObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
 	roomObject.transform = roomObject.baseTransform;
+	roomObject.id = objectIndex;
 
-	roomIndex = rScene.objects.size();
-	rScene.objects.push_back(roomObject);
+	rScene.objects[objectIndex++] = roomObject;
 
 	R_SceneObject cupObject{};
 	cupObject.model = renderer->loadModel(MODEL2_PATH, TEXTURE2_PATH);
 	cupObject.transform = enginemath::Mat4::translationM(enginemath::Vec3(4.0f, 2.0f, 2.0f));
 	cupObject.color = enginemath::Vec3(1.0f, 0.0f, 0.0f);
+	cupObject.id = objectIndex;
 
-	rScene.objects.push_back(cupObject);
+	rScene.objects[objectIndex++] = cupObject;
 
 	// Light objects
 	for (size i = 0; i < MAX_LIGHTS; i++) {
@@ -85,12 +86,14 @@ void Rath::Application::setUpScene() {
 		sceneLight.model = renderer->loadModel(MODEL2_PATH, TEXTURE2_PATH);
 		sceneLight.position = enginemath::Vec3(2.0f) * i;
 		sceneLight.color = enginemath::Vec3(1.0f);
-		rScene.lights.push_back(sceneLight);
+		sceneLight.id = lightIndex;
+		rScene.lights[lightIndex++] = sceneLight;
 	}
 }
 
 void Rath::Application::updateScene() {
 	f32 t = camera.getElapsedTime();
-	R_SceneObject& room = rScene.objects[roomIndex];
+	// 0 is the room (hardcode for now)
+	R_SceneObject& room = rScene.objects[0];
 	room.transform = room.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
 }

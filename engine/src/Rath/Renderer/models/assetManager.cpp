@@ -10,6 +10,8 @@ Rath::R_AssetManager::~R_AssetManager() {
 }
 
 Rath::R_Model* Rath::R_AssetManager::setUpModel(const std::string modelPath, const std::string texturePath) {
+	
+	// Check for model dupes
 	std::string key = modelPath + "|" + texturePath;
 
 	auto it = rModels.find(key);
@@ -17,21 +19,27 @@ Rath::R_Model* Rath::R_AssetManager::setUpModel(const std::string modelPath, con
 		return it->second.get();
 	}
 
-	std::unique_ptr<R_Material> material = std::make_unique<R_Material>();
-	std::unique_ptr<R_Model> model = std::make_unique<R_Model>();
+	// Check for material dupes
+	auto mIt = rMaterials.find(texturePath);
+	if (mIt == rMaterials.end()) {
+		std::unique_ptr<R_Material> material = std::make_unique<R_Material>();
 
-	R_ModelMaterialCreateInfo rMaterialCreateInfo{};
-	rMaterialCreateInfo.texturePath = texturePath;
+		R_ModelMaterialCreateInfo rMaterialCreateInfo{};
+		rMaterialCreateInfo.texturePath = texturePath;
 
-	if (!R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material.get())) {
-		throw std::runtime_error("Failed to create material for model");
+		if (!R_Material::rCreateMaterial(device, buffer, descriptor, image, rMaterialCreateInfo, material.get())) {
+			throw std::runtime_error("Failed to create material for model");
+		}
+
+		rMaterials[texturePath] = std::move(material);
 	}
-	rMaterials.push_back(std::move(material));
+	
+	std::unique_ptr<R_Model> model = std::make_unique<R_Model>();
 
 	R_ModelCreateInfo rModelInfo{};
 	rModelInfo.pipeline = pipeline.getGraphicsPipeline();
 	rModelInfo.pipelineLayout = pipeline.getPipelineLayout();
-	rModelInfo.material = rMaterials.back().get();
+	rModelInfo.material = rMaterials[texturePath].get();
 	rModelInfo.modelPath = modelPath;
 
 	if (!R_Model::rCreateModel(device, buffer, rModelInfo, model.get())) {

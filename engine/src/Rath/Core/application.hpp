@@ -48,7 +48,8 @@ namespace Rath {
 
 			// Application will manage the scene objects
 			R_Scene rScene;
-			u32 roomIndex;
+			u32 objectIndex = 0;
+			u32 lightIndex = 0;
 
 			// Main loop which polls for window resize/close/minimize and starts the drawing loop
 			void mainLoop();

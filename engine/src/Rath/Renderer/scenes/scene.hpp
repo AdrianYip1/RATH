@@ -12,6 +12,7 @@
 #include <cstring>
 #include <array>
 #include <memory>
+#include <unordered_map>
 
 
 namespace Rath {
@@ -26,6 +27,8 @@ namespace Rath {
 		enginemath::Mat4 transform = enginemath::Mat4::identity();
 		// Colour of object
 		enginemath::Vec3 color = enginemath::Vec3(1.0f);
+		// id
+		i32 id = -1;
 	};
 
 	struct R_SceneLight {
@@ -35,13 +38,14 @@ namespace Rath {
 		enginemath::Vec3 position = enginemath::Vec3(0.0f);
 		// Colour of light
 		enginemath::Vec3 color = enginemath::Vec3(1.0f);
+		// id
+		i32 id = -1;
 	};
 
 	// Scene will hold all of the model information
-	// Future: camera, lights
+	// Future: cameras, lights
 	struct R_Scene {
-		std::vector<R_SceneObject> objects;
-		std::vector<R_SceneLight> lights;
+		std::unordered_map<u32, R_SceneObject> objects;
+		std::unordered_map<u32, R_SceneLight> lights;
 	};
-
 } // namespace Rath

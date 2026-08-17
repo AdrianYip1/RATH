@@ -14,7 +14,7 @@
 // std
 #include <vector>
 #include <memory>
-#include <map>
+#include <unordered_map>
 
 
 namespace Rath {
@@ -34,8 +34,8 @@ namespace Rath {
 			Pipeline& pipeline;
 
 			// a map with the string being modelPath | texturepath
-			// to check for duplicates
+			// to check for du
 			std::unordered_map<std::string, std::unique_ptr<R_Model>> rModels;
-			std::vector<std::unique_ptr<R_Material>> rMaterials;
+			std::unordered_map<std::string, std::unique_ptr<R_Material>> rMaterials;
 	};
 } // namespace Rath

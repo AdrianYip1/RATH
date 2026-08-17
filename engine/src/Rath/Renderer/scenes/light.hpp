@@ -42,7 +42,7 @@ namespace Rath {
 			VkBuffer getLightBuffer(u32 currentFrame) const { return lightBuffers[currentFrame]; };
 
 			void createLightBuffers();
-			void updateLights(u32 currentImage, const std::vector<R_SceneLight>& lights);
+			void updateLights(u32 currentImage, const std::unordered_map<u32, R_SceneLight>& lights);
 
 		private:
 			Device& device;
