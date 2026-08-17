@@ -60,6 +60,8 @@ namespace Rath {
 
 			void handlePendingSpawns();
 
+			void handlePendingRemovals();
+
 			
 	};
 } // namespace Rath

@@ -34,7 +34,7 @@ namespace Rath {
 			Pipeline& pipeline;
 
 			// a map with the string being modelPath | texturepath
-			// to check for du
+			// to check for dupes
 			std::unordered_map<std::string, std::unique_ptr<R_Model>> rModels;
 			std::unordered_map<std::string, std::unique_ptr<R_Material>> rMaterials;
 	};

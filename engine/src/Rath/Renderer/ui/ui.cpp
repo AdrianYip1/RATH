@@ -69,7 +69,19 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 
 		rScene.pendingSpawns.push_back(type);
 	}
+
+	for (auto& [id, model] : rScene.objects) {
+		std::string label = "Delete Model " + std::to_string(id);
+		if (ImGui::Button(label.c_str())) {
+			PendingRemoval removal{};
+			removal.id = id;
+			removal.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
+
+			rScene.pendingRemovals.push_back(removal);
+		}
+	}
 	ImGui::End();
+
 
 	ImGui::Render();
 }

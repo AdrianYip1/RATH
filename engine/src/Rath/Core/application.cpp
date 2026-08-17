@@ -58,10 +58,14 @@ void Rath::Application::mainLoop() {
 		cameraController.checkMouse();
 		cameraController.updateCamera();
 
-		// check for any pending spawns
+		// check for any pending spawns/removals
 		if (!rScene.pendingSpawns.empty()) {
 			handlePendingSpawns();
 		}
+		if (!rScene.pendingRemovals.empty()) {
+			handlePendingRemovals();
+		}
+
 		updateScene();
 		renderer->drawFrame(rScene);
 	}
@@ -98,9 +102,9 @@ void Rath::Application::setUpScene() {
 
 void Rath::Application::updateScene() {
 	f32 t = camera.getElapsedTime();
-	// 0 is the room (hardcode for now)
-	R_SceneObject& room = rScene.objects[0];
-	room.transform = room.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
+	auto it = rScene.objects.find(0);
+	if (it == rScene.objects.end()) return;
+	it->second.transform = it->second.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
 }
 
 
@@ -127,5 +131,18 @@ void Rath::Application::handlePendingSpawns() {
 		}
 	}
 	rScene.pendingSpawns.clear();
+	return;
+}
+
+void Rath::Application::handlePendingRemovals() {
+	for (auto& removal : rScene.pendingRemovals) {
+		if (removal.type == Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT) {
+			rScene.objects.erase(removal.id);
+		}
+		else {
+			rScene.lights.erase(removal.id);
+		}
+	}
+	rScene.pendingRemovals.clear();
 	return;
 }
