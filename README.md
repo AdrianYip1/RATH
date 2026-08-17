@@ -15,6 +15,8 @@ consumer of the engine's API, which keeps that API usable from outside the engin
 Currently only a simple renderer exists. The direction I am interested long term is large open
 world rendering and generation capabilities.
 
+My Progress and Documentation: https://www.adrianyip.dev/devlog/index.html#Rath
+
 ## Implemented
 
 - Simple asset manager that stores model and texture

@@ -57,6 +57,11 @@ void Rath::Application::mainLoop() {
 		cameraController.checkCameraMovement();
 		cameraController.checkMouse();
 		cameraController.updateCamera();
+
+		// check for any pending spawns
+		if (!rScene.pendingSpawns.empty()) {
+			handlePendingSpawns();
+		}
 		updateScene();
 		renderer->drawFrame(rScene);
 	}
@@ -96,4 +101,30 @@ void Rath::Application::updateScene() {
 	// 0 is the room (hardcode for now)
 	R_SceneObject& room = rScene.objects[0];
 	room.transform = room.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
+}
+
+
+void Rath::Application::handlePendingSpawns() {
+	if (rScene.pendingSpawns[0].type == Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT) {
+		R_SceneObject newObject{};
+
+		newObject.model = renderer->loadModel(rScene.pendingSpawns[0].modelPath, rScene.pendingSpawns[0].texturePath);
+		newObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
+		newObject.transform = newObject.baseTransform;
+		newObject.id = objectIndex;
+
+		rScene.objects[objectIndex++] = newObject;
+		rScene.pendingSpawns.clear();
+		return;
+	}
+	else {
+		R_SceneLight sceneLight{};
+		sceneLight.model = renderer->loadModel(rScene.pendingSpawns[0].modelPath, rScene.pendingSpawns[0].texturePath);
+		sceneLight.position = enginemath::Vec3(2.0f) * lightIndex;
+		sceneLight.color = enginemath::Vec3(1.0f);
+		sceneLight.id = lightIndex;
+		rScene.lights[lightIndex++] = sceneLight;
+		rScene.pendingSpawns.clear();
+		return;
+	}
 }

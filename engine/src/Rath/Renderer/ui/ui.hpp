@@ -23,7 +23,9 @@
 #include <map>
 #include <set>
 #include <optional>
+#include <iostream>
 #include <string>
+
 
 namespace Rath {
 	inline enginemath::Vec3 position = enginemath::Vec3(0.0f);

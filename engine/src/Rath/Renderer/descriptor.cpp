@@ -4,16 +4,16 @@
 Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light, Storage& _storage) :
 	device(_device), uniform(_uniform), light(_light), storage(_storage) {
 
-	uboSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_UNIFORM);
-	samplerSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_SAMPLER);
-	computeSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_COMPUTE);
+	uboSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM);
+	samplerSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER);
+	computeSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE);
 
 	// REFACTOR: remove these and add them into material
-	uboPool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_UNIFORM, MAX_FRAMES_IN_FLIGHT);
-	computePool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_COMPUTE, MAX_FRAMES_IN_FLIGHT);
+	uboPool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM, MAX_FRAMES_IN_FLIGHT);
+	computePool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE, MAX_FRAMES_IN_FLIGHT);
 
-	uboSets = createDescriptorSets(R_DESCRIPTOR_TYPE::R_UNIFORM, uboPool, uboSetLayout, nullptr);
-	computeSets = createDescriptorSets(R_DESCRIPTOR_TYPE::R_COMPUTE, computePool, computeSetLayout, nullptr);
+	uboSets = createDescriptorSets(R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM, uboPool, uboSetLayout, nullptr);
+	computeSets = createDescriptorSets(R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE, computePool, computeSetLayout, nullptr);
 }
 
 // Descriptor destructor
@@ -30,11 +30,11 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 	std::array<VkDescriptorSetLayoutBinding, 3> layoutBinding{};
 
 	u32 bindingCount = 1;
-	if (type == R_DESCRIPTOR_TYPE::R_UNIFORM) bindingCount = 2;
-	if (type == R_DESCRIPTOR_TYPE::R_COMPUTE) bindingCount = 3;
+	if (type == R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM) bindingCount = 2;
+	if (type == R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE) bindingCount = 3;
 
 	switch (type) {
-		case R_DESCRIPTOR_TYPE::R_SAMPLER: {
+		case R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER: {
 			layoutBinding[0].binding = 0;
 			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			layoutBinding[0].descriptorCount = 1;
@@ -44,7 +44,7 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 			break;
 		}
 
-		case R_DESCRIPTOR_TYPE::R_UNIFORM: {
+		case R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM: {
 			layoutBinding[0].binding = 0;
 			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			layoutBinding[0].descriptorCount = 1;
@@ -59,7 +59,7 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 
 			break;
 		}
-		case R_DESCRIPTOR_TYPE::R_COMPUTE: {
+		case R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE: {
 			layoutBinding[0].binding = 0;
 			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			layoutBinding[0].descriptorCount = 1;
@@ -106,7 +106,7 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 	VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, Texture* texture) {
 
 	// Compute and uniform need a set per frame
-	const u32 setCount = (type == R_DESCRIPTOR_TYPE::R_SAMPLER ? 1 : MAX_FRAMES_IN_FLIGHT);
+	const u32 setCount = (type == R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER ? 1 : MAX_FRAMES_IN_FLIGHT);
 
 	std::vector<VkDescriptorSetLayout> layouts(setCount, descriptorSetLayout);
 
@@ -129,7 +129,7 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 
 		// Chooses functionality based on the R_DESCRIPTOR_TYPE
 		switch (type) {
-			case R_DESCRIPTOR_TYPE::R_UNIFORM: {
+			case R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM: {
 				VkDescriptorBufferInfo bufferInfo{};
 				bufferInfo.buffer = uniform.getUniformBuffer(i);
 				bufferInfo.offset = 0;
@@ -160,7 +160,7 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				break;
 			}
 
-			case R_DESCRIPTOR_TYPE::R_SAMPLER: {
+			case R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER: {
 				VkDescriptorImageInfo imageInfo{};
 				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				imageInfo.imageView = texture->getTextureImageView();
@@ -178,7 +178,7 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				break;
 			}
 
-			case R_DESCRIPTOR_TYPE::R_COMPUTE: {
+			case R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE: {
 				VkDescriptorBufferInfo bufferInfo{};
 				bufferInfo.buffer = uniform.getUniformBuffer(i);
 				bufferInfo.offset = 0;
@@ -232,24 +232,24 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 // poolSizes determine how many descriptors of each type exist
 VkDescriptorPool Rath::createDescriptorPool(Device& device, R_DESCRIPTOR_TYPE type, u32 setCount) {
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
-	const u32 poolSizeCount = (type == R_DESCRIPTOR_TYPE::R_COMPUTE ? 2 : 1);
+	const u32 poolSizeCount = (type == R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE ? 2 : 1);
 
 	switch (type) {
-		case R_DESCRIPTOR_TYPE::R_SAMPLER: {
+		case R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER: {
 			poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
 
 			break;
 		}
 
-		case R_DESCRIPTOR_TYPE::R_UNIFORM: {
+		case R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM: {
 			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT) * 2;
 
 			break;
 		}
 
-		case R_DESCRIPTOR_TYPE::R_COMPUTE: {
+		case R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE: {
 			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
 			poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;

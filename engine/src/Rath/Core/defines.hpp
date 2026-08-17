@@ -42,9 +42,16 @@ namespace Rath {
 	// Specify the type of descriptor layout is being passed
 	// into createDescriptorSetLayout()
 	enum class R_DESCRIPTOR_TYPE {
-		R_UNIFORM,
-		R_SAMPLER,
-		R_COMPUTE
+		R_TYPE_UNIFORM,
+		R_TYPE_SAMPLER,
+		R_TYPE_COMPUTE
+	};
+
+	// Specifies the type of scene object (object/light) that will be spawned in
+	// with pending spawn vector
+	enum class R_SCENE_TYPE {
+		R_SCENE_TYPE_OBJECT,
+		R_SCENE_TYPE_LIGHT
 	};
 
 } // namespace Rath

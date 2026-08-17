@@ -60,7 +60,15 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 	// Create another window
 	ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x, vp->WorkPos.y), ImGuiCond_Always, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x * 0.25, vp->WorkSize.y * 0.25), ImGuiCond_Always);
-	ImGui::Begin("Window 2");
+	ImGui::Begin("Add Mesh Button");
+	if (ImGui::Button("Add mesh")) {
+		PendingSpawn type{};
+		type.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
+		type.modelPath = MODEL_PATH;
+		type.texturePath = TEXTURE2_PATH;
+
+		rScene.pendingSpawns.push_back(type);
+	}
 	ImGui::End();
 
 	ImGui::Render();

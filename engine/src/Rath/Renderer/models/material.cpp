@@ -21,8 +21,8 @@ bool Rath::R_Material::rCreateMaterial(Device& _device, Buffer& _buffer,
 	_material->texture = std::make_unique<Texture>(_device, _image, _buffer, materialCreateInfo.texturePath);
 	
 
-	_material->materialDescriptorPool = createDescriptorPool(_device, R_DESCRIPTOR_TYPE::R_SAMPLER, 1);
-	_material->descriptorSet = _descriptor.createDescriptorSets(R_DESCRIPTOR_TYPE::R_SAMPLER, 
+	_material->materialDescriptorPool = createDescriptorPool(_device, R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER, 1);
+	_material->descriptorSet = _descriptor.createDescriptorSets(R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER,
 																_material->materialDescriptorPool,
 																_descriptor.getSamplerLayout(),
 																_material->texture.get())[0];

@@ -42,10 +42,18 @@ namespace Rath {
 		i32 id = -1;
 	};
 
+	struct PendingSpawn {
+		Rath::R_SCENE_TYPE type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
+		std::string modelPath;
+		std::string texturePath;
+	};
+
 	// Scene will hold all of the model information
 	// Future: cameras, lights
 	struct R_Scene {
 		std::unordered_map<u32, R_SceneObject> objects;
 		std::unordered_map<u32, R_SceneLight> lights;
+		std::vector<PendingSpawn> pendingSpawns;
 	};
+
 } // namespace Rath

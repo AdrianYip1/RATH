@@ -58,6 +58,8 @@ namespace Rath {
 
 			void updateScene();
 
+			void handlePendingSpawns();
+
 			
 	};
 } // namespace Rath
