@@ -20,7 +20,7 @@ My Progress and Documentation: https://www.adrianyip.dev/devlog/index.html#Rath
 ## Implemented
 
 - Simple asset manager that stores model and texture
-- ImGui integration
+- ImGui integration with model spawning and removal
 - Custom material and model objects (R_Material and R_Model) that are craeated with createInfo structs
 - Camera class with WASD movement + camera rotations with right mouse button held
 - Compute Shaders with particle simulation

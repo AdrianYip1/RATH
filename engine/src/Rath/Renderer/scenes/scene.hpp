@@ -46,6 +46,12 @@ namespace Rath {
 		Rath::R_SCENE_TYPE type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
 		std::string modelPath;
 		std::string texturePath;
+		// Location/Position and colour of the pending object
+		// only the relevant values will be used given the R_SCENE_TYPE
+		enginemath::Mat4 baseTransform = enginemath::Mat4::identity();
+		enginemath::Mat4 transform = enginemath::Mat4::identity();
+		enginemath::Vec3 position = enginemath::Vec3(0.0f);
+		enginemath::Vec3 color = enginemath::Vec3(1.0f);
 	};
 
 	struct PendingRemoval {

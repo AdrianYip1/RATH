@@ -61,13 +61,23 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 	ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x, vp->WorkPos.y), ImGuiCond_Always, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x * 0.25, vp->WorkSize.y * 0.25), ImGuiCond_Always);
 	ImGui::Begin("Add Mesh Button");
+	// Add mesh should open another menu to select mesh properties and types
+	static bool addMeshMenu = false;
 	if (ImGui::Button("Add mesh")) {
-		PendingSpawn type{};
+		addMeshMenu = true;
+	}
+	if (addMeshMenu) {
+		static PendingSpawn type{};
+		ImGui::DragFloat3("Choose Model Location", &type.position[0], 0.25, -5.0f, 5.0f);
+		type.transform = enginemath::Mat4::translationM(type.position);
 		type.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
 		type.modelPath = MODEL_PATH;
 		type.texturePath = TEXTURE2_PATH;
+		if (ImGui::Button("Spawn with selected values")) {
+			rScene.pendingSpawns.push_back(type);
+			addMeshMenu = false;
+		}
 
-		rScene.pendingSpawns.push_back(type);
 	}
 
 	for (auto& [id, model] : rScene.objects) {

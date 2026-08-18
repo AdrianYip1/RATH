@@ -114,8 +114,8 @@ void Rath::Application::handlePendingSpawns() {
 			R_SceneObject newObject{};
 
 			newObject.model = renderer->loadModel(spawn.modelPath, spawn.texturePath);
-			newObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
-			newObject.transform = newObject.baseTransform;
+			newObject.baseTransform = spawn.baseTransform;
+			newObject.transform = spawn.transform;
 			newObject.id = objectIndex;
 
 			rScene.objects[objectIndex++] = newObject;
