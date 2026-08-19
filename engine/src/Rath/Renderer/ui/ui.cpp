@@ -69,6 +69,8 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 	if (addMeshMenu) {
 		static PendingSpawn type{};
 		ImGui::DragFloat3("Choose Model Location", &type.position[0], 0.25, -5.0f, 5.0f);
+		ImGui::ColorEdit3("Choose Model Color", &type.color[0]);
+
 		type.transform = enginemath::Mat4::translationM(type.position);
 		type.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
 		type.modelPath = MODEL_PATH;

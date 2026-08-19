@@ -116,6 +116,7 @@ void Rath::Application::handlePendingSpawns() {
 			newObject.model = renderer->loadModel(spawn.modelPath, spawn.texturePath);
 			newObject.baseTransform = spawn.baseTransform;
 			newObject.transform = spawn.transform;
+			newObject.color = spawn.color;
 			newObject.id = objectIndex;
 
 			rScene.objects[objectIndex++] = newObject;
