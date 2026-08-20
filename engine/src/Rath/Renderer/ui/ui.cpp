@@ -54,7 +54,19 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 	ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x, vp->WorkPos.y), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x * 0.25, vp->WorkSize.y * 0.25), ImGuiCond_Always);
 	ImGui::Begin("UI", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-	ImGui::DragFloat3("Light position", &rScene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
+	//ImGui::DragFloat3("Light position", &rScene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
+
+	for (auto& [id, light] : rScene.lights) {
+		std::string label = "Delete Light " + std::to_string(id);
+		if (ImGui::Button(label.c_str())) {
+			PendingRemoval removal{};
+			removal.id = id;
+			removal.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_LIGHT;
+
+			rScene.pendingRemovals.push_back(removal);
+		}
+	}
+
 	ImGui::End();
 
 	// Create another window
@@ -71,10 +83,26 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 		ImGui::DragFloat3("Choose Model Location", &type.position[0], 0.25, -5.0f, 5.0f);
 		ImGui::ColorEdit3("Choose Model Color", &type.color[0]);
 
+		// combo box for type of scene object being spawned
+		const char* sceneTypes[] = { "Mesh", "Light" };
+		const std::vector<R_SCENE_TYPE> rSceneTypes = { R_SCENE_TYPE::R_SCENE_TYPE_OBJECT, R_SCENE_TYPE::R_SCENE_TYPE_LIGHT };
+		static const char* currentItem = sceneTypes[0];
+
+		if (ImGui::BeginCombo("Object Type", currentItem)) {
+			for (int n = 0; n < IM_ARRAYSIZE(sceneTypes); n++) {
+				bool isSelected = (currentItem == sceneTypes[n]);
+
+				if (ImGui::Selectable(sceneTypes[n], isSelected)) {
+					currentItem = sceneTypes[n];
+					type.type = rSceneTypes[n];
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
 		type.transform = enginemath::Mat4::translationM(type.position);
-		type.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;
-		type.modelPath = MODEL_PATH;
-		type.texturePath = TEXTURE2_PATH;
 		if (ImGui::Button("Spawn with selected values")) {
 			rScene.pendingSpawns.push_back(type);
 			addMeshMenu = false;

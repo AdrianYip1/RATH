@@ -113,7 +113,7 @@ void Rath::Application::handlePendingSpawns() {
 		if (spawn.type == Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT) {
 			R_SceneObject newObject{};
 
-			newObject.model = renderer->loadModel(spawn.modelPath, spawn.texturePath);
+			newObject.model = renderer->loadModel(MODEL_PATH, TEXTURE_PATH);
 			newObject.baseTransform = spawn.baseTransform;
 			newObject.transform = spawn.transform;
 			newObject.color = spawn.color;
@@ -123,9 +123,9 @@ void Rath::Application::handlePendingSpawns() {
 		}
 		else {
 			R_SceneLight sceneLight{};
-			sceneLight.model = renderer->loadModel(spawn.modelPath, spawn.texturePath);
-			sceneLight.position = enginemath::Vec3(2.0f) * lightIndex;
-			sceneLight.color = enginemath::Vec3(1.0f);
+			sceneLight.model = renderer->loadModel(MODEL2_PATH, TEXTURE2_PATH);
+			sceneLight.position = spawn.position;
+			sceneLight.color = spawn.color;
 			sceneLight.id = lightIndex;
 
 			rScene.lights[lightIndex++] = sceneLight;
@@ -140,7 +140,7 @@ void Rath::Application::handlePendingRemovals() {
 		if (removal.type == Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT) {
 			rScene.objects.erase(removal.id);
 		}
-		else {
+		else if (removal.type == Rath::R_SCENE_TYPE::R_SCENE_TYPE_LIGHT) {
 			rScene.lights.erase(removal.id);
 		}
 	}
