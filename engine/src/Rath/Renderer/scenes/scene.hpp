@@ -23,8 +23,10 @@ namespace Rath {
 		R_Model* model = nullptr;
 		// The default location of an object (starting point)
 		enginemath::Mat4 baseTransform = enginemath::Mat4::identity();
-		// Location of object
+		// Transform of object
 		enginemath::Mat4 transform = enginemath::Mat4::identity();
+		// Location of object
+		enginemath::Vec3 position = enginemath::Vec3(0.0f);
 		// Colour of object
 		enginemath::Vec3 color = enginemath::Vec3(1.0f);
 		// id
@@ -49,6 +51,8 @@ namespace Rath {
 		// Location/Position and colour of the pending object
 		// only the relevant values will be used given the R_SCENE_TYPE
 		enginemath::Mat4 baseTransform = enginemath::Mat4::identity();
+		// Transform is a derived value so it isnt set by hand
+		// It is computed using position, base transform, and any code for animation/etc
 		enginemath::Mat4 transform = enginemath::Mat4::identity();
 		enginemath::Vec3 position = enginemath::Vec3(0.0f);
 		enginemath::Vec3 color = enginemath::Vec3(1.0f);

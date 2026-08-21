@@ -29,7 +29,7 @@ layout (push_constant) uniform Push {
 void main() {
     vec3 diffuse = vec3(0.0);
 
-    for (int i = 0; i < MAX_LIGHTS; i++) {
+    for (int i = 0; i < lightUbo.lightCount; i++) {
         // Light dir from mesh to the light source
         vec3 lightDir = normalize(lightUbo.lights[i].position - modelLocation);
         vec3 norm = normalize(fragNormal);

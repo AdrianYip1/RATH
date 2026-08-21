@@ -102,9 +102,12 @@ void Rath::Application::setUpScene() {
 
 void Rath::Application::updateScene() {
 	f32 t = camera.getElapsedTime();
-	auto it = rScene.objects.find(0);
-	if (it == rScene.objects.end()) return;
-	it->second.transform = it->second.baseTransform * enginemath::Mat4::rotateX(std::sin(t));
+	for (auto& [id, obj] : rScene.objects) {
+		obj.transform = enginemath::Mat4::translationM(obj.position) * 
+							   obj.baseTransform * 
+							   enginemath::Mat4::rotateX(std::sin(t));
+
+	}
 }
 
 
@@ -116,6 +119,7 @@ void Rath::Application::handlePendingSpawns() {
 			newObject.model = renderer->loadModel(MODEL_PATH, TEXTURE_PATH);
 			newObject.baseTransform = spawn.baseTransform;
 			newObject.transform = spawn.transform;
+			newObject.position = spawn.position;
 			newObject.color = spawn.color;
 			newObject.id = objectIndex;
 

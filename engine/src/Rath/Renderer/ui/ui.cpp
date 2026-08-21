@@ -102,7 +102,6 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 			}
 			ImGui::EndCombo();
 		}
-		type.transform = enginemath::Mat4::translationM(type.position);
 		if (ImGui::Button("Spawn with selected values")) {
 			rScene.pendingSpawns.push_back(type);
 			addMeshMenu = false;
@@ -111,8 +110,18 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 	}
 
 	for (auto& [id, model] : rScene.objects) {
-		std::string label = "Delete Model " + std::to_string(id);
-		if (ImGui::Button(label.c_str())) {
+		// Every model should be movable and editable
+		std::string modelLabel = "Update Model " + std::to_string(id);
+		ImGui::Text(modelLabel.c_str());
+
+		// push and pop id because the dragfloat3 shares the same "Position" label for each model
+		// make them independent by making an internal id hashing label + id
+		ImGui::PushID(std::to_string(id).c_str());
+		ImGui::DragFloat3("Position", &model.position[0], 0.25, -5.0f, 5.0f);
+		ImGui::PopID();
+
+		std::string deleteLabel = "Delete Model " + std::to_string(id);
+		if (ImGui::Button(deleteLabel.c_str())) {
 			PendingRemoval removal{};
 			removal.id = id;
 			removal.type = Rath::R_SCENE_TYPE::R_SCENE_TYPE_OBJECT;

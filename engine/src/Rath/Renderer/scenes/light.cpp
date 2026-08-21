@@ -18,6 +18,7 @@ void Rath::R_Light::updateLights(u32 currentImage, const std::unordered_map<u32,
 	size lightCount = std::min(lights.size(), (size)MAX_LIGHTS);
 
 	R_LightUbo lightUbo{};
+	lightUbo.lightCount = lightCount;
 	size i = 0;
 	for (const auto& [id, light] : lights) {
 		// since the ids may not be in order, check if the number of updated
