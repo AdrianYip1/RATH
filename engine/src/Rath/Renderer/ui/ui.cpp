@@ -116,7 +116,7 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 
 		// push and pop id because the dragfloat3 shares the same "Position" label for each model
 		// make them independent by making an internal id hashing label + id
-		ImGui::PushID(std::to_string(id).c_str());
+		ImGui::PushID(id);
 		ImGui::DragFloat3("Position", &model.position[0], 0.25, -5.0f, 5.0f);
 		ImGui::PopID();
 
