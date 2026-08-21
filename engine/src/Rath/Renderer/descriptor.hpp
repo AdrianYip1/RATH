@@ -12,7 +12,6 @@
 #include "buffers/buffer.hpp"
 #include "buffers/uniform.hpp"
 #include "images/texture.hpp"
-#include "buffers/storage.hpp"
 #include "scenes/light.hpp"
 
 // std
@@ -25,7 +24,7 @@
 namespace Rath {
 	class Descriptor {
 		public:
-			Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light, Storage& _storage);
+			Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light);
 			~Descriptor();
 			Descriptor(const Descriptor& other) = delete;
 			Descriptor& operator=(const Descriptor& other) = delete;
@@ -34,23 +33,17 @@ namespace Rath {
 			VkDescriptorSetLayout getUBOSetLayout() const { return uboSetLayout; };
 			// Returns sampler (texture) descriptor set layout
 			VkDescriptorSetLayout getSamplerLayout() const { return samplerSetLayout; };
-			// Returns compute descriptor set layout
-			VkDescriptorSetLayout getComputeSetLayout() const { return computeSetLayout; };
 
-			// Returns the uniform descriptor set at a specified frame 
-			// TODO/REFACTOR: move getUBOSet and getComputeSet out of descriptor
+			// Returns the uniform descriptor set at a specified frame
+			// TODO/REFACTOR: move getUBOSet out of descriptor
 			// and have the same behaviour as rMaterial
 			VkDescriptorSet getUBOSet(u32 frame) const { return uboSets[frame]; }
-			// Returns the compute descriptor set at a specified frame 
-			// TODO/REFACTOR: move getUBOSet and getComputeSet out of descriptor
-			// and have the same behaviour as rMaterial
-			VkDescriptorSet getComputeSet(u32 frame) const { return computeSets[frame]; }
-			
+
 			// R_DESCRIPTOR_TYPE determines what kind of descriptor set will be made
 			// Takes in the pool and setlayout (which work with the passed R_RESCRIPTOR_TYPE)
 			// Passes a pointer to texture object 
-			// TODO: remove unifrombuffer and storage as members and pass them as pointers
-			// aswell, nullptr as defaults
+			// TODO: remove uniformbuffer as a member and pass it as a pointer
+			// aswell, nullptr as default
 			// Allocates a set per frame in flight, then writes the uniform buffer
 			// and the texture view + sampler into them with vkUpdateDescriptorSets
 			std::vector<VkDescriptorSet> createDescriptorSets(R_DESCRIPTOR_TYPE type, VkDescriptorPool descriptorPool,
@@ -60,18 +53,14 @@ namespace Rath {
 			Device& device;
 			UniformBuffer& uniform;
 			R_Light& light;
-			Storage& storage;
 
 			VkDescriptorSetLayout uboSetLayout = VK_NULL_HANDLE;
 			VkDescriptorSetLayout samplerSetLayout = VK_NULL_HANDLE;
-			VkDescriptorSetLayout computeSetLayout = VK_NULL_HANDLE;
 
 			VkDescriptorSetLayout createDescriptorSetLayout(R_DESCRIPTOR_TYPE type);
 
 			VkDescriptorPool uboPool = VK_NULL_HANDLE;
-			VkDescriptorPool computePool = VK_NULL_HANDLE;
 			std::vector<VkDescriptorSet> uboSets;
-			std::vector<VkDescriptorSet> computeSets;
 	};
 
 	// move somewhere else later

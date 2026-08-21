@@ -15,8 +15,7 @@ Rath::Renderer::Renderer(Window& _window, Camera& _camera, Context& _context,
 	renderpass(device, swapchain, depth),
 	uniformBuffer(device, swapchain, buffer, camera),
 	light(device, swapchain, buffer),
-	storage(device, buffer),
-	descriptor(device, uniformBuffer, light, storage),
+	descriptor(device, uniformBuffer, light),
 	pipeline(device, swapchain, renderpass, descriptor),
 	assetManager(device, buffer, descriptor, image, pipeline),
 	ui(window, context, device, renderpass, swapchain, pipeline){
@@ -32,8 +31,6 @@ Rath::Renderer::~Renderer() {
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(device.getDevice(), imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(device.getDevice(), inFlightFences[i], nullptr);
-		vkDestroySemaphore(device.getDevice(), computeFinishedSemaphores[i], nullptr);
-		vkDestroyFence(device.getDevice(), computeInFlightFences[i], nullptr);
 	}
 	for (size i = 0; i < swapchain.getImageCount(); i++) {
 		vkDestroySemaphore(device.getDevice(), renderFinishedSemaphores[i], nullptr);
@@ -51,34 +48,11 @@ Rath::Renderer::~Renderer() {
 // having imageIndex size makes it so sem[0] is only reached when aquire returns image 0,
 // the driver can't return image 0 while image 0's present hasnt consumed yet
 void Rath::Renderer::drawFrame(R_Scene& rScene) {
-	vkWaitForFences(device.getDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+	vkWaitForFences(device.getDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 	uniformBuffer.updateUniformBuffer(currentFrame);
 	// Updates the light's ubo based on the data on the scene lights
 	light.updateLights(currentFrame, rScene.lights);
-
-	// Reset fences only when submitting work
-	vkResetFences(device.getDevice(), 1, &computeInFlightFences[currentFrame]);
-
-	// vkResetCommandBuffer is redundant since the pool is created with 
-	// VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
-	// vkResetCommandBuffer(computeCommandBuffers[currentFrame], 0);
-	recordComputeCommandBuffer(computeCommandBuffers[currentFrame]);
-
-	VkSubmitInfo computeSubmitInfo{};
-	computeSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	computeSubmitInfo.pCommandBuffers = &computeCommandBuffers[currentFrame];
-	computeSubmitInfo.commandBufferCount = 1;
-	computeSubmitInfo.pSignalSemaphores = &computeFinishedSemaphores[currentFrame];
-	computeSubmitInfo.signalSemaphoreCount = 1;
-
-	// Both the semaphore and fence signal when the GPU finished executing every
-	// command in the submit
-	if (vkQueueSubmit(device.getComputeQueue(), 1, &computeSubmitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to submit to compute queue");
-	}
-
-	vkWaitForFences(device.getDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 	u32 imageIndex;
 	VkResult result = vkAcquireNextImageKHR(device.getDevice(), swapchain.getSwapchain(), UINT64_MAX,
@@ -107,9 +81,9 @@ void Rath::Renderer::drawFrame(R_Scene& rScene) {
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	
-	VkSemaphore waitSemaphores[] = { computeFinishedSemaphores[currentFrame], imageAvailableSemaphores[currentFrame] };
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	submitInfo.waitSemaphoreCount = 2;
+	VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 
@@ -172,18 +146,6 @@ void Rath::Renderer::createCommandBuffers() {
 	if (vkAllocateCommandBuffers(device.getDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to allocate command buffers");
 	}
-
-	computeCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-
-	allocInfo = {};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = device.getCommandPool();
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = static_cast<u32>(computeCommandBuffers.size());
-
-	if (vkAllocateCommandBuffers(device.getDevice(), &allocInfo, computeCommandBuffers.data()) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to allocate compute command buffers");
-	}
 }
 
 // Creates the semaphores and fences needed for rendering
@@ -194,9 +156,6 @@ void Rath::Renderer::createSyncObjects() {
 	renderFinishedSemaphores.resize(swapchain.getImageCount());
 	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
-	computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -206,9 +165,7 @@ void Rath::Renderer::createSyncObjects() {
 
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		if (vkCreateSemaphore(device.getDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-			vkCreateFence(device.getDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(device.getDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS ||
-			vkCreateFence(device.getDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS) {
+			vkCreateFence(device.getDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create sync objects");
 		}
 	}
@@ -297,18 +254,6 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 		light.model->draw(commandBuffer);
 	}
 	
-	// DRAW THE PARTICLES VIA STORAGE BUFFER AND PARTICLE PIPELINE
-	VkDescriptorSet particleSet = descriptor.getUBOSet(currentFrame);
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipelineLayout(),
-		0, 1, &particleSet, 0, nullptr);
-	VkDeviceSize offsets[] = { 0 };
-
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getParticlePipeline());
-
-	VkBuffer particleBuffers[] = { storage.getStorageBuffer(currentFrame) };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, particleBuffers, offsets);
-	vkCmdDraw(commandBuffer, PARTICLE_COUNT, 1, 0, 0);
-
 	ui.startFrame();
 	ui.drawUI(rScene);
 	ui.draw(commandBuffer);
@@ -317,29 +262,6 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to record command buffer");
-	}
-}
-
-// Begins a command buffer (compute), binds compute descriptor set, then dispatches
-void Rath::Renderer::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to begin command buffer");
-	}
-
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.getComputePipeline());
-
-	VkDescriptorSet set = descriptor.getComputeSet(currentFrame);
-
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.getComputePipelineLayout(),
-							0, 1, &set, 0, nullptr);
-
-	vkCmdDispatch(commandBuffer, PARTICLE_COUNT / 256, 1, 1);
-
-	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to end command buffer");
 	}
 }
 

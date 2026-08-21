@@ -17,7 +17,6 @@
 #include "descriptor.hpp"
 #include "images/texture.hpp"
 #include "images/color.hpp"
-#include "buffers/storage.hpp"
 #include "images/depth.hpp"
 #include "models/model.hpp"
 #include "Rath/Platform/window.hpp"
@@ -67,7 +66,6 @@ namespace Rath {
 			Renderpass renderpass;
 			UniformBuffer uniformBuffer;
 			R_Light light;
-			Storage storage;
 			Descriptor descriptor;
 			Pipeline pipeline;
 			R_AssetManager assetManager;
@@ -78,15 +76,10 @@ namespace Rath {
 			R_Material rCupMaterial;
 
 			std::vector<VkCommandBuffer> commandBuffers;
-			std::vector<VkCommandBuffer> computeCommandBuffers;
 
 			std::vector<VkSemaphore> imageAvailableSemaphores;
 			std::vector<VkSemaphore> renderFinishedSemaphores;
 			std::vector<VkFence> inFlightFences;
-
-			// Sync objects for compute
-			std::vector<VkSemaphore> computeFinishedSemaphores;
-			std::vector<VkFence> computeInFlightFences;
 
 			u32 currentFrame = 0;
 
@@ -101,9 +94,6 @@ namespace Rath {
 			// dynamic viewport and scissor, then binds the vertex, descriptor and
 			// index data before drawing
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imageIndex, R_Scene& rScene);
-			
-			// Begins a command buffer (compute), binds compute descriptor set, then dispatches
-			void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
-			
+
 	};
 } // namespace Rath

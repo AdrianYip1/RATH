@@ -57,6 +57,10 @@ void Rath::UI::drawUI(R_Scene& rScene) {
 	//ImGui::DragFloat3("Light position", &rScene.lights[0].position.x, 0.25f, -5.0f, 5.0f);
 
 	for (auto& [id, light] : rScene.lights) {
+		ImGui::PushID(id);
+		ImGui::DragFloat3("Position", &light.position[0], 0.25, -5.0f, 5.0f);
+		ImGui::PopID();
+
 		std::string label = "Delete Light " + std::to_string(id);
 		if (ImGui::Button(label.c_str())) {
 			PendingRemoval removal{};

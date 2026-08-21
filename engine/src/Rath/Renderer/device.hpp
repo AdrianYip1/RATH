@@ -59,9 +59,6 @@ namespace Rath {
 			// Returns presentQueue
 			VkQueue getPresentQueue() const { return presentQueue; };
 
-			// Returns computeQueue
-			VkQueue getComputeQueue() const { return computeQueue; };
-
 			// Returns commandPool
 			VkCommandPool getCommandPool() const { return commandPool; };
 
@@ -88,7 +85,6 @@ namespace Rath {
 			// Retrieve queue handles using vkGetDeviceQueue
 			VkQueue graphicsQueue = VK_NULL_HANDLE;
 			VkQueue presentQueue = VK_NULL_HANDLE;
-			VkQueue computeQueue = VK_NULL_HANDLE;
 			VkCommandPool commandPool;
 			VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 

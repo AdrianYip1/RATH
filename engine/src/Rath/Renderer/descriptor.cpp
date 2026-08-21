@@ -1,37 +1,31 @@
 #include "descriptor.hpp"
 
 // Descriptor constructor
-Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light, Storage& _storage) :
-	device(_device), uniform(_uniform), light(_light), storage(_storage) {
+Rath::Descriptor::Descriptor(Device& _device, UniformBuffer& _uniform, R_Light& _light) :
+	device(_device), uniform(_uniform), light(_light) {
 
 	uboSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM);
 	samplerSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER);
-	computeSetLayout = createDescriptorSetLayout(R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE);
 
 	// REFACTOR: remove these and add them into material
 	uboPool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM, MAX_FRAMES_IN_FLIGHT);
-	computePool = createDescriptorPool(device, R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE, MAX_FRAMES_IN_FLIGHT);
 
 	uboSets = createDescriptorSets(R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM, uboPool, uboSetLayout, nullptr);
-	computeSets = createDescriptorSets(R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE, computePool, computeSetLayout, nullptr);
 }
 
 // Descriptor destructor
 Rath::Descriptor::~Descriptor() {
 	vkDestroyDescriptorPool(device.getDevice(), uboPool, nullptr);
-	vkDestroyDescriptorPool(device.getDevice(), computePool, nullptr);
 	vkDestroyDescriptorSetLayout(device.getDevice(), uboSetLayout, nullptr);
 	vkDestroyDescriptorSetLayout(device.getDevice(), samplerSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device.getDevice(), computeSetLayout, nullptr);
 }
 
 // Creates and returns a descriptor set layout depending on R_DESCRIPTOR_TYPE
 VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_TYPE type) {
-	std::array<VkDescriptorSetLayoutBinding, 3> layoutBinding{};
+	std::array<VkDescriptorSetLayoutBinding, 2> layoutBinding{};
 
 	u32 bindingCount = 1;
 	if (type == R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM) bindingCount = 2;
-	if (type == R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE) bindingCount = 3;
 
 	switch (type) {
 		case R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER: {
@@ -59,29 +53,8 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 
 			break;
 		}
-		case R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE: {
-			layoutBinding[0].binding = 0;
-			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			layoutBinding[0].descriptorCount = 1;
-			layoutBinding[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-			layoutBinding[0].pImmutableSamplers = nullptr;
-
-			layoutBinding[1].binding = 1;
-			layoutBinding[1].descriptorCount = 1;
-			layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			layoutBinding[1].pImmutableSamplers = nullptr;
-			layoutBinding[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-
-			layoutBinding[2].binding = 2;
-			layoutBinding[2].descriptorCount = 1;
-			layoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			layoutBinding[2].pImmutableSamplers = nullptr;
-			layoutBinding[2].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-
-			break;
-		}
 	}
-	
+
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	layoutInfo.pBindings = layoutBinding.data();
@@ -105,7 +78,7 @@ VkDescriptorSetLayout Rath::Descriptor::createDescriptorSetLayout(R_DESCRIPTOR_T
 std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR_TYPE type, 
 	VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, Texture* texture) {
 
-	// Compute and uniform need a set per frame
+	// Uniform needs a set per frame
 	const u32 setCount = (type == R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER ? 1 : MAX_FRAMES_IN_FLIGHT);
 
 	std::vector<VkDescriptorSetLayout> layouts(setCount, descriptorSetLayout);
@@ -125,7 +98,7 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 
 	for (size i = 0; i < setCount; i++) {
 
-		std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
 		// Chooses functionality based on the R_DESCRIPTOR_TYPE
 		switch (type) {
@@ -177,50 +150,6 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 				vkUpdateDescriptorSets(device.getDevice(), 1, descriptorWrites.data(), 0, nullptr);
 				break;
 			}
-
-			case R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE: {
-				VkDescriptorBufferInfo bufferInfo{};
-				bufferInfo.buffer = uniform.getUniformBuffer(i);
-				bufferInfo.offset = 0;
-				bufferInfo.range = sizeof(UniformBufferObject);
-
-				VkDescriptorBufferInfo storageBufferInfoLastFrame{};
-				storageBufferInfoLastFrame.buffer = storage.getStorageBuffer((i - 1) % MAX_FRAMES_IN_FLIGHT);
-				storageBufferInfoLastFrame.offset = 0;
-				storageBufferInfoLastFrame.range = sizeof(Particle) * PARTICLE_COUNT;
-
-				VkDescriptorBufferInfo storageBufferInfoCurrentFrame{};
-				storageBufferInfoCurrentFrame.buffer = storage.getStorageBuffer(i);
-				storageBufferInfoCurrentFrame.offset = 0;
-				storageBufferInfoCurrentFrame.range = sizeof(Particle) * PARTICLE_COUNT;
-
-				descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrites[0].dstSet = sets[i];
-				descriptorWrites[0].dstBinding = 0;
-				descriptorWrites[0].dstArrayElement = 0;
-				descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				descriptorWrites[0].descriptorCount = 1;
-				descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-				descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-				descriptorWrites[1].dstSet = sets[i];
-				descriptorWrites[1].dstBinding = 1;
-				descriptorWrites[1].dstArrayElement = 0;
-				descriptorWrites[1].descriptorCount = 1;
-				descriptorWrites[1].pBufferInfo = &storageBufferInfoLastFrame;
-
-				descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-				descriptorWrites[2].dstSet = sets[i];
-				descriptorWrites[2].dstBinding = 2;
-				descriptorWrites[2].dstArrayElement = 0;
-				descriptorWrites[2].descriptorCount = 1;
-				descriptorWrites[2].pBufferInfo = &storageBufferInfoCurrentFrame;
-
-				vkUpdateDescriptorSets(device.getDevice(), 3, descriptorWrites.data(), 0, nullptr);
-				break;
-			}
 		}
 	}
 
@@ -231,8 +160,8 @@ std::vector<VkDescriptorSet> Rath::Descriptor::createDescriptorSets(R_DESCRIPTOR
 // DescriptorSets are allocated using descriptor pools (they get freed when the pool is destroyed)
 // poolSizes determine how many descriptors of each type exist
 VkDescriptorPool Rath::createDescriptorPool(Device& device, R_DESCRIPTOR_TYPE type, u32 setCount) {
-	std::array<VkDescriptorPoolSize, 2> poolSizes{};
-	const u32 poolSizeCount = (type == R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE ? 2 : 1);
+	std::array<VkDescriptorPoolSize, 1> poolSizes{};
+	const u32 poolSizeCount = 1;
 
 	switch (type) {
 		case R_DESCRIPTOR_TYPE::R_TYPE_SAMPLER: {
@@ -245,16 +174,6 @@ VkDescriptorPool Rath::createDescriptorPool(Device& device, R_DESCRIPTOR_TYPE ty
 		case R_DESCRIPTOR_TYPE::R_TYPE_UNIFORM: {
 			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT) * 2;
-
-			break;
-		}
-
-		case R_DESCRIPTOR_TYPE::R_TYPE_COMPUTE: {
-			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			poolSizes[0].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT);
-			poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			// 2 storage buffers
-			poolSizes[1].descriptorCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT) * 2;
 
 			break;
 		}

@@ -34,18 +34,6 @@ namespace Rath {
 			// Returns pipelineLayout
 			VkPipelineLayout getPipelineLayout() const { return pipelineLayout; };
 
-			// Returns computePipeline
-			VkPipeline getComputePipeline() const { return computePipeline; };
-
-			// Returns computePipelineLayout
-			VkPipelineLayout getComputePipelineLayout() const { return computePipelineLayout; };
-		
-			// Returns particlePipeline
-			VkPipeline getParticlePipeline() const { return particlePipeline; };
-
-			// Returns particlePipelineLayout
-			VkPipelineLayout getParticlePipelineLayout() const { return particlePipelineLayout; };
-
 		private:
 			Device& device;
 			Swapchain& swapchain;
@@ -53,19 +41,11 @@ namespace Rath {
 			Descriptor& descriptor;
 
 			VkPipelineLayout pipelineLayout;
-			VkPipelineLayout particlePipelineLayout;
-			VkPipelineLayout computePipelineLayout;
 			VkPipeline graphicsPipeline;
-			VkPipeline computePipeline;
-			VkPipeline particlePipeline;
 
 			// Builds every create info the pipeline needs, then creates the layout
 			// and the pipeline. Viewport and scissor are dynamic, set at record time
 			void createGraphicsPipeline();
-
-			void createComputePipeline();
-
-			void createParticlePipeline();
 
 			// Takes the byte data of a shader and returns a corresponding shader module
 			VkShaderModule createShaderModule(const std::vector<char>& code);
