@@ -82,7 +82,7 @@ void Rath::Application::setUpScene() {
 
 	R_SceneObject cupObject{};
 	cupObject.model = renderer->loadModel(MODEL2_PATH, TEXTURE2_PATH);
-	cupObject.transform = enginemath::Mat4::translationM(enginemath::Vec3(4.0f, 2.0f, 2.0f));
+	cupObject.position = enginemath::Vec3(4.0f, 2.0f, 2.0f);
 	cupObject.color = enginemath::Vec3(1.0f, 0.0f, 0.0f);
 	cupObject.id = objectIndex;
 
@@ -101,12 +101,12 @@ void Rath::Application::setUpScene() {
 
 void Rath::Application::updateScene() {
 	f32 t = camera.getElapsedTime();
-	//for (auto& [id, obj] : rScene.objects) {
-		//obj.transform = enginemath::Mat4::translationM(obj.position) *
-							   //obj.baseTransform *
+	for (auto& [id, obj] : rScene.objects) {
+		obj.transform = enginemath::Mat4::translationM(obj.position) *
+						obj.baseTransform;
 							   //enginemath::Mat4::rotateX(std::sin(t));
 
-	//}
+	}
 }
 
 

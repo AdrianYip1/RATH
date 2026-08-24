@@ -81,9 +81,19 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 				}
 			}
 
+			// number of vertices in the primitive since position's
+			// accessor's count has one position per vertex
 			cgltf_size n = posAccessor->count;
 
+			// basically the vertices and indices of all the
+			// primitives are being compacted into one vector
+			// so the offset is needed to keep track of which
+			// indices are drawn for each primitive -> adding vertices size after one has been pushed
+			// to ensure the next primitive's indices correspond
+			// to the location they are being pushed into
 			u32 vertexOffset = static_cast<u32>(vertices.size());
+
+			// loop for every vertex
 			for (size s = 0; s < n; s++) {
 				cgltf_accessor_read_float(posAccessor, s, vertex.pos.elements, 3);
 				if (normalAccessor) cgltf_accessor_read_float(normalAccessor, s, vertex.normal.elements, 3);
@@ -93,8 +103,8 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 				enginemath::Vec4 p = worldTransform * enginemath::Vec4::toVec4Pos(vertex.pos);
 				vertex.pos = { p.x, p.y, p.z };
 
-				enginemath::Vec4 nrm = worldTransform * enginemath::Vec4::toVec4Dir(vertex.normal);
-				vertex.normal = { nrm.x, nrm.y, nrm.z };
+				enginemath::Vec4 norm = worldTransform * enginemath::Vec4::toVec4Dir(vertex.normal);
+				vertex.normal = { norm.x, norm.y, norm.z };
 
 				vertices.push_back(vertex);
 			}
@@ -107,6 +117,7 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 		}
 	}
 
+	// recursive call to handle every node in the scene
 	for (size i = 0; i < node->children_count; i++) {
 		handleNodes(node->children[i]);
 	}
