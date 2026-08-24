@@ -16,6 +16,7 @@
 #include <cstring>
 #include <array>
 
+struct cgltf_node;
 
 namespace Rath {
 	class R_Model {
@@ -25,6 +26,7 @@ namespace Rath {
 			R_Model(const R_Model& other) = delete;
 			R_Model& operator=(const R_Model& other) = delete;
 
+			void handleNodes(cgltf_node* node);
 			static bool rCreateModel(Device& _device, Buffer& _buffer,
 									 const R_ModelCreateInfo& info, R_Model* _model);
 

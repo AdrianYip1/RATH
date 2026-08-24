@@ -16,7 +16,7 @@
 Rath::Application::Application(u32 width, u32 height, 
 	const char* title) : 
 	window(width, height, title),
-	input(window), camera(enginemath::Vec3(0.0f, 0.5f, 4.0f), width / (f32)height), 
+	input(window), camera(enginemath::Vec3(0.0f, 0.5f, 4.0f), width / (f32)height),
 	cameraController(window, input, camera),
 	context(std::make_unique<Context>(window)),
 	device(std::make_unique<Device>(*context)),
@@ -75,7 +75,6 @@ void Rath::Application::mainLoop() {
 void Rath::Application::setUpScene() {
 	R_SceneObject roomObject{};
 	roomObject.model = renderer->loadModel(MODEL_PATH, TEXTURE_PATH);
-	roomObject.baseTransform = enginemath::Mat4::rotateX(enginemath::toRad(-90.0f));
 	roomObject.transform = roomObject.baseTransform;
 	roomObject.id = objectIndex;
 
@@ -102,12 +101,12 @@ void Rath::Application::setUpScene() {
 
 void Rath::Application::updateScene() {
 	f32 t = camera.getElapsedTime();
-	for (auto& [id, obj] : rScene.objects) {
-		obj.transform = enginemath::Mat4::translationM(obj.position) * 
-							   obj.baseTransform * 
-							   enginemath::Mat4::rotateX(std::sin(t));
+	//for (auto& [id, obj] : rScene.objects) {
+		//obj.transform = enginemath::Mat4::translationM(obj.position) *
+							   //obj.baseTransform *
+							   //enginemath::Mat4::rotateX(std::sin(t));
 
-	}
+	//}
 }
 
 

@@ -1,6 +1,8 @@
 #include "model.hpp"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "vendor/tiny_obj_loader.h"
+#define CGLTF_IMPLEMENTATION
+#include "vendor/cgltf.h"
 
 // std
 #include <unordered_map>
@@ -29,60 +31,113 @@ bool Rath::R_Model::rCreateModel(Device& _device, Buffer& _buffer,
 	_model->pipelineLayout = info.pipelineLayout;
 
 	_model->loadModel();
+
 	_model->createVertexBuffer();
 	_model->createIndexBuffer();
 	
 	return true;
 }
 
-void Rath::R_Model::loadModel() {
-	tinyobj::attrib_t attrib;
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	std::string err;
-	std::string warn;
+void Rath::R_Model::handleNodes(cgltf_node* node) {
+	// If end of the recursive call, nothing will happen
+	if (node->mesh) {
+		f32 m[16];
+		cgltf_node_transform_world(node, m);
 
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
-		throw std::runtime_error(err);
-	}
+		enginemath::Mat4 worldTransform(
+			enginemath::Vec4(m[0], m[1], m[2], m[3]),
+			enginemath::Vec4(m[4], m[5], m[6], m[7]),
+			enginemath::Vec4(m[8], m[9], m[10], m[11]),
+			enginemath::Vec4(m[12], m[13], m[14], m[15])
+		);
 
-	std::unordered_map<Vertex, u32> uniqueVertices{};
-
-	// Combine all the shapes into a single model
-	for (const auto& shape : shapes) {
-		for (const auto& index : shape.mesh.indices) {
+		for (size i = 0; i < node->mesh->primitives_count; i++) {
 			Vertex vertex{};
+			cgltf_primitive* prim = &node->mesh->primitives[i];
 
-			vertex.pos = {
-				attrib.vertices[3 * index.vertex_index + 0],
-				attrib.vertices[3 * index.vertex_index + 1],
-				attrib.vertices[3 * index.vertex_index + 2],
-			};
+			cgltf_accessor* posAccessor = nullptr;
+			cgltf_accessor* normalAccessor = nullptr;
+			cgltf_accessor* texCoordAccessor = nullptr;
+			cgltf_accessor* colorAccessor = nullptr;
 
-			vertex.texCoord = {
-				attrib.texcoords[2 * index.texcoord_index + 0],
-				// OBJ format assumes 0 is the bottom, in Vulkan top is bottom
-				1.0f - attrib.texcoords[2 * index.texcoord_index + 1],
-			};
+			for (size a = 0; a < prim->attributes_count; a++) {
+				cgltf_attribute* attrib = &prim->attributes[a];
 
-			vertex.color = { 1.0f, 1.0f, 1.0f };
+				if (attrib->type == cgltf_attribute_type_position) {
+					posAccessor = attrib->data;
+					continue;
+				}
+				else if (attrib->type == cgltf_attribute_type_normal) {
+					normalAccessor = attrib->data;
+					continue;
+				}
+				else if (attrib->type == cgltf_attribute_type_color) {
+					colorAccessor = attrib->data;
+					continue;
+				}
+				else if (attrib->type == cgltf_attribute_type_texcoord) {
+					texCoordAccessor = attrib->data;
+					continue;
+				}
+			}
 
-			vertex.normal = {
-				attrib.normals[3 * index.normal_index + 0],
-				attrib.normals[3 * index.normal_index + 1],
-				attrib.normals[3 * index.normal_index + 2]
-			};
+			cgltf_size n = posAccessor->count;
 
+			u32 vertexOffset = static_cast<u32>(vertices.size());
+			for (size s = 0; s < n; s++) {
+				cgltf_accessor_read_float(posAccessor, s, vertex.pos.elements, 3);
+				if (normalAccessor) cgltf_accessor_read_float(normalAccessor, s, vertex.normal.elements, 3);
+				if (texCoordAccessor) cgltf_accessor_read_float(texCoordAccessor, s, vertex.texCoord.data, 2);
+				vertex.color = enginemath::Vec3(1.0f);
 
-			if (uniqueVertices.count(vertex) == 0) {
-				// Key matches with the order the vertex was placed into vertices
-				uniqueVertices[vertex] = static_cast<u32>(vertices.size());
+				enginemath::Vec4 p = worldTransform * enginemath::Vec4::toVec4Pos(vertex.pos);
+				vertex.pos = { p.x, p.y, p.z };
+
+				enginemath::Vec4 nrm = worldTransform * enginemath::Vec4::toVec4Dir(vertex.normal);
+				vertex.normal = { nrm.x, nrm.y, nrm.z };
+
 				vertices.push_back(vertex);
 			}
 
-			indices.push_back(uniqueVertices[vertex]);
+			// indices
+			for (cgltf_size index = 0; index < prim->indices->count; index++) {
+				cgltf_size idx = cgltf_accessor_read_index(prim->indices, index);
+				indices.push_back(vertexOffset + static_cast<u32>(idx));
+			}
 		}
 	}
+
+	for (size i = 0; i < node->children_count; i++) {
+		handleNodes(node->children[i]);
+	}
+}
+
+void Rath::R_Model::loadModel() {
+	cgltf_options options = {};
+	cgltf_data* data = NULL;
+
+	if (cgltf_parse_file(&options, modelPath.c_str(), &data) != cgltf_result_success) {
+		throw std::runtime_error("Failed to parse gltf");
+	};
+
+	if (cgltf_load_buffers(&options, data, modelPath.c_str()) != cgltf_result_success) {
+		throw std::runtime_error("Failed to load gltf buffers (is the .bin next to the .gltf?)");
+	}
+
+	for (cgltf_size i = 0; i < data->scene->nodes_count; i++) {
+		handleNodes(data->scene->nodes[i]);
+	}
+
+	cgltf_free(data);
+	//tinyobj::attrib_t attrib;
+	//std::vector<tinyobj::shape_t> shapes;
+	//std::vector<tinyobj::material_t> materials;
+	//std::string err;
+	//std::string warn;
+
+	//if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
+		//throw std::runtime_error(err);
+	//}
 }
 
 // Wrapper for creating the vertex buffer

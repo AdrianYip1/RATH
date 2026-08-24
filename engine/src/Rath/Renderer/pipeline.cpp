@@ -93,7 +93,8 @@ void Rath::Pipeline::createGraphicsPipeline() {
 	rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizer.cullMode = VK_CULL_MODE_NONE;
+	//rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.depthBiasEnable = VK_FALSE;
 
