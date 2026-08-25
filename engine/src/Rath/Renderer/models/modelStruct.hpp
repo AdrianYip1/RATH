@@ -19,6 +19,13 @@
 #include <unordered_map>
 
 namespace Rath {
+	struct R_Primitive {
+		u32 indexOffset;
+		u32 indexCount;
+		std::string textureUri;
+		R_Material* material = nullptr;
+	};
+
 	// The expanding model struct for RATH
 	// The create info describes the mesh asset, no placements etc
 	struct R_ModelCreateInfo {
@@ -28,7 +35,6 @@ namespace Rath {
 		VkPipeline pipeline = VK_NULL_HANDLE;
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		std::string modelPath;
-		R_Material* material = nullptr;
 	};
 
 } // namespace Rath

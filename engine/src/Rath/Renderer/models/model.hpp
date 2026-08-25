@@ -37,7 +37,7 @@ namespace Rath {
 
 			VkPipeline getPipeline() const { return pipeline; };
 			VkPipelineLayout getPipelineLayout() const { return pipelineLayout; };
-
+			std::vector<R_Primitive>& getPrimitives() { return primitives; };
 
 		private:
 			Device* device = nullptr;
@@ -48,14 +48,12 @@ namespace Rath {
 
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
+			std::vector<R_Primitive> primitives;
 
 			VkBuffer vertexBuffer = VK_NULL_HANDLE;
 			VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
 			VkBuffer indexBuffer = VK_NULL_HANDLE;
 			VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
-
-			// Model stores the material
-			R_Material* material = nullptr;
 
 			//Pipeline* pipeline = nullptr;
 			VkPipeline pipeline = nullptr;

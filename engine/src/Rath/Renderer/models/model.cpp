@@ -26,7 +26,6 @@ bool Rath::R_Model::rCreateModel(Device& _device, Buffer& _buffer,
 	_model->device = &_device;
 	_model->buffer = &_buffer;
 	_model->modelPath = info.modelPath;
-	_model->material = info.material;
 	_model->pipeline = info.pipeline;
 	_model->pipelineLayout = info.pipelineLayout;
 
@@ -53,6 +52,8 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 
 		for (size i = 0; i < node->mesh->primitives_count; i++) {
 			Vertex vertex{};
+			R_Primitive primitive{};
+
 			cgltf_primitive* prim = &node->mesh->primitives[i];
 
 			cgltf_accessor* posAccessor = nullptr;
@@ -109,11 +110,33 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 				vertices.push_back(vertex);
 			}
 
+			// material
+			cgltf_material* material = prim->material;
+			if (material && material->has_pbr_metallic_roughness) {
+				// later implementation when shaders have pbr
+			}
+
+			// create a primitive with offset/indices/texture uri
+			primitive.indexCount = prim->indices->count;
+			primitive.indexOffset = (u32)indices.size();
+			
+			// get texture uri if available
+			std::string textureUri;
+			if (prim->material && prim->material->has_pbr_metallic_roughness) {
+				cgltf_texture* tex = prim->material->pbr_metallic_roughness.base_color_texture.texture;
+				if (tex && tex->image && tex->image->uri) {
+					textureUri = tex->image->uri;
+				}
+			}
+			primitive.textureUri = textureUri;
+			primitives.push_back(primitive);
+
 			// indices
 			for (cgltf_size index = 0; index < prim->indices->count; index++) {
 				cgltf_size idx = cgltf_accessor_read_index(prim->indices, index);
 				indices.push_back(vertexOffset + static_cast<u32>(idx));
 			}
+
 		}
 	}
 
@@ -221,16 +244,13 @@ void Rath::R_Model::bind(VkCommandBuffer commandBuffer) {
 }
 
 void Rath::R_Model::draw(VkCommandBuffer commandBuffer) {
-	vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indices.size()), 1, 0, 0, 0);
-}
+	for (auto& p : primitives) {
+		VkDescriptorSet set = p.material->getDescriptorSet();
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
+								pipelineLayout, 1, 1, &set, 0, nullptr);
 
-// Binds sets 1 and 2 later on
-// Set 0: per frame
-// Set 1: per material (shared by every object using this material)
-// Set 2: per object
-void Rath::R_Model::bindDescriptors(VkCommandBuffer commandBuffer) {
-	VkDescriptorSet set = material->getDescriptorSet();
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 1, 1, &set, 0, nullptr);
+		vkCmdDrawIndexed(commandBuffer, p.indexCount, 1, p.indexOffset, 0, 0);
+	}
 }
 
 void Rath::R_Model::bindPipeline(VkCommandBuffer commandBuffer) {

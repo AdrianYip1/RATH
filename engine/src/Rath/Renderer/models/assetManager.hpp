@@ -24,7 +24,7 @@ namespace Rath {
 			~R_AssetManager();
 
 			// called by application.cpp
-			R_Model* setUpModel(const std::string modelPath, const std::string texturePath);
+			R_Model* setUpModel(const std::string modelPath, const std::string texturePath = " ");
 
 		private:
 			Device& device;

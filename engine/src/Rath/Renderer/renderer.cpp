@@ -229,7 +229,6 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	for (auto& [id, obj] : rScene.objects) {
 		obj.model->bind(commandBuffer);
 		obj.model->bindPipeline(commandBuffer);
-		obj.model->bindDescriptors(commandBuffer);
 
 		MeshPushConstant modelPushConstant{
 			obj.transform, obj.color
@@ -243,7 +242,6 @@ void Rath::Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer, u32 imag
 	for (auto& [id, light] : rScene.lights) {
 		light.model->bind(commandBuffer);
 		light.model->bindPipeline(commandBuffer);
-		light.model->bindDescriptors(commandBuffer);
 
 		MeshPushConstant lightPushConstant{
 			enginemath::Mat4::translationM(light.position), light.color
