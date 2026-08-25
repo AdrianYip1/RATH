@@ -153,7 +153,7 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 				for (cgltf_size v = 0; v < posDelta->count; v++) {
 					f32 d[3];
 					cgltf_accessor_read_float(posDelta, v, d, 3);
-					deltas.push_back(d);
+					deltas.push_back(enginemath::Vec3(d[0], d[1], d[2]));
 				}
 			}
 		}
