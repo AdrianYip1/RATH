@@ -49,6 +49,7 @@ namespace Rath {
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
 			std::vector<R_Primitive> primitives;
+			std::vector<enginemath::Vec3> deltas;
 
 			VkBuffer vertexBuffer = VK_NULL_HANDLE;
 			VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;

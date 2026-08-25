@@ -137,6 +137,25 @@ void Rath::R_Model::handleNodes(cgltf_node* node) {
 				indices.push_back(vertexOffset + static_cast<u32>(idx));
 			}
 
+			// deltas for morph targets
+			for (cgltf_size index = 0; index < prim->targets_count; index++) {
+				cgltf_morph_target* morphTarget = &prim->targets[index];
+
+				cgltf_accessor* posDelta = nullptr;
+				for (cgltf_size a = 0; a < morphTarget->attributes_count; a++) {
+					if (morphTarget->attributes[a].type == cgltf_attribute_type_position) {
+						posDelta = morphTarget->attributes[a].data;
+						break;
+					}
+				}
+				if (!posDelta) continue;
+
+				for (cgltf_size v = 0; v < posDelta->count; v++) {
+					f32 d[3];
+					cgltf_accessor_read_float(posDelta, v, d, 3);
+					deltas.push_back(d);
+				}
+			}
 		}
 	}
 
