@@ -13,10 +13,10 @@
 // Short aliases for commonly used types
 namespace Rath {
 	// Defining the model and texture paths (move later)
-	const std::string MODEL_PATH = "../../../../engine/models/test.gltf";
+	const std::string MODEL_PATH = "../../../../engine/models/dragon.gltf";
 	const std::string TEXTURE_PATH = "../../../../engine/textures/viking_room.png";
 
-	const std::string MODEL2_PATH = "../../../../engine/models/test.gltf";
+	const std::string MODEL2_PATH = "../../../../engine/models/dragon.gltf";
 	const std::string TEXTURE2_PATH = "../../../../engine/textures/texture.jpg";
 	
 	// The amount of frames that can be processed at the same time
