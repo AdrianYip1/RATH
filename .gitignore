@@ -13,3 +13,9 @@ cmake-build-*/
 *.obj
 !engine/models/*.obj
 *.exe
+
+# large 3D model assets (textures + binary buffers) — kept local, not versioned.
+# GitHub rejects files >100MB and warns >50MB. Re-download/regenerate to reproduce.
+engine/models/*.png
+engine/models/*.jpg
+engine/models/*.bin
