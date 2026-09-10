@@ -1,6 +1,8 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+
+#include "../Platform/window.hpp"
 #include <Rath/Core/defines.hpp>
 
 namespace RATH {
@@ -15,14 +17,17 @@ namespace RATH {
 
 	class Context {
 	public:
-		Context();
+		Context(Window& _window);
 		~Context();
 		Context(const Context& other) = delete;
 		Context& operator=(const Context& other) = delete;
 
 		VkInstance getInstance() { return instance; };
+		VkSurfaceKHR getSurface() { return surface; };
 
 	private:
+		Window& window;
+
 		void createInstance();
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
@@ -30,8 +35,10 @@ namespace RATH {
 		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& debugCreateInfo);
 		void setupDebug();
 
+		void createSurface();
+
 		VkInstance instance = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
-
+		VkSurfaceKHR surface = VK_NULL_HANDLE;
 	};
 } // namespace RATH

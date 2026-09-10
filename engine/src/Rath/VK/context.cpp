@@ -31,12 +31,14 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	}
 }
 
-RATH::Context::Context() {
+RATH::Context::Context(Window& _window) : window(_window) {
 	createInstance();
 	setupDebug();
+	createSurface();
 }
 
 RATH::Context::~Context() {
+	vkDestroySurfaceKHR(instance, surface, nullptr);
 	if (RATH_DEBUG) DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 	vkDestroyInstance(instance, nullptr);
 }
@@ -135,5 +137,11 @@ void RATH::Context::setupDebug() {
 
 	if (CreateDebugUtilsMessengerEXT(instance, &debugCreateInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
 		throw std::runtime_error("ERROR: context.cpp -> setupDebug -> CreateDebugUtilsMessengerEXT()");
+	}
+}
+
+void RATH::Context::createSurface() {
+	if (glfwCreateWindowSurface(instance, window.getWindow(), nullptr, &surface) != VK_SUCCESS) {
+		throw std::runtime_error("ERROR: context.cpp -> createSurface() -> glfwCreateWindowSurface()");
 	}
 }
