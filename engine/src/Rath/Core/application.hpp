@@ -3,7 +3,7 @@
 #include "Rath/Core/defines.hpp"
 #include "Rath/Platform/window.hpp"
 
-namespace Rath {
+namespace RATH{
 	class Application {
 		public:
 			Application(u32 width, u32 height, const char* title);
@@ -20,4 +20,4 @@ namespace Rath {
 			// Polls the window until it closes
 			void mainLoop();
 	};
-} // namespace Rath
+} // namespace RATH

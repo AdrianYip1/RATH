@@ -1,10 +1,6 @@
 #include "Rath/Core/defines.hpp"
 #include "Rath/Core/application.hpp"
 
-#include <iostream>
-#include <stdexcept>
-#include <cstdlib>
-
 int main() {
 // Detects the platform RATH is being ran on
 #if defined(RATH_PLATFORM_WINDOWS)
@@ -16,7 +12,7 @@ int main() {
 #endif
 	
 	// Init application with dimensions and name
-	Rath::Application app(1600, 1200, "RATH");
+	RATH::Application app(1600, 1200, "RATH");
 	try {
 		// Start render loop
 		app.run();

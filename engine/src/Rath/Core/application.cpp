@@ -1,17 +1,17 @@
 #include "application.hpp"
 
-Rath::Application::Application(u32 width, u32 height, const char* title) :
+RATH::Application::Application(u32 width, u32 height, const char* title) :
 	window(width, height, title) {
 }
 
-Rath::Application::~Application() {
+RATH::Application::~Application() {
 }
 
-void Rath::Application::run() {
+void RATH::Application::run() {
 	mainLoop();
 }
 
-void Rath::Application::mainLoop() {
+void RATH::Application::mainLoop() {
 	while (!window.shouldClose()) {
 		window.pollEvents();
 	}

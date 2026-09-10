@@ -1,12 +1,12 @@
 #pragma once
 #define GLFW_INCLUDE_VULKAN
 
-// Rath files
+// RATHfiles
 #include "Rath/Core/defines.hpp"
 
 struct GLFWwindow;
 
-namespace Rath {
+namespace RATH{
 	class Window {
 		public:
 			Window(u32 width, u32 height, const char* title);
@@ -42,4 +42,4 @@ namespace Rath {
 			// Sets framebufferResized to true when a resize is detected
 			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	};
-} // namespace Rath
+} // namespace RATH

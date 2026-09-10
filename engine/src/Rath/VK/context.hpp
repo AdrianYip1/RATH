@@ -1,8 +1,9 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
 #include <Rath/Core/defines.hpp>
 
-namespace RATH {
+namespace RATH{
 	class Context {
 	public:
 		Context();
@@ -12,5 +13,7 @@ namespace RATH {
 
 	private:
 		void createInstance();
+
+		VkInstance instance = VK_NULL_HANDLE;
 	};
 } // namespace RATH

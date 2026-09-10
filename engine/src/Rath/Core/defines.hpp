@@ -1,14 +1,14 @@
 // Aliases, detection for platform/debug mode
 #pragma once
 
-// Rath files
+// RATHfiles
 #include "Rath/Core/platformDetection.hpp"
 #include "Rath/Core/asserts.hpp"
 
 #include "stdIncludes.hpp"
 
 // Short aliases for commonly used types
-namespace Rath {
+namespace RATH{
 	// The amount of frames that can be processed at the same time
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -26,4 +26,4 @@ namespace Rath {
 
 	using f32 = float;
 	using f64 = double;
-} // namespace Rath
+} // namespace RATH
