@@ -19,7 +19,7 @@ add_custom_target(shaders DEPENDS ${SPV_FILES})
 
 add_library(rath_engine STATIC
      "src/Rath/Platform/window.cpp"
-     "src/Rath/Core/application.cpp")
+     "src/Rath/Core/application.cpp" "src/Rath/VK/device.cpp" "src/Rath/VK/context.cpp")
 
 
 target_include_directories(rath_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
