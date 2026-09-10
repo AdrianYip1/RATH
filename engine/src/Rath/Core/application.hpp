@@ -1,28 +1,9 @@
 #pragma once
 
-// Rath files
+#include "Rath/Core/defines.hpp"
 #include "Rath/Platform/window.hpp"
-#include "Rath/Platform/input.hpp"
-#include "camera/camera.hpp"
-#include "camera/cameraController.hpp"
-
-#include "Rath/Renderer/scenes/scene.hpp"
-
-
-// std
-#include <chrono>
-#include <memory>
 
 namespace Rath {
-	class Context;
-	class Device;
-	class Buffer;
-	class Renderer;
-	class UI;
-
-	class R_Model;
-	class R_Material;
-
 	class Application {
 		public:
 			Application(u32 width, u32 height, const char* title);
@@ -30,38 +11,13 @@ namespace Rath {
 			Application& operator=(const Application& other) = delete;
 			Application(Application&& other) = delete;
 
-			// Entrypoint to the application, runs mainLoop
+			// Entrypoint, runs the main loop
 			void run();
 
 		private:
-
 			Window window;
-			Input input;
-			Camera camera;
-			CameraController cameraController;
-			std::unique_ptr<Context> context;
-			std::unique_ptr<Device> device;
-			std::unique_ptr<Buffer> buffer;
 
-			// Smart pointer used for renderer to automatically manage memory
-			std::unique_ptr<Renderer> renderer;
-
-			// Application will manage the scene objects
-			R_Scene rScene;
-			u32 objectIndex = 0;
-			u32 lightIndex = 0;
-
-			// Main loop which polls for window resize/close/minimize and starts the drawing loop
+			// Polls the window until it closes
 			void mainLoop();
-
-			void setUpScene();
-
-			void updateScene();
-
-			void handlePendingSpawns();
-
-			void handlePendingRemovals();
-
-			
 	};
 } // namespace Rath
