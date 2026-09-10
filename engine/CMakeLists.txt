@@ -24,6 +24,8 @@ add_library(rath_engine STATIC
 
 target_include_directories(rath_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+target_precompile_headers(rath_engine PRIVATE src/Rath/Core/stdIncludes.hpp)
+
 target_link_libraries(rath_engine
     PUBLIC  enginemath::enginemath
     PRIVATE glfw Vulkan::Vulkan)

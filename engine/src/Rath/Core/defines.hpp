@@ -5,10 +5,7 @@
 #include "Rath/Core/platformDetection.hpp"
 #include "Rath/Core/asserts.hpp"
 
-// std
-#include <cstdint>
-#include <cstddef>
-#include <string>
+#include "stdIncludes.hpp"
 
 // Short aliases for commonly used types
 namespace Rath {
