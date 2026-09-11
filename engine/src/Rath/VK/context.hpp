@@ -1,9 +1,9 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+#include <Rath/Core/defines.hpp>
 
 #include "../Platform/window.hpp"
-#include <Rath/Core/defines.hpp>
 
 namespace RATH {
 
@@ -26,17 +26,15 @@ namespace RATH {
 		VkSurfaceKHR getSurface() { return surface; };
 
 	private:
-		Window& window;
-
 		void createInstance();
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
 
 		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& debugCreateInfo);
 		void setupDebug();
-
 		void createSurface();
 
+		Window& window;
 		VkInstance instance = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;

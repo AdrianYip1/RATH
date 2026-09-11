@@ -2,18 +2,20 @@
 #include <vulkan/vulkan.h>
 
 #include <Rath/Core/defines.hpp>
+#include "../Platform/window.hpp"
 #include "context.hpp"
 #include "device.hpp"
 
 namespace RATH {
 	class Swapchain {
 	public:
-		Swapchain(Context& _context, Device& _device);
+		Swapchain(Window& _window, Context& _context, Device& _device);
 		~Swapchain();
 		Swapchain(const Swapchain& other) = delete;
 		Swapchain& operator=(const Swapchain& other) = delete;
 
 	private:
+		Window& window;
 		Context& context;
 		Device& device;
 

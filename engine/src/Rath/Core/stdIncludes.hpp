@@ -17,9 +17,11 @@
 // types
 #include <cstdint>
 #include <cstddef>
+#include <cstring>
 
 // algorithms
 #include <algorithm>
+#include <limits>
 
 // errors
 #include <stdexcept>

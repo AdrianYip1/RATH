@@ -54,7 +54,7 @@ void RATH::Context::createInstance() {
 		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 		.pApplicationName = "RATH",
 		.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-		.pEngineName = "RATHENGINE",
+		.pEngineName = "RATH ENGINE",
 		.engineVersion = VK_MAKE_VERSION(1, 0, 0),
 		.apiVersion = VK_API_VERSION_1_0,
 	};
