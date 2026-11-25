@@ -36,6 +36,10 @@ namespace RATH {
 		VkQueue getPresentQ() { return presentQueue; };
 		VkQueue getComputeQ() { return computeQueue; };
 
+		// One-off commands
+		VkCommandBuffer beginSingleTimeCommands();
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
 		static SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
 		static std::optional<RATH::QueueInfos> findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
@@ -51,7 +55,11 @@ namespace RATH {
 		VkQueue presentQueue = VK_NULL_HANDLE;
 		VkQueue computeQueue = VK_NULL_HANDLE;
 
+		// used only for single time commands
+		VkCommandPool transientCommandPool = VK_NULL_HANDLE;
+
 		static VkInstance createInstance();
+		static VkCommandPool createTransientCommandPool(VkDevice logicalDevice, u32 queueFamilyIdx);
 		static VkDebugUtilsMessengerEXT createDebugMessenger(VkInstance instance);
 		
 		static VkSurfaceKHR createSurface(VkInstance instance, GLFWwindow* window);

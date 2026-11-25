@@ -43,9 +43,12 @@ RATH::Device::Device(GLFWwindow* window) :
 	vkGetDeviceQueue(logicalDevice, queueInfos.graphicsQueueIdx.value(), 0, &graphicsQueue);
 	vkGetDeviceQueue(logicalDevice, queueInfos.presentQueueIdx.value(), 0, &presentQueue);
 	vkGetDeviceQueue(logicalDevice, queueInfos.computeQueueIdx.value(), 0, &computeQueue);
+
+	transientCommandPool = createTransientCommandPool(logicalDevice, queueInfos.graphicsQueueIdx.value());
 }
 
 RATH::Device::~Device() {
+	vkDestroyCommandPool(logicalDevice, transientCommandPool, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	if (debugMessenger) {
@@ -289,4 +292,69 @@ RATH::SwapchainSupportDetails RATH::Device::querySwapchainSupport(VkPhysicalDevi
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &swapchainSupport.capabilities);
 	return swapchainSupport;
+}
+
+VkCommandPool RATH::Device::createTransientCommandPool(VkDevice logicalDevice, u32 queueFamilyIdx) {
+	VkCommandPoolCreateInfo poolCreateInfo = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		// Hint to the driver that command buffers from this pool are short lived
+		.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT,
+		.queueFamilyIndex = queueFamilyIdx
+	};
+
+	VkCommandPool commandPool = VK_NULL_HANDLE;
+
+	if (vkCreateCommandPool(logicalDevice, &poolCreateInfo, nullptr, &commandPool) != VK_SUCCESS) {
+		throw std::runtime_error("ERROR: vkDevice.cpp -> createTransientCommandPool()");
+	}
+
+	return commandPool;
+}
+
+VkCommandBuffer RATH::Device::beginSingleTimeCommands() {
+	VkCommandBufferAllocateInfo allocInfo = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		.commandPool = transientCommandPool,
+		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		.commandBufferCount = 1
+	};
+
+	VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+	if (vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer) != VK_SUCCESS) {
+		throw std::runtime_error("ERROR: vkDevice.cpp -> beginSingleTimeCommands() allocate");
+	}
+
+	VkCommandBufferBeginInfo beginInfo = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
+	};
+
+	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+		vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
+		throw std::runtime_error("ERROR: vkDevice.cpp -> beginSingleTimeCommands() begin");
+	}
+
+	return commandBuffer;
+}
+
+void RATH::Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+		vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
+		throw std::runtime_error("ERROR: vkDevice.cpp -> endSingleTimeCommands() end");
+	}
+
+	VkSubmitInfo submitInfo = {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &commandBuffer
+	};
+
+	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+		vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
+		throw std::runtime_error("ERROR: vkDevice.cpp -> endSingleTimeCommands() submit");
+	}
+
+	vkQueueWaitIdle(graphicsQueue);
+
+	vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
 }

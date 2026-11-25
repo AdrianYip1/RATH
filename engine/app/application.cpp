@@ -34,16 +34,16 @@ RATH::Application::Application(const ApplicationConfig& config) :
 {
 	// handle vertex buffers
 	VkDeviceSize bytes = sizeof(Vertex) * vertices.size();
-	auto vertexBuffer = std::make_unique<Buffer>(*device, bytes, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	vertexBuffer->upload(vertices.data(), bytes);
+	auto vertexBuffer = std::make_unique<Buffer>(*device, bytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	vertexBuffer->upload(*device, vertices.data(), bytes);
 	vertexBuffers.push_back(std::move(vertexBuffer));
 
 	// handle index buffer
 	VkDeviceSize indexBytes = sizeof(u16) * indices.size();
-	auto indexBuffer = std::make_unique<Buffer>(*device, indexBytes, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	indexBuffer->upload(indices.data(), indexBytes);
+	auto indexBuffer = std::make_unique<Buffer>(*device, indexBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	indexBuffer->upload(*device, indices.data(), indexBytes);
 	indexBuffers.push_back(std::move(indexBuffer));
 }
 

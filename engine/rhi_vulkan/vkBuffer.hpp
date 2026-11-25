@@ -6,6 +6,7 @@
 
 #include "vkDevice.hpp"
 
+
 namespace RATH {
 	class Buffer {
 	public:
@@ -14,8 +15,13 @@ namespace RATH {
 		Buffer(const Buffer& other) = delete;
 		Buffer& operator=(const Buffer& other) = delete;
 
-		// Copies raw bytes into the buffer (memory must be HOST_VISIBLE)
-		void upload(const void* data, VkDeviceSize dataSize);
+		// HOST_VISIBLE memory -> mapped + memcpy directly
+		// otherwise (DEVICE_LOCAL) -> temporary staging buffer + GPU copy (buffer needs TRANSFER_DST usage)
+		void upload(Device& device, const void* data, VkDeviceSize dataSize, VkDeviceSize dstOffset = 0);
+
+		// GPU side copy between any two buffers (src needs TRANSFER_SRC, dst needs TRANSFER_DST), blocks until done
+		static void copyBuffer(Device& device, VkBuffer src, VkBuffer dst, VkDeviceSize size,
+							   VkDeviceSize srcOffset = 0, VkDeviceSize dstOffset = 0);
 
 		VkBuffer getBuffer() { return buffer; };
 		VkDeviceSize getSize() { return _size; };
@@ -23,8 +29,12 @@ namespace RATH {
 	private:
 		VkDevice _device = VK_NULL_HANDLE;
 		VkDeviceSize _size = 0;
+		VkBufferUsageFlags _usage = 0;
+		VkMemoryPropertyFlags _memoryProperties = 0;
 		VkBuffer buffer = VK_NULL_HANDLE;
 		VkDeviceMemory memory = VK_NULL_HANDLE;
+
+		void writeMapped(const void* data, VkDeviceSize dataSize, VkDeviceSize dstOffset);
 
 		static VkBuffer createBuffer(Device& device, VkDeviceSize size, VkBufferUsageFlags usage);
 		static VkDeviceMemory allocateMemory(Device& device, VkBuffer buffer, VkMemoryPropertyFlags memoryProperties);
