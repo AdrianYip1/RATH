@@ -1,25 +1,25 @@
-// Aliases, detection for platform/debug mode
+// Aliases for commonly used types
 #pragma once
 
-// RATHfiles
-#include "Rath/Core/platformDetection.hpp"
-#include "Rath/Core/asserts.hpp"
+#include "platformDetection.hpp"
 
-#include "stdIncludes.hpp"
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
-// Short aliases for commonly used types
-namespace RATH{
+namespace RATH {
 	// The amount of frames that can be processed at the same time
-	const int MAX_FRAMES_IN_FLIGHT = 2;
+	inline constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
+	using str = std::string;
 	using size = size_t;
 
-	using u8  = uint8_t;
+	using u8 = uint8_t;
 	using u16 = uint16_t;
 	using u32 = uint32_t;
 	using u64 = uint64_t;
 
-	using i8  = int8_t;
+	using i8 = int8_t;
 	using i16 = int16_t;
 	using i32 = int32_t;
 	using i64 = int64_t;
