@@ -51,9 +51,8 @@ void RATH::Buffer::copyBuffer(Device& device, VkBuffer src, VkBuffer dst, VkDevi
 
 void RATH::Buffer::writeMapped(const void* data, VkDeviceSize dataSize, VkDeviceSize dstOffset) {
 	void* mapped = nullptr;
-	if (vkMapMemory(_device.getDevice(), memory, dstOffset, dataSize, 0, &mapped) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkBuffer.cpp -> writeMapped()");
-	}
+	VK_CHECK(vkMapMemory(_device.getDevice(), memory, dstOffset, dataSize, 0, &mapped));
+
 	memcpy(mapped, data, static_cast<size>(dataSize));
 	vkUnmapMemory(_device.getDevice(), memory);
 }
@@ -68,9 +67,7 @@ VkBuffer RATH::Buffer::createBuffer(Device& device, VkDeviceSize size, VkBufferU
 
 	VkBuffer buffer = VK_NULL_HANDLE;
 
-	if (vkCreateBuffer(device.getDevice(), &bufferCreateInfo, nullptr, &buffer) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkBuffer.cpp -> createBuffer()");
-	}
+	VK_CHECK(vkCreateBuffer(device.getDevice(), &bufferCreateInfo, nullptr, &buffer));
 
 	return buffer;
 }
@@ -87,9 +84,7 @@ VkDeviceMemory RATH::Buffer::allocateMemory(Device& device, VkBuffer buffer, VkM
 
 	VkDeviceMemory memory = VK_NULL_HANDLE;
 
-	if (vkAllocateMemory(device.getDevice(), &allocInfo, nullptr, &memory) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkBuffer.cpp -> allocateMemory()");
-	}
+	VK_CHECK(vkAllocateMemory(device.getDevice(), &allocInfo, nullptr, &memory));
 
 	vkBindBufferMemory(device.getDevice(), buffer, memory, 0);
 

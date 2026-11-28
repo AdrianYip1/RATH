@@ -5,6 +5,8 @@
 #include <engine/core/defines.hpp>
 #include <engine/core/stdIncludes.hpp>
 
+#include "vkCheck.hpp"
+
 struct GLFWwindow;
 
 namespace RATH {

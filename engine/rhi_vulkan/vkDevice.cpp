@@ -6,7 +6,6 @@ static constexpr bool enableValidation = true;
 static constexpr bool enableValidation = false;
 #endif
 
-
 #include <GLFW/glfw3.h>
 
 // Extensions for the physical device
@@ -107,9 +106,7 @@ VkInstance RATH::Device::createInstance() {
 		.ppEnabledExtensionNames = extensions.data(),
 	};
 
-	if (vkCreateInstance(&instanceCreateInfo, nullptr, &instance) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkDevice.cpp -> createInstance()");
-	}
+	VK_CHECK(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
 
 	return instance;
 }
@@ -132,9 +129,7 @@ VkDebugUtilsMessengerEXT RATH::Device::createDebugMessenger(VkInstance instance)
 VkSurfaceKHR RATH::Device::createSurface(VkInstance instance, GLFWwindow* window) {
 	VkSurfaceKHR surface = VK_NULL_HANDLE;
 	
-	if (glfwCreateWindowSurface(instance, window , nullptr, &surface) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkDevice.cpp -> createSurface()");
-	}
+	VK_CHECK(glfwCreateWindowSurface(instance, window, nullptr, &surface));
 
 	return surface;
 }
@@ -266,9 +261,7 @@ VkDevice RATH::Device::selectLogicalDevice(VkPhysicalDevice physicalDevice, cons
 
 	};
 
-	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkDevice.cpp -> selectLogicalDevice()");
-	}
+	VK_CHECK(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice));
 
 	return logicalDevice;
 }
@@ -304,9 +297,7 @@ VkCommandPool RATH::Device::createTransientCommandPool(VkDevice logicalDevice, u
 
 	VkCommandPool commandPool = VK_NULL_HANDLE;
 
-	if (vkCreateCommandPool(logicalDevice, &poolCreateInfo, nullptr, &commandPool) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkDevice.cpp -> createTransientCommandPool()");
-	}
+	VK_CHECK(vkCreateCommandPool(logicalDevice, &poolCreateInfo, nullptr, &commandPool));
 
 	return commandPool;
 }
@@ -320,28 +311,20 @@ VkCommandBuffer RATH::Device::beginSingleTimeCommands() {
 	};
 
 	VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-	if (vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkDevice.cpp -> beginSingleTimeCommands() allocate");
-	}
+	VK_CHECK(vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer));
 
 	VkCommandBufferBeginInfo beginInfo = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
 		.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
 	};
 
-	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-		vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
-		throw std::runtime_error("ERROR: vkDevice.cpp -> beginSingleTimeCommands() begin");
-	}
+	VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
 
 	return commandBuffer;
 }
 
 void RATH::Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
-	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-		vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
-		throw std::runtime_error("ERROR: vkDevice.cpp -> endSingleTimeCommands() end");
-	}
+	VK_CHECK(vkEndCommandBuffer(commandBuffer));
 
 	VkSubmitInfo submitInfo = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -349,10 +332,7 @@ void RATH::Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
 		.pCommandBuffers = &commandBuffer
 	};
 
-	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
-		vkFreeCommandBuffers(logicalDevice, transientCommandPool, 1, &commandBuffer);
-		throw std::runtime_error("ERROR: vkDevice.cpp -> endSingleTimeCommands() submit");
-	}
+	VK_CHECK(vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
 
 	vkQueueWaitIdle(graphicsQueue);
 

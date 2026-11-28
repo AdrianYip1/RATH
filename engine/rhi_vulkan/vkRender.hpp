@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include <GLFW/glfw3.h>
 #include <engine/core/defines.hpp>
 #include <engine/core/stdIncludes.hpp>
 
@@ -10,6 +9,8 @@
 #include "vkPipeline.hpp"
 
 #include "vkBuffer.hpp"
+
+#include "vkCheck.hpp"
 
 namespace RATH {
 	class Render {

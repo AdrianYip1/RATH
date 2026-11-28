@@ -58,9 +58,7 @@ bool RATH::Render::drawFrame(const std::vector<std::unique_ptr<Buffer>>& vertexB
 	};
 
 	// Fence must be unsignaled, same with signalSemaphores
-	if (vkQueueSubmit(_device.getGraphicsQ(), 1, &submitInfo, inFlightFence[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkRender.cpp -> drawFrame()");
-	}
+	VK_CHECK(vkQueueSubmit(_device.getGraphicsQ(), 1, &submitInfo, inFlightFence[currentFrame]));
 
 	// Present queue
 	VkSwapchainKHR swapchains[] = { _swapchain.getSwapchain()};
@@ -112,10 +110,8 @@ void RATH::Render::createSyncObjects(size swapchainImageCount) {
 	inFlightFence.resize(MAX_FRAMES_IN_FLIGHT);
 
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		if (vkCreateSemaphore(_device.getDevice(), &semaphoreCreateInfo, nullptr, &imageAvailableSem[i]) != VK_SUCCESS ||
-			vkCreateFence(_device.getDevice(), &fenceCreateInfo, nullptr, &inFlightFence[i]) != VK_SUCCESS) {
-			throw std::runtime_error("ERROR: vkRender.cpp -> createSyncObjects()");
-		}
+		VK_CHECK(vkCreateSemaphore(_device.getDevice(), &semaphoreCreateInfo, nullptr, &imageAvailableSem[i]));
+		VK_CHECK(vkCreateFence(_device.getDevice(), &fenceCreateInfo, nullptr, &inFlightFence[i]));
 	}
 
 	createRenderFinishedSems(swapchainImageCount);
@@ -130,9 +126,7 @@ void RATH::Render::createRenderFinishedSems(size swapchainImageCount) {
 	renderFinishedSem.resize(swapchainImageCount);
 
 	for (size i = 0; i < swapchainImageCount; i++) {
-		if (vkCreateSemaphore(_device.getDevice(), &semaphoreCreateInfo, nullptr, &renderFinishedSem[i]) != VK_SUCCESS) {
-			throw std::runtime_error("ERROR: vkRender.cpp -> createSyncObjects()");
-		}
+		VK_CHECK(vkCreateSemaphore(_device.getDevice(), &semaphoreCreateInfo, nullptr, &renderFinishedSem[i]));
 	}
 }
 
@@ -143,9 +137,7 @@ void RATH::Render::recordCommandBuffer(const std::vector<std::unique_ptr<Buffer>
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
 	};
 
-	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkRender.cpp -> recordCommandBuffer()");
-	}
+	VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
 
 	// Barrier 1 -> before rendering
 	VkImageMemoryBarrier2 toColor = {
@@ -248,9 +240,7 @@ void RATH::Render::recordCommandBuffer(const std::vector<std::unique_ptr<Buffer>
 	};
 	vkCmdPipelineBarrier2(commandBuffer, &toPresentDep);
 
-	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkRender.cpp -> recordCommandBuffer()");
-	}
+	VK_CHECK(vkEndCommandBuffer(commandBuffer));
 }
 
 VkCommandPool RATH::Render::createCommandPool(Device& device) {
@@ -264,9 +254,7 @@ VkCommandPool RATH::Render::createCommandPool(Device& device) {
 
 	VkCommandPool commandPool = VK_NULL_HANDLE;
 
-	if (vkCreateCommandPool(device.getDevice(), &poolCreateInfo, nullptr, &commandPool) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkRender.cpp -> createCommandPool()");
-	}
+	VK_CHECK(vkCreateCommandPool(device.getDevice(), &poolCreateInfo, nullptr, &commandPool));
 
 	return commandPool;
 }
@@ -281,9 +269,7 @@ std::vector<VkCommandBuffer> RATH::Render::createCommandBuffers(Device& device, 
 		.commandBufferCount = static_cast<u32>(commandBuffers.size())
 	};
 
-	if (vkAllocateCommandBuffers(device.getDevice(), &commandBufferAllocInfo, commandBuffers.data()) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkRender.cpp -> createCommandBuffers()");
-	}
+	VK_CHECK(vkAllocateCommandBuffers(device.getDevice(), &commandBufferAllocInfo, commandBuffers.data()));
 
 	return commandBuffers;
 }

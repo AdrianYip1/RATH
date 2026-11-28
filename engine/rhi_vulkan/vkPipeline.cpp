@@ -41,9 +41,7 @@ std::vector<VkShaderModule> RATH::Pipeline::createShaderModules(Device& device, 
 			.pCode = reinterpret_cast<const u32*>(code[i].data())
 		};
 
-		if (vkCreateShaderModule(device.getDevice(), &shaderCreateInfo, nullptr, &shaderModules[i]) != VK_SUCCESS) {
-			throw std::runtime_error("ERROR: vkPipeline.cpp -> createShaderModules()");
-		}
+		VK_CHECK(vkCreateShaderModule(device.getDevice(), &shaderCreateInfo, nullptr, &shaderModules[i]));
 	}
 
 	return shaderModules;
@@ -57,9 +55,7 @@ VkPipelineLayout RATH::Pipeline::createPipelineLayout(Device& device) {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 	};
 
-	if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkPipeline.cpp -> createPipelineLayout()");
-	}
+	VK_CHECK(vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
 	return pipelineLayout;
 }
@@ -193,9 +189,7 @@ VkPipeline RATH::Pipeline::createGraphicsPipeline(Device& device, const Graphics
 		
 	};
 
-	if (vkCreateGraphicsPipelines(device.getDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkPipeline.cpp -> createGraphicsPipeline()");
-	}
+	VK_CHECK(vkCreateGraphicsPipelines(device.getDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &graphicsPipeline));
 
 	for (VkShaderModule& shaderModule : shaderModules) {
 		vkDestroyShaderModule(device.getDevice(), shaderModule, nullptr);

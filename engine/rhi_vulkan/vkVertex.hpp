@@ -2,7 +2,6 @@
 #include <enginemath/enginemath.hpp>
 
 #include <vulkan/vulkan.h>
-#include <GLFW/glfw3.h>
 #include <engine/core/defines.hpp>
 #include <engine/core/stdIncludes.hpp>
 
