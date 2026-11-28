@@ -1,15 +1,15 @@
 #include "vkPipeline.hpp"
 
 RATH::Pipeline::Pipeline(Device& device, const GraphicsPipelineConfig& graphicsPipelineConfig) :
-	_device(device.getDevice()), pipelineLayout(createPipelineLayout(device)),
+	_device(device), pipelineLayout(createPipelineLayout(device)),
 	pipeline(createGraphicsPipeline(device, graphicsPipelineConfig, pipelineLayout))
 {
 
 };
 
 RATH::Pipeline::~Pipeline() {
-	vkDestroyPipeline(_device, pipeline, nullptr);
-	vkDestroyPipelineLayout(_device, pipelineLayout, nullptr);
+	vkDestroyPipeline(_device.getDevice(), pipeline, nullptr);
+	vkDestroyPipelineLayout(_device.getDevice(), pipelineLayout, nullptr);
 };
 
 

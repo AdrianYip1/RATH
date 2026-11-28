@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(rath VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -53,13 +53,16 @@ add_library(rath_engine STATIC
     engine/rhi_vulkan/vkSwapchain.cpp 
     engine/rhi_vulkan/vkRender.cpp
     engine/rhi_vulkan/vkPipeline.cpp
-    engine/rhi_vulkan/vkBuffer.cpp)
+    engine/rhi_vulkan/vkBuffer.cpp 
+    engine/rhi_vulkan/vkDescriptor.cpp)
 
 target_include_directories(rath_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(rath_engine
     PUBLIC enginemath::enginemath
     PRIVATE glfw Vulkan::Vulkan)
+
+target_precompile_headers(rath_engine PRIVATE "engine/core/stdIncludes.hpp")
 
 add_executable(rath sandbox/main.cpp 
 "sandbox/visualizer.cpp")

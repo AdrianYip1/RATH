@@ -36,14 +36,14 @@ RATH::Application::Application(const ApplicationConfig& config) :
 	VkDeviceSize bytes = sizeof(Vertex) * vertices.size();
 	auto vertexBuffer = std::make_unique<Buffer>(*device, bytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	vertexBuffer->upload(*device, vertices.data(), bytes);
+	vertexBuffer->upload(vertices.data(), bytes);
 	vertexBuffers.push_back(std::move(vertexBuffer));
 
 	// handle index buffer
 	VkDeviceSize indexBytes = sizeof(u16) * indices.size();
 	auto indexBuffer = std::make_unique<Buffer>(*device, indexBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	indexBuffer->upload(*device, indices.data(), indexBytes);
+	indexBuffer->upload(indices.data(), indexBytes);
 	indexBuffers.push_back(std::move(indexBuffer));
 }
 
@@ -57,7 +57,7 @@ void RATH::Application::run() {
 		window->pollEvents();
 		onUpdate(0.0f);
 
-		bool outOfDate = render->drawFrame(*device, *swapchain, *pipeline, vertexBuffers, indexBuffers);
+		bool outOfDate = render->drawFrame(vertexBuffers, indexBuffers);
 		if (outOfDate || window->getFramebufferResized()) {
 			window->setFramebufferResized(false);
 			swapchain->recreate();

@@ -1,29 +1,29 @@
 #include "vkRender.hpp"
 
 RATH::Render::Render(Device& device, Swapchain& swapchain, Pipeline& pipeline) :
-	_device(device.getDevice()), _commandPool(createCommandPool(device)), 
+	_device(device), _swapchain(swapchain), _pipeline(pipeline),
+	_commandPool(createCommandPool(device)), 
 	commandBuffers(createCommandBuffers(device, _commandPool))
 {
-	createSyncObjects(_device, swapchain.getImages().size());
+	createSyncObjects(swapchain.getImages().size());
 };
 
 RATH::Render::~Render() {
-	for (VkSemaphore sem : imageAvailableSem) vkDestroySemaphore(_device, sem, nullptr);
-	for (VkSemaphore sem : renderFinishedSem) vkDestroySemaphore(_device, sem, nullptr);
-	for (VkFence fence : inFlightFence) vkDestroyFence(_device, fence, nullptr);
+	for (VkSemaphore sem : imageAvailableSem) vkDestroySemaphore(_device.getDevice(), sem, nullptr);
+	for (VkSemaphore sem : renderFinishedSem) vkDestroySemaphore(_device.getDevice(), sem, nullptr);
+	for (VkFence fence : inFlightFence) vkDestroyFence(_device.getDevice(), fence, nullptr);
 
-	vkDestroyCommandPool(_device, _commandPool, nullptr);
+	vkDestroyCommandPool(_device.getDevice(), _commandPool, nullptr);
 };
 
 // CPU -> recording command buffer
 // GPU -> submitting/executing command buffer
-bool RATH::Render::drawFrame(Device& device, Swapchain& swapchain, Pipeline& pipeline, 
-	const std::vector<std::unique_ptr<Buffer>>& vertexBuffers,
-	const std::vector<std::unique_ptr<Buffer>>& indexBuffers) {
-	vkWaitForFences(device.getDevice(), 1, &inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
+bool RATH::Render::drawFrame(const std::vector<std::unique_ptr<Buffer>>& vertexBuffers,
+							 const std::vector<std::unique_ptr<Buffer>>& indexBuffers) {
+	vkWaitForFences(_device.getDevice(), 1, &inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
 
 	u32 imageIdx;
-	VkResult acquireResult = vkAcquireNextImageKHR(device.getDevice(), swapchain.getSwapchain(), UINT64_MAX, imageAvailableSem[currentFrame], VK_NULL_HANDLE, &imageIdx);
+	VkResult acquireResult = vkAcquireNextImageKHR(_device.getDevice(), _swapchain.getSwapchain(), UINT64_MAX, imageAvailableSem[currentFrame], VK_NULL_HANDLE, &imageIdx);
 	if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR) {
 		return true;
 	}
@@ -32,11 +32,11 @@ bool RATH::Render::drawFrame(Device& device, Swapchain& swapchain, Pipeline& pip
 	}
 
 	// Reset only once we know we will submit, otherwise an early return leaves it unsignaled -> deadlock
-	vkResetFences(device.getDevice(), 1, &inFlightFence[currentFrame]);
+	vkResetFences(_device.getDevice(), 1, &inFlightFence[currentFrame]);
 
 	VkCommandBuffer commandBuffer = commandBuffers[currentFrame];
 	vkResetCommandBuffer(commandBuffer, 0);
-	recordCommandBuffer(device, swapchain, pipeline, vertexBuffers, indexBuffers, commandBuffer, imageIdx);
+	recordCommandBuffer(vertexBuffers, indexBuffers, commandBuffer, imageIdx);
 
 	// Submit info
 	VkSemaphore waitSemaphore[] = { imageAvailableSem[currentFrame] };
@@ -58,12 +58,12 @@ bool RATH::Render::drawFrame(Device& device, Swapchain& swapchain, Pipeline& pip
 	};
 
 	// Fence must be unsignaled, same with signalSemaphores
-	if (vkQueueSubmit(device.getGraphicsQ(), 1, &submitInfo, inFlightFence[currentFrame]) != VK_SUCCESS) {
+	if (vkQueueSubmit(_device.getGraphicsQ(), 1, &submitInfo, inFlightFence[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("ERROR: vkRender.cpp -> drawFrame()");
 	}
 
 	// Present queue
-	VkSwapchainKHR swapchains[] = { swapchain.getSwapchain()};
+	VkSwapchainKHR swapchains[] = { _swapchain.getSwapchain()};
 
 	VkPresentInfoKHR presentInfo = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -78,7 +78,7 @@ bool RATH::Render::drawFrame(Device& device, Swapchain& swapchain, Pipeline& pip
 	};
 
 	// vkQueuePresentKHR doesn't wait, returns right away
-	VkResult presentResult = vkQueuePresentKHR(device.getPresentQ(), &presentInfo);
+	VkResult presentResult = vkQueuePresentKHR(_device.getPresentQ(), &presentInfo);
 
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
@@ -92,12 +92,12 @@ bool RATH::Render::drawFrame(Device& device, Swapchain& swapchain, Pipeline& pip
 }
 
 void RATH::Render::onSwapchainRecreated(Swapchain& swapchain) {
-	for (VkSemaphore sem : renderFinishedSem) vkDestroySemaphore(_device, sem, nullptr);
+	for (VkSemaphore sem : renderFinishedSem) vkDestroySemaphore(_device.getDevice(), sem, nullptr);
 	renderFinishedSem.clear();
-	createRenderFinishedSems(_device, swapchain.getImages().size());
+	createRenderFinishedSems(swapchain.getImages().size());
 }
 
-void RATH::Render::createSyncObjects(VkDevice device, size swapchainImageCount) {
+void RATH::Render::createSyncObjects(size swapchainImageCount) {
 	VkSemaphoreCreateInfo semaphoreCreateInfo = {
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
 	};
@@ -112,16 +112,16 @@ void RATH::Render::createSyncObjects(VkDevice device, size swapchainImageCount) 
 	inFlightFence.resize(MAX_FRAMES_IN_FLIGHT);
 
 	for (size i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		if (vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &imageAvailableSem[i]) != VK_SUCCESS ||
-			vkCreateFence(device, &fenceCreateInfo, nullptr, &inFlightFence[i]) != VK_SUCCESS) {
+		if (vkCreateSemaphore(_device.getDevice(), &semaphoreCreateInfo, nullptr, &imageAvailableSem[i]) != VK_SUCCESS ||
+			vkCreateFence(_device.getDevice(), &fenceCreateInfo, nullptr, &inFlightFence[i]) != VK_SUCCESS) {
 			throw std::runtime_error("ERROR: vkRender.cpp -> createSyncObjects()");
 		}
 	}
 
-	createRenderFinishedSems(device, swapchainImageCount);
+	createRenderFinishedSems(swapchainImageCount);
 }
 
-void RATH::Render::createRenderFinishedSems(VkDevice device, size swapchainImageCount) {
+void RATH::Render::createRenderFinishedSems(size swapchainImageCount) {
 	VkSemaphoreCreateInfo semaphoreCreateInfo = {
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
 	};
@@ -130,14 +130,13 @@ void RATH::Render::createRenderFinishedSems(VkDevice device, size swapchainImage
 	renderFinishedSem.resize(swapchainImageCount);
 
 	for (size i = 0; i < swapchainImageCount; i++) {
-		if (vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &renderFinishedSem[i]) != VK_SUCCESS) {
+		if (vkCreateSemaphore(_device.getDevice(), &semaphoreCreateInfo, nullptr, &renderFinishedSem[i]) != VK_SUCCESS) {
 			throw std::runtime_error("ERROR: vkRender.cpp -> createSyncObjects()");
 		}
 	}
 }
 
-void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipeline& pipeline, 
-									   const std::vector<std::unique_ptr<Buffer>>& vertexBuffers,
+void RATH::Render::recordCommandBuffer(const std::vector<std::unique_ptr<Buffer>>& vertexBuffers,
 									   const std::vector<std::unique_ptr<Buffer>>& indexBuffers,
 									   VkCommandBuffer commandBuffer, u32 imageIdx) {
 	VkCommandBufferBeginInfo beginInfo = {
@@ -160,7 +159,7 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 		.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = swapchain.getImages()[imageIdx],
+		.image = _swapchain.getImages()[imageIdx],
 		.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1},
 	};
 
@@ -174,7 +173,7 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 	// Begin rendering (instead of renderpass + framebuffer)
 	VkRenderingAttachmentInfo colorAttachment = {
 		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		.imageView = swapchain.getImageViews()[imageIdx],
+		.imageView = _swapchain.getImageViews()[imageIdx],
 		.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -189,7 +188,7 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
 		.renderArea = {
 			.offset = {0, 0},
-			.extent = swapchain.getExtent()
+			.extent = _swapchain.getExtent()
 		},
 		.layerCount = 1,
 		.colorAttachmentCount = 1,
@@ -198,13 +197,13 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 	vkCmdBeginRendering(commandBuffer, &rendering);
 
 	// Bind pipeline/viewport/scissor
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipeline());
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline.getPipeline());
 
 	VkViewport viewport = {
 		.x = 0.0f,
 		.y = 0.0f,
-		.width = static_cast<f32>(swapchain.getExtent().width),
-		.height = static_cast<f32>(swapchain.getExtent().height),
+		.width = static_cast<f32>(_swapchain.getExtent().width),
+		.height = static_cast<f32>(_swapchain.getExtent().height),
 		.minDepth = 0.0f,
 		.maxDepth = 1.0f,
 	};
@@ -212,7 +211,7 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 
 	VkRect2D scissor = {
 		.offset = {0, 0},
-		.extent = swapchain.getExtent(),
+		.extent = _swapchain.getExtent(),
 	};
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -222,7 +221,7 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, indexBuffers[i]->getBuffer(), 0, VK_INDEX_TYPE_UINT16);
 
-		vkCmdDrawIndexed(commandBuffer, static_cast<u32>(sizeof(indexBuffers[i])), 1, 0, 0, 0);
+		vkCmdDrawIndexed(commandBuffer, static_cast<u32>(indexBuffers[i]->getSize() / sizeof(u16)), 1, 0, 0, 0);
 	}
 
 	vkCmdEndRendering(commandBuffer);
@@ -238,7 +237,7 @@ void RATH::Render::recordCommandBuffer(Device& device, Swapchain& swapchain,Pipe
 		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = swapchain.getImages()[imageIdx],
+		.image = _swapchain.getImages()[imageIdx],
 		.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1},
 	};
 

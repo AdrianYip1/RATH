@@ -28,7 +28,7 @@ namespace RATH {
 		VkPipeline getPipeline() { return pipeline; };
 
 	private:
-		VkDevice _device;
+		Device& _device;
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline pipeline = VK_NULL_HANDLE;
 
