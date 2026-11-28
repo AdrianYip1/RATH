@@ -6,7 +6,7 @@
 
 #include "vkDevice.hpp"
 
-#include "vkCheck.hpp"
+#include "RATH_VULKAN_RHI_MACROS.hpp"
 
 namespace RATH {
 	class Buffer {

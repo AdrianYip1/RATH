@@ -5,7 +5,7 @@
 #include <engine/core/defines.hpp>
 #include <engine/core/stdIncludes.hpp>
 
-#include "vkCheck.hpp"
+#include "RATH_VULKAN_RHI_MACROS.hpp"
 
 struct GLFWwindow;
 

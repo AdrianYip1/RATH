@@ -7,6 +7,8 @@
 
 #include "vkDevice.hpp"
 
+#include "RATH_VULKAN_RHI_MACROS.hpp"
+
 namespace RATH {
 
 	class Swapchain {

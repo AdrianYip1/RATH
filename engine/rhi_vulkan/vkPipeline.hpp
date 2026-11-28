@@ -8,7 +8,7 @@
 
 #include "vkVertex.hpp"
 
-#include "vkCheck.hpp"
+#include "RATH_VULKAN_RHI_MACROS.hpp"
 
 namespace RATH {
 	struct GraphicsPipelineConfig {

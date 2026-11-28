@@ -115,9 +115,7 @@ VkSwapchainKHR RATH::Swapchain::createSwapchain(GLFWwindow* window, Device& devi
 		.oldSwapchain = oldSwapchain,
 	};
 
-	if (vkCreateSwapchainKHR(device.getDevice(), &createInfo, nullptr, &swapchain) != VK_SUCCESS) {
-		throw std::runtime_error("ERROR: vkSwapchain.cpp -> createSwapchain()");
-	};
+	VK_CHECK(vkCreateSwapchainKHR(device.getDevice(), &createInfo, nullptr, &swapchain));
 
 	_format = format.format;
 	_extent = extent;
@@ -155,9 +153,7 @@ std::vector<VkImageView> RATH::Swapchain::getImageViews(Device& device, std::vec
 				.layerCount = 1,
 			},
 		};
-		if (vkCreateImageView(device.getDevice(), &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS) {
-			throw std::runtime_error("ERROR: vkSwapchain.cpp -> getImageViews");
-		}
+		VK_CHECK(vkCreateImageView(device.getDevice(), &imageViewCreateInfo, nullptr, &imageViews[i]));
 	}
 
 	return imageViews;
